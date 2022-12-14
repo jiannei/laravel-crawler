@@ -1,0 +1,17 @@
+{
+    "name": "jiannei\/laravel-crawler",
+    "description": "crawler",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "jiannei",
+            "email": "longjian.huang@foxmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Jiannei\\LaravelCrawler\\": "src"
+        }
+    }
+}
