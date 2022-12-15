@@ -8,10 +8,28 @@
             "email": "longjian.huang@foxmail.com"
         }
     ],
-    "require": {},
     "autoload": {
         "psr-4": {
             "Jiannei\\LaravelCrawler\\": "src"
+        },
+        "files": [
+            "src/Support/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Jiannei\\LaravelCrawler\\Tests\\": "tests"
         }
+    },
+    "require-dev": {
+        "orchestra/testbench": "^7.0",
+        "phpunit/phpunit": "^9.5",
+        "guzzlehttp/guzzle": "^7.5"
+    },
+    "require": {
+        "ext-dom": "*"
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit"
     }
 }
