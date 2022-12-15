@@ -8,26 +8,26 @@ use Jiannei\LaravelCrawler\Tests\TestCase;
 
 class InstanceTest extends TestCase
 {
-    protected $html;
+    protected $html = <<<STR
+<div id="one">
+    <div class="two">
+        <a href="http://querylist.cc">QueryList官网</a>
+        <img src="http://querylist.com/1.jpg" alt="这是图片" abc="这是一个自定义属性">
+        <img class="second_pic" src="http://querylist.com/2.jpg" alt="这是图片2">
+        <a href="http://doc.querylist.cc">QueryList文档</a>
+    </div>
+    <span>其它的<b>一些</b>文本</span>
+</div>
+STR;
 
-    public function setUp(): void
-    {
-        $this->html = $this->getSnippet('snippet-1');
-    }
-    /**
-     * @test
-     */
-    public function singleton_instance_mode()
+    public function testSingletonInstanceMode()
     {
         $ql = QueryList::getInstance()->html($this->html);
         $ql2 = QueryList::getInstance();
         $this->assertEquals($ql->getHtml(),$ql2->getHtml());
     }
 
-    /**
-     * @test
-     */
-    public function get_new_object()
+    public function testGetNewObject()
     {
         $ql = (new QueryList())->html($this->html);
         $ql2 = (new QueryList())->html('');

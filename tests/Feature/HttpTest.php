@@ -10,22 +10,14 @@ use Jiannei\LaravelCrawler\Tests\TestCase;
 
 class HttpTest extends TestCase
 {
-    protected $urls;
+    protected $urls = [
+        'http://httpbin.org/get?name=php',
+        'http://httpbin.org/get?name=golang',
+        'http://httpbin.org/get?name=c++',
+        'http://httpbin.org/get?name=java'
+    ];
 
-    public function setUp(): void
-    {
-        $this->urls = [
-            'http://httpbin.org/get?name=php',
-            'http://httpbin.org/get?name=golang',
-            'http://httpbin.org/get?name=c++',
-            'http://httpbin.org/get?name=java'
-        ];
-    }
-
-    /**
-     * @test
-     */
-    public function can_post_json_data()
+    public function testCanPostJsonData()
     {
         $mock = new MockHandler([new Response()]);
         $data = [
@@ -37,10 +29,7 @@ class HttpTest extends TestCase
         $this->assertEquals((string)$mock->getLastRequest()->getBody(),json_encode($data));
     }
 
-    /**
-     * @test
-     */
-    public function concurrent_requests_base_use()
+    public function testConcurrentRequestsBaseUse()
     {
         $urls = $this->urls;
         QueryList::getInstance()
@@ -51,10 +40,7 @@ class HttpTest extends TestCase
             })->send();
     }
 
-    /**
-     * @test
-     */
-    public function concurrent_requests_advanced_use()
+    public function testConcurrentRequestsAdvancedUse()
     {
         $ua = 'QueryList/4.0';
 
@@ -80,19 +66,14 @@ class HttpTest extends TestCase
             ->send();
     }
 
-    /**
-     * @test
-     */
-    public function request_with_cache()
+
+    public function testRequestWithCache()
     {
         $url = $this->urls[0];
-        $cache_path = __DIR__.'/temp/';
         $data = QueryList::get($url,null,[
-            'cache' => $cache_path,
             'cache_ttl' => 600
         ])->getHtml();
         $data = json_decode($data,true);
         $this->assertEquals($url,$data['url']);
-
     }
 }

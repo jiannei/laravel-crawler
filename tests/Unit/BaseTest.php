@@ -1,8 +1,9 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Tests;
+namespace Jiannei\LaravelCrawler\Tests\Unit;
 
 use Jiannei\LaravelCrawler\Base\phpQuery;
+use Jiannei\LaravelCrawler\Tests\TestCase;
 
 class BaseTest extends TestCase
 {
