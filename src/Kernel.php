@@ -13,7 +13,7 @@ use Illuminate\Support\Collection;
 
 class Kernel
 {
-    protected $providers = [
+    protected array $providers = [
         SystemServiceProvider::class,
         HttpServiceProvider::class,
         EncodeServiceProvider::class,

@@ -66,7 +66,8 @@ class QueryList
 
     public function __destruct()
     {
-        $this->destruct();
+        unset($this->query);
+        unset($this->kernel);
     }
 
     /**
@@ -87,15 +88,6 @@ class QueryList
     public static function config()
     {
         return Config::getInstance();
-    }
-
-    /**
-     * Destruction of resources
-     */
-    public function destruct()
-    {
-        unset($this->query);
-        unset($this->kernel);
     }
 
     /**
