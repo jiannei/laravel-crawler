@@ -11,6 +11,7 @@
 namespace Jiannei\LaravelCrawler\Http;
 
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Class GHttp
@@ -29,10 +30,25 @@ class GHttp
     public static function __callStatic($name, $arguments)
     {
         $protectedName = '_'.$name;
-        if(method_exists(self::class,$protectedName)){
-            return Cache::remember($protectedName, $arguments);
+        if (!method_exists(self::class,$protectedName)) {
+            throw new MethodNotFoundException('Call undefined method '.self::class.':'.$name.'()');
         }
-        throw new MethodNotFoundException('Call undefined method '.self::class.':'.$name.'()');
+
+        $cacheConfig = self::initCacheConfig($arguments);
+        if (empty($cacheConfig['cache_ttl'])) {
+            return self::$protectedName(...$arguments);
+        }
+
+        $cacheKey = self::getCacheKey($protectedName,$arguments);
+        $data =  Cache::get($cacheKey);
+        if (empty($data)) {
+            $data = self::$protectedName(...$arguments);
+            if(!empty($data)) {
+                Cache::put($cacheKey,$data,$cacheConfig['cache_ttl']);
+            }
+        }
+
+        return $data;
     }
 
     public static function getClient(array $config = [])
@@ -160,5 +176,25 @@ class GHttp
     {
         $client = self::getClient();
         return MultiRequest::newRequest($client)->urls($urls);
+    }
+
+    protected static function initCacheConfig($arguments)
+    {
+        $cacheConfig = [
+            'cache' => null,
+            'cache_ttl' => null
+        ];
+        if(!empty($arguments[2])) {
+            $cacheConfig = array_merge([
+                'cache' => null,
+                'cache_ttl' => null
+            ],$arguments[2]);
+        }
+        return $cacheConfig;
+    }
+
+    protected static function getCacheKey($name, $arguments)
+    {
+        return md5($name.'_'.json_encode($arguments));
     }
 }

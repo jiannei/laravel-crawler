@@ -1,9 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Jaeger <JaegerCode@gmail.com>
- * Date: 2017/9/22
- */
 
 namespace Jiannei\LaravelCrawler\Providers;
 
