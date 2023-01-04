@@ -1,6 +1,6 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Base;
+namespace Jiannei\LaravelCrawler\Support\Query;
 
 /**
  * CallbackParameterToReference can be used when we don't really want a callback,

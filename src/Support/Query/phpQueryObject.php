@@ -1,6 +1,6 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Base;
+namespace Jiannei\LaravelCrawler\Support\Query;
 
 use ArrayAccess;
 use Countable;
@@ -379,7 +379,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
         $specialChars = array('>', ' ');
         //		$specialCharsMapping = array('/' => '>');
         $specialCharsMapping = array();
-        $strlen = mb_strlen($query);
+        $strlen = \mb_strlen($query);
         $classChars = array('.', '-');
         $pseudoChars = array('-');
         $tagChars = array('*', '|', '-');
@@ -387,7 +387,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
         // http://code.google.com/p/phpquery/issues/detail?id=76
         $_query = array();
         for ($i = 0; $i < $strlen; $i++) {
-            $_query[] = mb_substr($query, $i, 1);
+            $_query[] = \mb_substr($query, $i, 1);
         }
         $query = $_query;
         // it works, but i dont like it...
@@ -698,7 +698,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     protected function matchClasses($class, $node)
     {
         // multi-class
-        if (mb_strpos($class, '.', 1)) {
+        if (\mb_strpos($class, '.', 1)) {
             $classes = explode('.', substr($class, 1));
             $classesCount = count($classes);
             $nodeClasses = explode(' ', $node->getAttribute('class'));
@@ -854,7 +854,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
                 if ($isTag) {
                     if ($this->isXML()) {
                         // namespace support
-                        if (mb_strpos($s, '|') !== false) {
+                        if (\mb_strpos($s, '|') !== false) {
                             $ns = $tag = null;
                             list($ns, $tag) = explode('|', $s);
                             $XQuery .= "$ns:$tag";
@@ -885,7 +885,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
                             $attr = trim($s, '][');
                             $execute = false;
                             // attr with specifed value
-                            if (mb_strpos($s, '=')) {
+                            if (\mb_strpos($s, '=')) {
                                 $value = null;
                                 list($attr, $value) = explode('=', $attr);
                                 $value = trim($value, "'\"");
@@ -1019,7 +1019,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     {
         // TODO clean args parsing ?
         $class = ltrim($class, ':');
-        $haveArgs = mb_strpos($class, '(');
+        $haveArgs = \mb_strpos($class, '(');
         if ($haveArgs !== false) {
             $args = substr($class, $haveArgs + 1, -1);
             $class = substr($class, 0, $haveArgs);
@@ -1446,7 +1446,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
                         // all besides DOMElement
                         if ($s[0] == '[') {
                             $attr = trim($s, '[]');
-                            if (mb_strpos($attr, '=')) {
+                            if (\mb_strpos($attr, '=')) {
                                 list($attr, $val) = explode('=', $attr);
                                 if ($attr == 'nodeType' && $node->nodeType != $val) {
                                     $break = true;
@@ -1473,7 +1473,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
                                 if ($s[0] == '[') {
                                     // strip side brackets
                                     $attr = trim($s, '[]');
-                                    if (mb_strpos($attr, '=')) {
+                                    if (\mb_strpos($attr, '=')) {
                                         list($attr, $val) = explode('=', $attr);
                                         $val = self::unQuote($val);
                                         if ($attr == 'nodeType') {
@@ -1611,7 +1611,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
             $callback = $data;
             $data = null;
         }
-        if (mb_strpos($url, ' ') !== false) {
+        if (\mb_strpos($url, ' ') !== false) {
             $matches = null;
             if (extension_loaded('mbstring') && phpQuery::$mbstringSupport) {
                 mb_ereg('^([^ ]+) (.*)$', $url, $matches);

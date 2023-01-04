@@ -1,6 +1,6 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Base;
+namespace Jiannei\LaravelCrawler\Support\Query;
 
 /**
  * Callback type which on execution returns value passed during creation.

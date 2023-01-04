@@ -1,10 +1,17 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Base;
+namespace Jiannei\LaravelCrawler\Support\Query;
 
 use DOMDocument;
 use DOMNode;
 use Exception;
+use Jiannei\LaravelCrawler\Query\DOMNODELIST;
+use Jiannei\LaravelCrawler\Query\Iterator;
+use Jiannei\LaravelCrawler\Query\New;
+use Jiannei\LaravelCrawler\Query\QueryTemplatesPhpQuery;
+use Jiannei\LaravelCrawler\Query\Zend_Http_Client;
+use Jiannei\LaravelCrawler\Query\Zend_Json_Decoder;
+use Jiannei\LaravelCrawler\Query\Zend_Json_Encoder;
 
 /**
  * Static namespace for phpQuery functions.

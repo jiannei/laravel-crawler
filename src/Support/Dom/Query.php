@@ -1,12 +1,12 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Dom;
+namespace Jiannei\LaravelCrawler\Support\Dom;
 
 use Closure;
 use Illuminate\Support\Collection;
-use Jiannei\LaravelCrawler\Base\phpQuery;
-use Jiannei\LaravelCrawler\Base\phpQueryObject;
 use Jiannei\LaravelCrawler\QueryList;
+use Jiannei\LaravelCrawler\Support\Query\phpQuery;
+use Jiannei\LaravelCrawler\Support\Query\phpQueryObject;
 
 class Query
 {

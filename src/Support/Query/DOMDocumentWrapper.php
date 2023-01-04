@@ -1,12 +1,15 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Base;
+namespace Jiannei\LaravelCrawler\Support\Query;
 
 use DOMDocument;
 use DOMNode;
 use DOMNodeList;
 use DOMXPath;
 use Exception;
+use Jiannei\LaravelCrawler\Query\unknown_type;
+use function Jiannei\LaravelCrawler\Query\mb_convert_encoding;
+use function Jiannei\LaravelCrawler\Query\mb_detect_encoding;
 
 /**
  * DOMDocumentWrapper class simplifies work with DOMDocument.

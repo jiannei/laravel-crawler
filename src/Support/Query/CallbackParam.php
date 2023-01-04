@@ -1,6 +1,6 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Base;
+namespace Jiannei\LaravelCrawler\Support\Query;
 
 //class CallbackReference extends Callback {
 //	/**

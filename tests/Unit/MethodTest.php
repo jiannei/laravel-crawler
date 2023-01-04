@@ -1,6 +1,6 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Tests\Feature;
+namespace Jiannei\LaravelCrawler\Tests\Unit;
 
 
 use Jiannei\LaravelCrawler\QueryList;

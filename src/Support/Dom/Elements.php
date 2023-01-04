@@ -1,10 +1,10 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Dom;
+namespace Jiannei\LaravelCrawler\Support\Dom;
 
 use Illuminate\Support\Collection;
-use Jiannei\LaravelCrawler\Base\phpQuery;
-use Jiannei\LaravelCrawler\Base\phpQueryObject;
+use Jiannei\LaravelCrawler\Support\Query\phpQuery;
+use Jiannei\LaravelCrawler\Support\Query\phpQueryObject;
 
 /**
  * Class Elements
@@ -183,7 +183,7 @@ class Elements
      * Iterating elements
      *
      * @param $callback
-     * @return \Illuminate\Support\Collection|\Tightenco\Collect\Support\Collection
+     * @return \Illuminate\Support\Collection
      */
     public function map($callback)
     {
@@ -198,7 +198,7 @@ class Elements
      * Gets the attributes of all the elements
      *
      * @param string $attr HTML attribute name
-     * @return \Illuminate\Support\Collection|\Tightenco\Collect\Support\Collection
+     * @return \Illuminate\Support\Collection
      */
     public function attrs($attr)
     {
@@ -210,7 +210,7 @@ class Elements
     /**
      * Gets the text of all the elements
      *
-     * @return \Illuminate\Support\Collection|\Tightenco\Collect\Support\Collection
+     * @return \Illuminate\Support\Collection
      */
     public function texts()
     {
@@ -222,7 +222,7 @@ class Elements
     /**
      * Gets the html of all the elements
      *
-     * @return \Illuminate\Support\Collection|\Tightenco\Collect\Support\Collection
+     * @return \Illuminate\Support\Collection
      */
     public function htmls()
     {
@@ -234,7 +234,7 @@ class Elements
     /**
      * Gets the htmlOuter of all the elements
      *
-     * @return \Illuminate\Support\Collection|\Tightenco\Collect\Support\Collection
+     * @return \Illuminate\Support\Collection
      */
     public function htmlOuters()
     {

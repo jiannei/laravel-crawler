@@ -1,6 +1,6 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Tests\Feature;
+namespace Jiannei\LaravelCrawler\Tests\Unit;
 
 
 use GuzzleHttp\Handler\MockHandler;
@@ -11,11 +11,23 @@ use Jiannei\LaravelCrawler\Tests\TestCase;
 class HttpTest extends TestCase
 {
     protected $urls = [
-        'http://httpbin.org/get?name=php',
-        'http://httpbin.org/get?name=golang',
-        'http://httpbin.org/get?name=c++',
-        'http://httpbin.org/get?name=java'
+        'https://httpbin.org/get?name=php',
+        'https://httpbin.org/get?name=golang',
+        'https://httpbin.org/get?name=c++',
+        'https://httpbin.org/get?name=java'
     ];
+
+    public function testGet()
+    {
+        $ql = QueryList::get('https://httpbin.org/get?param1=testvalue&params2=somevalue');
+
+        $res = $ql->get('https://httpbin.org/get',[
+            'param1' => 'testvalue',
+            'params2' => 'somevalue'
+        ]);
+
+        $this->assertEquals($ql->getHtml(),$res->getHtml());
+    }
 
     public function testCanPostJsonData()
     {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Http;
+namespace Jiannei\LaravelCrawler\Support\Http;
 use Exception;
 use Throwable;
 

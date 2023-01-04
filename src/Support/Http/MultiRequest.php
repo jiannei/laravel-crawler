@@ -1,8 +1,8 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Http;
-use GuzzleHttp\Client;
+namespace Jiannei\LaravelCrawler\Support\Http;
 use Closure;
+use GuzzleHttp\Client;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
 

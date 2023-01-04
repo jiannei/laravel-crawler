@@ -5,9 +5,8 @@ namespace Jiannei\LaravelCrawler\Services;
 use Closure;
 use GuzzleHttp\Exception\TransferException;
 use GuzzleHttp\Psr7\Response;
-use Jiannei\LaravelCrawler\Http\GHttp;
 use Jiannei\LaravelCrawler\QueryList;
-use GuzzleHttp\Exception\RequestException;
+use Jiannei\LaravelCrawler\Support\Http\GHttp;
 
 /**
  * Class MultiRequestService

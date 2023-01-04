@@ -1,6 +1,6 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Base;
+namespace Jiannei\LaravelCrawler\Support\Query;
 
 /**
  * Callback class introduces currying-like pattern.
@@ -25,8 +25,7 @@ namespace Jiannei\LaravelCrawler\Base;
  * @TODO??? return fake forwarding function created via create_function
  * @TODO honor paramStructure
  */
-class Callback
-    implements ICallbackNamed
+class Callback implements ICallbackNamed
 {
     public $callback = null;
     public $params = null;

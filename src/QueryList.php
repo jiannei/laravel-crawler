@@ -1,11 +1,11 @@
 <?php
 
 namespace Jiannei\LaravelCrawler;
-use Jiannei\LaravelCrawler\Base\phpQuery;
-use Jiannei\LaravelCrawler\Dom\Query;
-use Jiannei\LaravelCrawler\Services\MultiRequestService;
-use Illuminate\Support\Collection;
 use Closure;
+use Illuminate\Support\Collection;
+use Jiannei\LaravelCrawler\Services\MultiRequestService;
+use Jiannei\LaravelCrawler\Support\Dom\Query;
+use Jiannei\LaravelCrawler\Support\Query\phpQuery;
 
 
 /**
@@ -15,7 +15,7 @@ use Closure;
  * @method string getHtml($rel = true)
  * @method QueryList setHtml($html)
  * @method QueryList html($html)
- * @method Dom\Elements find($selector)
+ * @method Support\Dom\Elements find($selector)
  * @method QueryList rules(array $rules)
  * @method QueryList range($range)
  * @method QueryList removeHead()

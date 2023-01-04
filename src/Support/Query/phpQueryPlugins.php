@@ -1,6 +1,8 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Base;
+namespace Jiannei\LaravelCrawler\Support\Query;
+
+use Jiannei\LaravelCrawler\Query\Exception;
 
 /**
  * Plugins static namespace class.

@@ -8,7 +8,7 @@
  * @Version V1.0
  */
 
-namespace Jiannei\LaravelCrawler\Http;
+namespace Jiannei\LaravelCrawler\Support\Http;
 
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Cache;

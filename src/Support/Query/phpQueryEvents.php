@@ -1,6 +1,9 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Base;
+namespace Jiannei\LaravelCrawler\Support\Query;
+
+use Jiannei\LaravelCrawler\Query\DOMNode;
+use Jiannei\LaravelCrawler\Query\unknown_type;
 
 /**
  * Event handling class.

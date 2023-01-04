@@ -3,8 +3,8 @@
 namespace Jiannei\LaravelCrawler\Services;
 
 use GuzzleHttp\Cookie\CookieJar;
-use Jiannei\LaravelCrawler\Http\GHttp;
 use Jiannei\LaravelCrawler\QueryList;
+use Jiannei\LaravelCrawler\Support\Http\GHttp;
 
 class HttpService
 {

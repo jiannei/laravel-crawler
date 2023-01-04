@@ -1,11 +1,11 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Tests\Unit;
+namespace Jiannei\LaravelCrawler\Tests\Feature;
 
-use Jiannei\LaravelCrawler\Base\phpQuery;
+use Jiannei\LaravelCrawler\Support\Query\phpQuery;
 use Jiannei\LaravelCrawler\Tests\TestCase;
 
-class BaseTest extends TestCase
+class QueryTest extends TestCase
 {
     public function testFindSrcAttr()
     {

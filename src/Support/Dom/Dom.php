@@ -1,8 +1,8 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Dom;
+namespace Jiannei\LaravelCrawler\Support\Dom;
 
-use Jiannei\LaravelCrawler\Base\phpQueryObject;
+use Jiannei\LaravelCrawler\Support\Query\phpQueryObject;
 
 class Dom
 {

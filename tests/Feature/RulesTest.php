@@ -1,6 +1,6 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Tests\Unit;
+namespace Jiannei\LaravelCrawler\Tests\Feature;
 
 
 use Illuminate\Support\Collection;
