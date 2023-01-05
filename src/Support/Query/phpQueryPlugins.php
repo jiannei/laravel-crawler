@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the jiannei/laravel-crawler.
+ *
+ * (c) jiannei <longjian.huang@foxmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Jiannei\LaravelCrawler\Support\Query;
 
 use Jiannei\LaravelCrawler\Query\Exception;
@@ -8,7 +17,7 @@ use Jiannei\LaravelCrawler\Query\Exception;
  * Plugins static namespace class.
  *
  * @author Tobiasz Cudnik <tobiasz.cudnik/gmail.com>
- * @package phpQuery
+ *
  * @todo move plugin methods here (as statics)
  */
 class phpQueryPlugins
@@ -25,7 +34,7 @@ class phpQueryPlugins
                 $class = phpQuery::$pluginsStaticMethods[$method];
                 $realClass = "phpQueryPlugin_$class";
                 $return = call_user_func_array(
-                    array($realClass, $method),
+                    [$realClass, $method],
                     $args
                 );
 

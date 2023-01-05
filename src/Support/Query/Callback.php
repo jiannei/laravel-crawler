@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the jiannei/laravel-crawler.
+ *
+ * (c) jiannei <longjian.huang@foxmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Jiannei\LaravelCrawler\Support\Query;
 
 /**
@@ -19,7 +28,8 @@ namespace Jiannei\LaravelCrawler\Support\Query;
  *
  * Callback class is supported in all phpQuery methods which accepts callbacks.
  *
- * @link http://code.google.com/p/phpquery/wiki/Callbacks#Param_Structures
+ * @see http://code.google.com/p/phpquery/wiki/Callbacks#Param_Structures
+ *
  * @author Tobiasz Cudnik <tobiasz.cudnik/gmail.com>
  *
  * @TODO??? return fake forwarding function created via create_function

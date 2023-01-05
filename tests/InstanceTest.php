@@ -1,7 +1,15 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Tests;
+/*
+ * This file is part of the jiannei/laravel-crawler.
+ *
+ * (c) jiannei <longjian.huang@foxmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
 
+namespace Jiannei\LaravelCrawler\Tests;
 
 use Jiannei\LaravelCrawler\QueryList;
 
@@ -23,17 +31,17 @@ STR;
     {
         $ql = QueryList::getInstance()->html($this->html);
         $ql2 = QueryList::getInstance();
-        $this->assertEquals($ql->getHtml(),$ql2->getHtml());
+        $this->assertEquals($ql->getHtml(), $ql2->getHtml());
     }
 
     public function testGetNewObject()
     {
         $ql = (new QueryList())->html($this->html);
         $ql2 = (new QueryList())->html('');
-        $this->assertNotEquals($ql->getHtml(),$ql2->getHtml());
+        $this->assertNotEquals($ql->getHtml(), $ql2->getHtml());
 
         $ql = QueryList::range('')->html($this->html);
         $ql2 = QueryList::range('')->html('');
-        $this->assertNotEquals($ql->getHtml(),$ql2->getHtml());
+        $this->assertNotEquals($ql->getHtml(), $ql2->getHtml());
     }
 }

@@ -1,10 +1,14 @@
 <?php
 
-/**
- *  mb_internal_encoding()
+/*
+ * This file is part of the jiannei/laravel-crawler.
  *
- *  Included for mbstring pseudo-compatability.
+ * (c) jiannei <longjian.huang@foxmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
  */
+
 if (!function_exists('mb_internal_encoding')) {
     function mb_internal_encoding($enc)
     {
@@ -12,7 +16,7 @@ if (!function_exists('mb_internal_encoding')) {
     }
 }
 
-/**
+/*
  *  mb_regex_encoding()
  *
  *  Included for mbstring pseudo-compatability.
@@ -24,7 +28,7 @@ if (!function_exists('mb_regex_encoding')) {
     }
 }
 
-/**
+/*
  *  mb_strlen()
  *
  *  Included for mbstring pseudo-compatability.
@@ -36,7 +40,7 @@ if (!function_exists('mb_strlen')) {
     }
 }
 
-/**
+/*
  *  mb_strpos()
  *
  *  Included for mbstring pseudo-compatability.
@@ -47,7 +51,7 @@ if (!function_exists('mb_strpos')) {
         return strpos($haystack, $needle, $offset);
     }
 }
-/**
+/*
  *  mb_stripos()
  *
  *  Included for mbstring pseudo-compatability.
@@ -59,7 +63,7 @@ if (!function_exists('mb_stripos')) {
     }
 }
 
-/**
+/*
  *  mb_substr()
  *
  *  Included for mbstring pseudo-compatability.
@@ -71,7 +75,7 @@ if (!function_exists('mb_substr')) {
     }
 }
 
-/**
+/*
  *  mb_substr_count()
  *
  *  Included for mbstring pseudo-compatability.
@@ -83,8 +87,7 @@ if (!function_exists('mb_substr_count')) {
     }
 }
 
-
-/**
+/*
  * Shortcut to phpQuery::pq($arg1, $context)
  * Chainable.
  *

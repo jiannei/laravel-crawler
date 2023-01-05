@@ -1,7 +1,15 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Tests;
+/*
+ * This file is part of the jiannei/laravel-crawler.
+ *
+ * (c) jiannei <longjian.huang@foxmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
 
+namespace Jiannei\LaravelCrawler\Tests;
 
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Response;
@@ -13,31 +21,31 @@ class HttpTest extends TestCase
         'https://httpbin.org/get?name=php',
         'https://httpbin.org/get?name=golang',
         'https://httpbin.org/get?name=c++',
-        'https://httpbin.org/get?name=java'
+        'https://httpbin.org/get?name=java',
     ];
 
     public function testGet()
     {
         $ql = QueryList::get('https://httpbin.org/get?param1=testvalue&params2=somevalue');
 
-        $res = $ql->get('https://httpbin.org/get',[
+        $res = $ql->get('https://httpbin.org/get', [
             'param1' => 'testvalue',
-            'params2' => 'somevalue'
+            'params2' => 'somevalue',
         ]);
 
-        $this->assertEquals($ql->getHtml(),$res->getHtml());
+        $this->assertEquals($ql->getHtml(), $res->getHtml());
     }
 
     public function testCanPostJsonData()
     {
         $mock = new MockHandler([new Response()]);
         $data = [
-            'name' => 'foo'
+            'name' => 'foo',
         ];
-        QueryList::postJson('http://foo.com',$data,[
-            'handler' => $mock
+        QueryList::postJson('http://foo.com', $data, [
+            'handler' => $mock,
         ]);
-        $this->assertEquals((string)$mock->getLastRequest()->getBody(),json_encode($data));
+        $this->assertEquals((string) $mock->getLastRequest()->getBody(), json_encode($data));
     }
 
     public function testConcurrentRequestsBaseUse()
@@ -45,9 +53,9 @@ class HttpTest extends TestCase
         $urls = $this->urls;
         QueryList::getInstance()
             ->multiGet($urls)
-            ->success(function(QueryList $ql,Response $response, $index) use($urls){
-                $body = json_decode((string)$response->getBody(),true);
-                $this->assertEquals($urls[$index],$body['url']);
+            ->success(function (QueryList $ql, Response $response, $index) use ($urls) {
+                $body = json_decode((string) $response->getBody(), true);
+                $this->assertEquals($urls[$index], $body['url']);
             })->send();
     }
 
@@ -56,35 +64,34 @@ class HttpTest extends TestCase
         $ua = 'QueryList/4.0';
 
         $errorUrl = 'http://web-site-not-exist.com';
-        $urls = array_merge($this->urls,[$errorUrl]);
+        $urls = array_merge($this->urls, [$errorUrl]);
 
         QueryList::rules([])
             ->multiGet($urls)
             ->concurrency(2)
             ->withOptions([
-                'timeout' => 60
+                'timeout' => 60,
             ])
             ->withHeaders([
-                'User-Agent' => $ua
+                'User-Agent' => $ua,
             ])
-            ->success(function (QueryList $ql, Response $response, $index) use($ua){
-                $body = json_decode((string)$response->getBody(),true);
-                $this->assertEquals($ua,$body['headers']['User-Agent']);
+            ->success(function (QueryList $ql, Response $response, $index) use ($ua) {
+                $body = json_decode((string) $response->getBody(), true);
+                $this->assertEquals($ua, $body['headers']['User-Agent']);
             })
-            ->error(function (QueryList $ql, $reason, $index) use($urls,$errorUrl){
-                $this->assertEquals($urls[$index],$errorUrl);
+            ->error(function (QueryList $ql, $reason, $index) use ($urls, $errorUrl) {
+                $this->assertEquals($urls[$index], $errorUrl);
             })
             ->send();
     }
 
-
     public function testRequestWithCache()
     {
         $url = $this->urls[0];
-        $data = QueryList::get($url,null,[
-            'cache_ttl' => 600
+        $data = QueryList::get($url, null, [
+            'cache_ttl' => 600,
         ])->getHtml();
-        $data = json_decode($data,true);
-        $this->assertEquals($url,$data['url']);
+        $data = json_decode($data, true);
+        $this->assertEquals($url, $data['url']);
     }
 }

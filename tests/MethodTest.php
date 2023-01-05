@@ -1,7 +1,15 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Tests;
+/*
+ * This file is part of the jiannei/laravel-crawler.
+ *
+ * (c) jiannei <longjian.huang@foxmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
 
+namespace Jiannei\LaravelCrawler\Tests;
 
 use Jiannei\LaravelCrawler\QueryList;
 
@@ -22,10 +30,11 @@ STR;
     public function testPipe()
     {
         $html = $this->html;
-        $qlHtml = QueryList::pipe(function(QueryList $ql) use($html){
+        $qlHtml = QueryList::pipe(function (QueryList $ql) use ($html) {
             $ql->setHtml($html);
+
             return $ql;
         })->getHtml(false);
-        $this->assertEquals($html,$qlHtml);
+        $this->assertEquals($html, $qlHtml);
     }
 }

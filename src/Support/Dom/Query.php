@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the jiannei/laravel-crawler.
+ *
+ * (c) jiannei <longjian.huang@foxmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Jiannei\LaravelCrawler\Support\Dom;
 
 use Closure;
@@ -23,7 +32,6 @@ class Query
      */
     protected $data;
 
-
     public function __construct(QueryList $ql)
     {
         $this->ql = $ql;
@@ -31,7 +39,8 @@ class Query
 
     /**
      * @param bool $rel
-     * @return String
+     *
+     * @return string
      */
     public function getHtml($rel = true)
     {
@@ -41,6 +50,7 @@ class Query
     /**
      * @param $html
      * @param null $charset
+     *
      * @return QueryList
      */
     public function setHtml($html, $charset = null)
@@ -48,13 +58,13 @@ class Query
         $this->html = value($html);
         $this->destroyDocument();
         $this->document = phpQuery::newDocumentHTML($this->html, $charset);
+
         return $this->ql;
     }
 
     /**
-     * Get crawl results
+     * Get crawl results.
      *
-     * @param Closure|null $callback
      * @return Collection|static
      */
     public function getData(Closure $callback = null)
@@ -62,19 +72,16 @@ class Query
         return $this->handleData($this->data, $callback);
     }
 
-    /**
-     * @param Collection $data
-     */
     public function setData(Collection $data)
     {
         $this->data = $data;
     }
 
-
     /**
      * Searches for all elements that match the specified expression.
      *
-     * @param $selector A string containing a selector expression to match elements against.
+     * @param $selector A string containing a selector expression to match elements against
+     *
      * @return Elements
      */
     public function find($selector)
@@ -87,7 +94,7 @@ class Query
     }
 
     /**
-     * Set crawl rule
+     * Set crawl rule.
      *
      * $rules = [
      *    'rule_name1' => ['selector','HTML attribute | text | html','Tag filter list','callback'],
@@ -95,30 +102,31 @@ class Query
      *    // ...
      *  ]
      *
-     * @param array $rules
      * @return QueryList
      */
     public function rules(array $rules)
     {
         $this->rules = $rules;
+
         return $this->ql;
     }
 
-
     /**
-     * Set the slice area for crawl list
+     * Set the slice area for crawl list.
      *
      * @param $selector
+     *
      * @return QueryList
      */
     public function range($selector)
     {
         $this->range = $selector;
+
         return $this->ql;
     }
 
     /**
-     * Remove HTML head,try to solve the garbled
+     * Remove HTML head,try to solve the garbled.
      *
      * @return QueryList
      */
@@ -126,19 +134,20 @@ class Query
     {
         $html = preg_replace('/(<head>|<head\s+.+?>).+<\/head>/is', '<head></head>', $this->html);
         $this->setHtml($html);
+
         return $this->ql;
     }
 
     /**
-     * Execute the query rule
+     * Execute the query rule.
      *
-     * @param Closure|null $callback
      * @return QueryList
      */
     public function query(Closure $callback = null)
     {
         $this->data = $this->getList();
         $this->data = $this->handleData($this->data, $callback);
+
         return $this->ql;
     }
 
@@ -173,7 +182,7 @@ class Query
                     $contentElements = phpQuery::pq($element)->find($rule['selector']);
                     $data[$i][$key] = $this->extractContent($contentElements, $key, $rule);
                 }
-                $i++;
+                ++$i;
             }
         }
 
@@ -208,7 +217,7 @@ class Query
                 })->all();
                 break;
             default:
-                if(preg_match('/attr\((.+)\)/', $rule['attr'], $arr)) {
+                if (preg_match('/attr\((.+)\)/', $rule['attr'], $arr)) {
                     $content = $pqObj->attr($arr[1]);
                 } elseif (preg_match('/attrs\((.+)\)/', $rule['attr'], $arr)) {
                     $content = (new Elements($pqObj))->attrs($arr[1])->all();
@@ -237,27 +246,32 @@ class Query
     }
 
     /**
-     * 去除特定的html标签
+     * 去除特定的html标签.
+     *
      * @param string $html
      * @param string $tags_str 多个标签名之间用空格隔开
+     *
      * @return string
      */
     protected function stripTags($html, $tags_str)
     {
         $tagsArr = $this->tag($tags_str);
         $html = $this->removeTags($html, $tagsArr[1]);
-        $p = array();
+        $p = [];
         foreach ($tagsArr[0] as $tag) {
-            $p[] = "/(<(?:\/" . $tag . "|" . $tag . ")[^>]*>)/i";
+            $p[] = "/(<(?:\/".$tag.'|'.$tag.')[^>]*>)/i';
         }
-        $html = preg_replace($p, "", trim($html));
+        $html = preg_replace($p, '', trim($html));
+
         return $html;
     }
 
     /**
-     * 保留特定的html标签
+     * 保留特定的html标签.
+     *
      * @param string $html
      * @param string $tags_str 多个标签名之间用空格隔开
+     *
      * @return string
      */
     protected function allowTags($html, $tags_str)
@@ -268,13 +282,14 @@ class Query
         foreach ($tagsArr[0] as $tag) {
             $allow .= "<$tag> ";
         }
+
         return strip_tags(trim($html), $allow);
     }
 
     protected function tag($tags_str)
     {
         $tagArr = preg_split("/\s+/", $tags_str, -1, PREG_SPLIT_NO_EMPTY);
-        $tags = array(array(), array());
+        $tags = [[], []];
         foreach ($tagArr as $tag) {
             if (preg_match('/-(.+)/', $tag, $arr)) {
                 array_push($tags[1], $arr[1]);
@@ -282,13 +297,16 @@ class Query
                 array_push($tags[0], $tag);
             }
         }
+
         return $tags;
     }
 
     /**
-     * 移除特定的html标签
+     * 移除特定的html标签.
+     *
      * @param string $html
-     * @param array $tags 标签数组
+     * @param array  $tags 标签数组
+     *
      * @return string
      */
     protected function removeTags($html, $tags)
@@ -296,7 +314,7 @@ class Query
         $tag_str = '';
         if (count($tags)) {
             foreach ($tags as $tag) {
-                $tag_str .= $tag_str ? ',' . $tag : $tag;
+                $tag_str .= $tag_str ? ','.$tag : $tag;
             }
 //            phpQuery::$defaultCharset = $this->inputEncoding?$this->inputEncoding:$this->htmlEncoding;
             $doc = phpQuery::newDocumentHTML($html);
@@ -304,6 +322,7 @@ class Query
             $html = phpQuery::pq($doc)->htmlOuter();
             $doc->unloadDocument();
         }
+
         return $html;
     }
 

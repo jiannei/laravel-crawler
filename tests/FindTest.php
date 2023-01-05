@@ -1,8 +1,16 @@
 <?php
 
+/*
+ * This file is part of the jiannei/laravel-crawler.
+ *
+ * (c) jiannei <longjian.huang@foxmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Jiannei\LaravelCrawler\Tests;
 
-use Illuminate\Support\Facades\Log;
 use Jiannei\LaravelCrawler\QueryList;
 
 class FindTest extends TestCase
@@ -35,9 +43,7 @@ STR;
         $this->assertCount(1, array_unique($img));
         $this->assertEquals($alt, '这是图片');
         $this->assertEquals($abc, '这是一个自定义属性');
-
     }
-
 
     public function testFindSecondDomAttr()
     {
@@ -49,7 +55,6 @@ STR;
         $img2[] = $ql->find('.second_pic')->alt;
 
         $this->assertCount(1, array_unique($img2));
-
     }
 
     public function testFindDomAllAttr()

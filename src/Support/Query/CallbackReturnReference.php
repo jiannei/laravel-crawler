@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the jiannei/laravel-crawler.
+ *
+ * (c) jiannei <longjian.huang@foxmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Jiannei\LaravelCrawler\Support\Query;
 
 /**
@@ -7,15 +16,14 @@ namespace Jiannei\LaravelCrawler\Support\Query;
  *
  * @author Tobiasz Cudnik <tobiasz.cudnik/gmail.com>
  */
-class CallbackReturnReference extends Callback
-    implements ICallbackNamed
+class CallbackReturnReference extends Callback implements ICallbackNamed
 {
     protected $reference;
 
     public function __construct(&$reference, $name = null)
     {
         $this->reference = &$reference;
-        $this->callback = array($this, 'callback');
+        $this->callback = [$this, 'callback'];
     }
 
     public function callback()
