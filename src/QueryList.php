@@ -6,6 +6,7 @@ use Illuminate\Support\Collection;
 use Jiannei\LaravelCrawler\Services\MultiRequestService;
 use Jiannei\LaravelCrawler\Support\Dom\Query;
 use Jiannei\LaravelCrawler\Support\Query\phpQuery;
+use Jiannei\LaravelCrawler\Support\Query\phpQueryObject;
 
 
 /**
@@ -15,7 +16,7 @@ use Jiannei\LaravelCrawler\Support\Query\phpQuery;
  * @method string getHtml($rel = true)
  * @method QueryList setHtml($html)
  * @method QueryList html($html)
- * @method Support\Dom\Elements find($selector)
+ * @method phpQueryObject find($selector)
  * @method QueryList rules(array $rules)
  * @method QueryList range($range)
  * @method QueryList removeHead()

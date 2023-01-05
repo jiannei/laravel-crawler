@@ -2,8 +2,6 @@
 
 namespace Jiannei\LaravelCrawler\Support\Query;
 
-use Jiannei\LaravelCrawler\Query\unknown_type;
-
 /**
  * DOMEvent class.
  *
@@ -18,25 +16,25 @@ class DOMEvent
     /**
      * Returns a boolean indicating whether the event bubbles up through the DOM or not.
      *
-     * @var unknown_type
+     * @var
      */
     public $bubbles = true;
     /**
      * Returns a boolean indicating whether the event is cancelable.
      *
-     * @var unknown_type
+     * @var
      */
     public $cancelable = true;
     /**
      * Returns a reference to the currently registered target for the event.
      *
-     * @var unknown_type
+     * @var
      */
     public $currentTarget;
     /**
      * Returns detail about the event, depending on the type of event.
      *
-     * @var unknown_type
+     * @var
      * @link http://developer.mozilla.org/en/DOM/event.detail
      */
     public $detail;    // ???
@@ -45,7 +43,7 @@ class DOMEvent
      *
      * NOT IMPLEMENTED
      *
-     * @var unknown_type
+     * @var
      * @link http://developer.mozilla.org/en/DOM/event.eventPhase
      */
     public $eventPhase;    // ???
@@ -54,7 +52,7 @@ class DOMEvent
      *
      * NOT IMPLEMENTED
      *
-     * @var unknown_type
+     * @var
      */
     public $explicitOriginalTarget; // moz only
     /**
@@ -62,25 +60,25 @@ class DOMEvent
      *
      * NOT IMPLEMENTED
      *
-     * @var unknown_type
+     * @var
      */
     public $originalTarget;    // moz only
     /**
      * Identifies a secondary target for the event.
      *
-     * @var unknown_type
+     * @var
      */
     public $relatedTarget;
     /**
      * Returns a reference to the target to which the event was originally dispatched.
      *
-     * @var unknown_type
+     * @var
      */
     public $target;
     /**
      * Returns the time that the event was created.
      *
-     * @var unknown_type
+     * @var
      */
     public $timeStamp;
     /**

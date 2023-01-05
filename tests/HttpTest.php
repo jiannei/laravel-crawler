@@ -1,12 +1,11 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Tests\Unit;
+namespace Jiannei\LaravelCrawler\Tests;
 
 
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Response;
 use Jiannei\LaravelCrawler\QueryList;
-use Jiannei\LaravelCrawler\Tests\TestCase;
 
 class HttpTest extends TestCase
 {

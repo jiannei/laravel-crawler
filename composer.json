@@ -21,6 +21,16 @@
             "Jiannei\\LaravelCrawler\\Tests\\": "tests"
         }
     },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Jiannei\\LaravelCrawler\\Providers\\LaravelServiceProvider"
+            ],
+            "aliases": {
+                "Crawler": "Jiannei\\LaravelCrawler\\Support\\Facades\\Crawler"
+            }
+        }
+    },
     "require-dev": {
         "orchestra/testbench": "^7.0",
         "phpunit/phpunit": "^9.5",

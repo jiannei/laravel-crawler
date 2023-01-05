@@ -4,14 +4,9 @@ namespace Jiannei\LaravelCrawler\Support\Query;
 
 use DOMDocument;
 use DOMNode;
+use DOMNodeList;
 use Exception;
-use Jiannei\LaravelCrawler\Query\DOMNODELIST;
-use Jiannei\LaravelCrawler\Query\Iterator;
-use Jiannei\LaravelCrawler\Query\New;
-use Jiannei\LaravelCrawler\Query\QueryTemplatesPhpQuery;
-use Jiannei\LaravelCrawler\Query\Zend_Http_Client;
-use Jiannei\LaravelCrawler\Query\Zend_Json_Decoder;
-use Jiannei\LaravelCrawler\Query\Zend_Json_Encoder;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Static namespace for phpQuery functions.
@@ -127,7 +122,7 @@ abstract class phpQuery
      * @param  string|DOMNode|DOMNodeList|array  $arg1  HTML markup, CSS Selector, DOMNode or array of DOMNodes
      * @param  string|phpQueryObject|DOMNode  $context  DOM ID from $pq->getDocumentID(), phpQuery object (determines also query root) or DOMNode (determines also query root)
      *
-     * @return phpQueryObject|QueryTemplatesPhpQuery|false
+     * @return phpQueryObject|false
      * phpQuery object or false in case of error.
      */
     public static function pq($arg1, $context = null)
@@ -309,9 +304,7 @@ abstract class phpQuery
      */
     public static function newDocumentHTML($markup = null, $charset = null)
     {
-        $contentType = $charset
-            ? ";charset=$charset"
-            : '';
+        $contentType = $charset ? ";charset=$charset" : '';
 
         return self::newDocument($markup, "text/html{$contentType}");
     }
@@ -325,9 +318,7 @@ abstract class phpQuery
      */
     public static function newDocumentXML($markup = null, $charset = null)
     {
-        $contentType = $charset
-            ? ";charset=$charset"
-            : '';
+        $contentType = $charset ? ";charset=$charset" : '';
 
         return self::newDocument($markup, "text/xml{$contentType}");
     }
@@ -342,9 +333,7 @@ abstract class phpQuery
      */
     public static function newDocumentXHTML($markup = null, $charset = null)
     {
-        $contentType = $charset
-            ? ";charset=$charset"
-            : '';
+        $contentType = $charset ? ";charset=$charset" : '';
 
         return self::newDocument($markup, "application/xhtml+xml{$contentType}");
     }
@@ -756,7 +745,7 @@ abstract class phpQuery
     public static function debug($text)
     {
         if (self::$debug) {
-            print var_dump($text);
+            Log::debug($text);
         }
     }
 

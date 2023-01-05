@@ -1,9 +1,9 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Tests\Feature;
+namespace Jiannei\LaravelCrawler\Tests;
 
+use Illuminate\Support\Facades\Log;
 use Jiannei\LaravelCrawler\QueryList;
-use Jiannei\LaravelCrawler\Tests\TestCase;
 
 class FindTest extends TestCase
 {
@@ -19,23 +19,18 @@ class FindTest extends TestCase
 </div>
 STR;
 
-    protected $ql;
-
-    public function setUp(): void
-    {
-        $this->ql = QueryList::html($this->html);
-    }
-
     public function testFindFirstDomAttr()
     {
-        $img = [];
-        $img[] = $this->ql->find('img')->attr('src');
-        $img[] = $this->ql->find('img')->src;
-        $img[] = $this->ql->find('img:eq(0)')->src;
-        $img[] = $this->ql->find('img')->eq(0)->src;
+        $ql = QueryList::setHtml($this->html);
 
-        $alt = $this->ql->find('img')->alt;
-        $abc = $this->ql->find('img')->abc;
+        $img = [];
+        $img[] = $ql->find('img')->attr('src');
+        $img[] = $ql->find('img')->src;
+        $img[] = $ql->find('img:eq(0)')->src;
+        $img[] = $ql->find('img')->eq(0)->src;
+
+        $alt = $ql->find('img')->alt;
+        $abc = $ql->find('img')->abc;
 
         $this->assertCount(1, array_unique($img));
         $this->assertEquals($alt, '这是图片');
@@ -46,11 +41,12 @@ STR;
 
     public function testFindSecondDomAttr()
     {
+        $ql = QueryList::setHtml($this->html);
 
         $img2 = [];
-        $img2[] = $this->ql->find('img')->eq(1)->alt;
-        $img2[] = $this->ql->find('img:eq(1)')->alt;
-        $img2[] = $this->ql->find('.second_pic')->alt;
+        $img2[] = $ql->find('img')->eq(1)->alt;
+        $img2[] = $ql->find('img:eq(1)')->alt;
+        $img2[] = $ql->find('.second_pic')->alt;
 
         $this->assertCount(1, array_unique($img2));
 
@@ -58,8 +54,10 @@ STR;
 
     public function testFindDomAllAttr()
     {
-        $imgAttr = $this->ql->find('img:eq(0)')->attr('*');
-        $linkAttr = $this->ql->find('a:eq(1)')->attr('*');
+        $ql = QueryList::setHtml($this->html);
+
+        $imgAttr = $ql->find('img:eq(0)')->attr('*');
+        $linkAttr = $ql->find('a:eq(1)')->attr('*');
         $this->assertCount(3, $imgAttr);
         $this->assertCount(1, $linkAttr);
     }

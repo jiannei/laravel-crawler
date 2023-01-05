@@ -12,7 +12,7 @@ class Query
 {
     protected $html;
     /**
-     * @var \phpQueryObject
+     * @var phpQueryObject
      */
     protected $document;
     protected $rules;
@@ -79,7 +79,11 @@ class Query
      */
     public function find($selector)
     {
-        return (new Dom($this->document))->find($selector);
+        $elements = $this->document->find($selector);
+
+        return new Elements($elements);
+
+//        return (new Dom($this->document))->find($selector);
     }
 
     /**
@@ -138,7 +142,7 @@ class Query
         return $this->ql;
     }
 
-    public function handleData(Collection $data, $callback)
+    protected function handleData(Collection $data, $callback)
     {
         if (is_callable($callback)) {
             if (empty($this->range)) {

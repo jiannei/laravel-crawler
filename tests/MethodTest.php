@@ -1,10 +1,9 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Tests\Unit;
+namespace Jiannei\LaravelCrawler\Tests;
 
 
 use Jiannei\LaravelCrawler\QueryList;
-use Jiannei\LaravelCrawler\Tests\TestCase;
 
 class MethodTest extends TestCase
 {

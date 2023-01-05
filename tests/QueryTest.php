@@ -1,9 +1,8 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Tests\Feature;
+namespace Jiannei\LaravelCrawler\Tests;
 
 use Jiannei\LaravelCrawler\Support\Query\phpQuery;
-use Jiannei\LaravelCrawler\Tests\TestCase;
 
 class QueryTest extends TestCase
 {

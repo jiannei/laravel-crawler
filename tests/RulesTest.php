@@ -1,11 +1,10 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Tests\Feature;
+namespace Jiannei\LaravelCrawler\Tests;
 
 
 use Illuminate\Support\Collection;
 use Jiannei\LaravelCrawler\QueryList;
-use Jiannei\LaravelCrawler\Tests\TestCase;
 
 class RulesTest extends TestCase
 {
@@ -27,12 +26,6 @@ class RulesTest extends TestCase
     </ul>
 </div>
 STR;
-    protected $ql;
-
-    public function setUp(): void
-    {
-        $this->ql = QueryList::html($this->html);
-    }
 
     public function testGetDataByRules()
     {
