@@ -1,11 +1,12 @@
 <?php
 
-/**
- * 基于GuzzleHttp的简单版Http客户端。 Simple Http client base on GuzzleHttp
+/*
+ * This file is part of the jiannei/laravel-crawler.
  *
- * @Author: Jaeger <JaegerCode@gmail.com>
+ * (c) jiannei <longjian.huang@foxmail.com>
  *
- * @Version V1.0
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
  */
 
 namespace Jiannei\LaravelCrawler\Support\Http;
@@ -14,8 +15,7 @@ use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Class GHttp
- * @package Jaeger
+ * Class GHttp.
  *
  * @method static string get($url,$args = null,$otherArgs = [])
  * @method static mixed  getJson($url, $args = null, $otherArgs = [])
@@ -30,7 +30,7 @@ class GHttp
     public static function __callStatic($name, $arguments)
     {
         $protectedName = '_'.$name;
-        if (!method_exists(self::class,$protectedName)) {
+        if (!method_exists(self::class, $protectedName)) {
             throw new MethodNotFoundException('Call undefined method '.self::class.':'.$name.'()');
         }
 
@@ -39,12 +39,12 @@ class GHttp
             return self::$protectedName(...$arguments);
         }
 
-        $cacheKey = self::getCacheKey($protectedName,$arguments);
-        $data =  Cache::get($cacheKey);
+        $cacheKey = self::getCacheKey($protectedName, $arguments);
+        $data = Cache::get($cacheKey);
         if (empty($data)) {
             $data = self::$protectedName(...$arguments);
-            if(!empty($data)) {
-                Cache::put($cacheKey,$data,$cacheConfig['cache_ttl']);
+            if (!empty($data)) {
+                Cache::put($cacheKey, $data, $cacheConfig['cache_ttl']);
             }
         }
 
@@ -53,9 +53,10 @@ class GHttp
 
     public static function getClient(array $config = [])
     {
-        if(self::$client == null){
+        if (null == self::$client) {
             self::$client = new Client($config);
         }
+
         return self::$client;
     }
 
@@ -63,56 +64,62 @@ class GHttp
      * @param $url
      * @param array $args
      * @param array $otherArgs
+     *
      * @return string
      */
-    protected static function _get($url,$args = null,$otherArgs = [])
+    protected static function _get($url, $args = null, $otherArgs = [])
     {
-        is_string($args) && parse_str($args,$args);
+        is_string($args) && parse_str($args, $args);
         $args = array_merge([
             'verify' => false,
             'query' => $args,
             'headers' => [
                 'referer' => $url,
-                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
-            ]
-        ],$otherArgs);
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
+            ],
+        ], $otherArgs);
         $client = self::getClient();
-        $response = $client->request('GET', $url,$args);
-        return (string)$response->getBody();
+        $response = $client->request('GET', $url, $args);
+
+        return (string) $response->getBody();
     }
 
     protected static function _getJson($url, $args = null, $otherArgs = [])
     {
-        $data = self::get($url, $args , $otherArgs);
-        return json_decode($data,JSON_UNESCAPED_UNICODE);
+        $data = self::get($url, $args, $otherArgs);
+
+        return json_decode($data, JSON_UNESCAPED_UNICODE);
     }
 
     /**
      * @param $url
      * @param array $args
      * @param array $otherArgs
+     *
      * @return string
      */
-    protected static function _post($url,$args = null,$otherArgs = [])
+    protected static function _post($url, $args = null, $otherArgs = [])
     {
-        is_string($args) && parse_str($args,$args);
+        is_string($args) && parse_str($args, $args);
         $args = array_merge([
             'verify' => false,
             'form_params' => $args,
             'headers' => [
                 'referer' => $url,
-                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
-            ]
-        ],$otherArgs);
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
+            ],
+        ], $otherArgs);
         $client = self::getClient();
-        $response = $client->request('Post', $url,$args);
-        return (string)$response->getBody();
+        $response = $client->request('Post', $url, $args);
+
+        return (string) $response->getBody();
     }
 
     /**
      * @param $url
-     * @param null $raw
+     * @param null  $raw
      * @param array $otherArgs
+     *
      * @return string
      */
     protected static function _postRaw($url, $raw = null, $otherArgs = [])
@@ -123,58 +130,65 @@ class GHttp
             'body' => $raw,
             'headers' => [
                 'referer' => $url,
-                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
-            ]
-        ],$otherArgs);
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
+            ],
+        ], $otherArgs);
         $client = self::getClient();
-        $response = $client->request('Post', $url,$args);
-        return (string)$response->getBody();
+        $response = $client->request('Post', $url, $args);
+
+        return (string) $response->getBody();
     }
 
     /**
      * @param $url
-     * @param null $args
+     * @param null  $args
      * @param array $otherArgs
+     *
      * @return string
      */
     protected static function _postJson($url, $args = null, $otherArgs = [])
     {
-        is_string($args) && parse_str($args,$args);
+        is_string($args) && parse_str($args, $args);
         $args = array_merge([
             'verify' => false,
             'json' => $args,
             'headers' => [
                 'referer' => $url,
-                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
-            ]
-        ],$otherArgs);
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
+            ],
+        ], $otherArgs);
         $client = self::getClient();
-        $response = $client->request('Post', $url,$args);
-        return (string)$response->getBody();
+        $response = $client->request('Post', $url, $args);
+
+        return (string) $response->getBody();
     }
 
     /**
      * @param $url
      * @param $filePath
-     * @param null $args
+     * @param null  $args
      * @param array $otherArgs
+     *
      * @return string
      */
-    public static function download($url,$filePath,$args = null,$otherArgs = [])
+    public static function download($url, $filePath, $args = null, $otherArgs = [])
     {
-        $otherArgs = array_merge($otherArgs,[
+        $otherArgs = array_merge($otherArgs, [
             'sink' => $filePath,
         ]);
-        return self::get($url,$args,$otherArgs);
+
+        return self::get($url, $args, $otherArgs);
     }
 
     /**
      * @param $urls
+     *
      * @return MultiRequest
      */
     public static function multiRequest($urls)
     {
         $client = self::getClient();
+
         return MultiRequest::newRequest($client)->urls($urls);
     }
 
@@ -182,14 +196,15 @@ class GHttp
     {
         $cacheConfig = [
             'cache' => null,
-            'cache_ttl' => null
+            'cache_ttl' => null,
         ];
-        if(!empty($arguments[2])) {
+        if (!empty($arguments[2])) {
             $cacheConfig = array_merge([
                 'cache' => null,
-                'cache_ttl' => null
-            ],$arguments[2]);
+                'cache_ttl' => null,
+            ], $arguments[2]);
         }
+
         return $cacheConfig;
     }
 

@@ -1,14 +1,25 @@
 <?php
 
+/*
+ * This file is part of the jiannei/laravel-crawler.
+ *
+ * (c) jiannei <longjian.huang@foxmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Jiannei\LaravelCrawler\Support\Query;
 
 /**
  * DOMEvent class.
  *
  * Based on
- * @link http://developer.mozilla.org/En/DOM:event
+ *
+ * @see http://developer.mozilla.org/En/DOM:event
+ *
  * @author Tobiasz Cudnik <tobiasz.cudnik/gmail.com>
- * @package phpQuery
+ *
  * @todo implement ArrayAccess ?
  */
 class DOMEvent
@@ -35,7 +46,8 @@ class DOMEvent
      * Returns detail about the event, depending on the type of event.
      *
      * @var
-     * @link http://developer.mozilla.org/en/DOM/event.detail
+     *
+     * @see http://developer.mozilla.org/en/DOM/event.detail
      */
     public $detail;    // ???
     /**
@@ -44,7 +56,8 @@ class DOMEvent
      * NOT IMPLEMENTED
      *
      * @var
-     * @link http://developer.mozilla.org/en/DOM/event.eventPhase
+     *
+     * @see http://developer.mozilla.org/en/DOM/event.eventPhase
      */
     public $eventPhase;    // ???
     /**
@@ -100,7 +113,6 @@ class DOMEvent
 
     /**
      * Cancels the event (if it is cancelable).
-     *
      */
     public function preventDefault()
     {
@@ -109,7 +121,6 @@ class DOMEvent
 
     /**
      * Stops the propagation of events further along in the DOM.
-     *
      */
     public function stopPropagation()
     {

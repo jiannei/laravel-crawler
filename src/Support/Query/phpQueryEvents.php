@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the jiannei/laravel-crawler.
+ *
+ * (c) jiannei <longjian.huang@foxmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Jiannei\LaravelCrawler\Support\Query;
 
 use Jiannei\LaravelCrawler\Query\DOMNode;
@@ -9,7 +18,6 @@ use Jiannei\LaravelCrawler\Query\unknown_type;
  * Event handling class.
  *
  * @author Tobiasz Cudnik
- * @package phpQuery
  * @static
  */
 abstract class phpQueryEvents
@@ -17,20 +25,20 @@ abstract class phpQueryEvents
     /**
      * Trigger a type of event on every matched element.
      *
-     * @param  DOMNode|phpQueryObject|string  $document
-     * @param  unknown_type  $type
-     * @param  unknown_type  $data
+     * @param DOMNode|phpQueryObject|string $document
+     * @param unknown_type                  $type
+     * @param unknown_type                  $data
      *
      * @TODO exclusive events (with !)
      * @TODO global events (test)
      * @TODO support more than event in $type (space-separated)
      */
-    public static function trigger($document, $type, $data = array(), $node = null)
+    public static function trigger($document, $type, $data = [], $node = null)
     {
         // trigger: function(type, data, elem, donative, extra) {
         $documentID = phpQuery::getDocumentID($document);
         $namespace = null;
-        if (strpos($type, '.') !== false) {
+        if (false !== strpos($type, '.')) {
             list($name, $namespace) = explode('.', $type);
         } else {
             $name = $type;
@@ -49,25 +57,25 @@ abstract class phpQueryEvents
                 $event->target = $node;
                 $data = array_slice($data, 1);
             } else {
-                $event = new DOMEvent(array(
+                $event = new DOMEvent([
                     'type' => $type,
                     'target' => $node,
                     'timeStamp' => time(),
-                ));
+                ]);
             }
             $i = 0;
             while ($node) {
                 // TODO whois
                 phpQuery::debug(
-                    "Triggering ".($i ? "bubbled " : '')."event '{$type}' on "
+                    'Triggering '.($i ? 'bubbled ' : '')."event '{$type}' on "
                     ."node \n"
-                ); //.phpQueryObject::whois($node)."\n");
+                ); // .phpQueryObject::whois($node)."\n");
                 $event->currentTarget = $node;
                 $eventNode = self::getNode($documentID, $node);
                 if (isset($eventNode->eventHandlers)) {
                     foreach ($eventNode->eventHandlers as $eventType => $handlers) {
                         $eventNamespace = null;
-                        if (strpos($type, '.') !== false) {
+                        if (false !== strpos($type, '.')) {
                             list($eventName, $eventNamespace) = explode('.', $eventType);
                         } else {
                             $eventName = $eventType;
@@ -83,9 +91,9 @@ abstract class phpQueryEvents
                             $event->data = $handler['data']
                                 ? $handler['data']
                                 : null;
-                            $params = array_merge(array($event), $data);
+                            $params = array_merge([$event], $data);
                             $return = phpQuery::callbackRun($handler['callback'], $params);
-                            if ($return === false) {
+                            if (false === $return) {
                                 $event->bubbles = false;
                             }
                         }
@@ -96,7 +104,7 @@ abstract class phpQueryEvents
                     break;
                 }
                 $node = $node->parentNode;
-                $i++;
+                ++$i;
             }
         }
     }
@@ -105,10 +113,10 @@ abstract class phpQueryEvents
      * Binds a handler to one or more events (like click) for each matched element.
      * Can also bind custom events.
      *
-     * @param  DOMNode|phpQueryObject|string  $document
-     * @param  unknown_type  $type
-     * @param  unknown_type  $data  Optional
-     * @param  unknown_type  $callback
+     * @param DOMNode|phpQueryObject|string $document
+     * @param unknown_type                  $type
+     * @param unknown_type                  $data     Optional
+     * @param unknown_type                  $callback
      *
      * @TODO support '!' (exclusive) events
      * @TODO support more than event in $type (space-separated)
@@ -127,20 +135,20 @@ abstract class phpQueryEvents
             $eventNode = self::setNode($documentID, $node);
         }
         if (!isset($eventNode->eventHandlers[$type])) {
-            $eventNode->eventHandlers[$type] = array();
+            $eventNode->eventHandlers[$type] = [];
         }
-        $eventNode->eventHandlers[$type][] = array(
+        $eventNode->eventHandlers[$type][] = [
             'callback' => $callback,
             'data' => $data,
-        );
+        ];
     }
 
     /**
      * Enter description here...
      *
-     * @param  DOMNode|phpQueryObject|string  $document
-     * @param  unknown_type  $type
-     * @param  unknown_type  $callback
+     * @param DOMNode|phpQueryObject|string $document
+     * @param unknown_type                  $type
+     * @param unknown_type                  $callback
      *
      * @TODO namespace events
      * @TODO support more than event in $type (space-separated)

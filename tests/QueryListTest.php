@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the jiannei/laravel-crawler.
+ *
+ * (c) jiannei <longjian.huang@foxmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Jiannei\LaravelCrawler\Tests;
 
 use Jiannei\LaravelCrawler\QueryList;
@@ -39,15 +48,15 @@ STR;
         $alt = $ql->find('img')->alt;
         $this->assertEquals('这是图片', $alt);
 
-        //获取第一张图片的abc属性，注意这里获取定义属性的写法与普通属性的写法是一样的
+        // 获取第一张图片的abc属性，注意这里获取定义属性的写法与普通属性的写法是一样的
         $abc = $ql->find('img')->abc;
         $this->assertEquals('这是一个自定义属性', $abc);
 
-        //获取第二张图片的alt属性
+        // 获取第二张图片的alt属性
         $alt1 = $ql->find('img')->eq(1)->alt;
-        //等价下面这句话
+        // 等价下面这句话
         $alt2 = $ql->find('img:eq(1)')->alt;
-        //也等价下面这句话，通过class选择图片
+        // 也等价下面这句话，通过class选择图片
         $alt3 = $ql->find('.second_pic')->alt;
 
         $this->assertEquals('这是图片2', $alt1);
@@ -64,14 +73,14 @@ STR;
 
         $this->assertIsArray($attrs1);
         $this->assertEquals([
-            "src" => "http://querylist.com/1.jpg",
-            "alt" => "这是图片",
-            "abc" => "这是一个自定义属性",
+            'src' => 'http://querylist.com/1.jpg',
+            'alt' => '这是图片',
+            'abc' => '这是一个自定义属性',
         ], $attrs1);
 
         $attrs2 = $ql->find('a:eq(1)')->attr('*');
         $this->assertEquals([
-            "href" => "http://doc.querylist.cc",
+            'href' => 'http://doc.querylist.cc',
         ], $attrs2);
     }
 
@@ -95,7 +104,7 @@ STR,
         // 获取元素下的text内容
         $text = $ql->find('.two')->text();
 
-        $this->assertEquals('ok','ok');
+        $this->assertEquals('ok', 'ok');
     }
 
     public function testGetElementsAttr()
@@ -111,15 +120,15 @@ STR,
         // 等价下面这句话
         $alts2 = $ql->find('.two img')->attrs('alt');
 
-        $this->assertEquals(["这是图片", "这是图片2"], $alts1->all());
+        $this->assertEquals(['这是图片', '这是图片2'], $alts1->all());
         $this->assertEquals($alts1, $alts2);
 
         // 获取选中元素的所有html内容和text内容
         $texts = $ql->find('.two>a')->texts();
-        $this->assertEquals(["QueryList官网", "QueryList文档"], $texts->all());
+        $this->assertEquals(['QueryList官网', 'QueryList文档'], $texts->all());
 
         $htmls = $ql->find('#one span')->htmls();
-        $this->assertEquals(["其它的<b>一些</b>文本"], $htmls->all());
+        $this->assertEquals(['其它的<b>一些</b>文本'], $htmls->all());
     }
 
     public function testGetHtmlByUrl()
@@ -134,7 +143,7 @@ STR,
         // DOM解析文章内容
         $rt['content'] = $ql->find('.post_content')->html();
 
-        $this->assertEquals('ok','ok');
+        $this->assertEquals('ok', 'ok');
     }
 
     public function testRules()
@@ -186,7 +195,7 @@ STR,
         $rt = QueryList::get($url)->rules($rules)
             ->range($range)->query()->getData();
 
-        $this->assertEquals('ok','ok');
+        $this->assertEquals('ok', 'ok');
     }
 
     public function testSingleElementContentFilter()
@@ -225,7 +234,7 @@ STR,
             $content
         );
 
-        $this->assertEquals('ok','ok');
+        $this->assertEquals('ok', 'ok');
     }
 
     public function testMultiElementsContentFilterByRules()
@@ -248,7 +257,7 @@ STR;
 
         // DOM解析规则
         $rules = [
-            //设置了内容过滤选择器
+            // 设置了内容过滤选择器
             'content' => ['#content', 'html', '-.tt -span:last -p:last'],
         ];
 
@@ -265,9 +274,8 @@ STR
             ,
         ], $rt->all());
 
-        $this->assertEquals('ok','ok');
+        $this->assertEquals('ok', 'ok');
     }
-
 
     public function testMultiElementsContentFilterByRules2()
     {
@@ -301,7 +309,7 @@ STR;
 
         $rt = QueryList::rules($rules)->html($html)->query()->getData();
 
-        $this->assertEquals('ok','ok');
+        $this->assertEquals('ok', 'ok');
     }
 
     public function testMultiElementsContentFilterByRemove()
@@ -337,7 +345,7 @@ STR;
                 return $item;
             });
 
-        $this->assertEquals('ok','ok');
+        $this->assertEquals('ok', 'ok');
     }
 
     public function testEncoding()
@@ -352,7 +360,7 @@ STR;
         ];
         $data = QueryList::html($html)->rules($rule)->encoding('UTF-8', 'GB2312')->query()->getData();
 
-        $this->assertEquals('ok','ok');
+        $this->assertEquals('ok', 'ok');
     }
 
     public function testRemoveHead()
@@ -372,7 +380,7 @@ STR;
         $data = QueryList::html($html)->rules($rule)
             ->encoding('UTF-8', 'GB2312')->removeHead()->query()->getData();
 
-        $this->assertEquals('ok','ok');
+        $this->assertEquals('ok', 'ok');
     }
 
     public function testParseResult()
@@ -395,21 +403,21 @@ STR;
             return $item;
         });
 
-        $this->assertEquals([["image" => "/path/to/1.jpg"], ["image" => "/path/to/2.jpg"], ["image" => "/path/to/3.jpg"]], $result->all());
-        $this->assertEquals(["/path/to/1.jpg", "/path/to/2.jpg", "/path/to/3.jpg"], $result->flatten()->all());
-        $this->assertEquals([["image" => "/path/to/1.jpg"], ["image" => "/path/to/2.jpg"]], $result->take(2)->all());
-        $this->assertEquals([1 => ["image" => "/path/to/2.jpg"], 2 => ["image" => "/path/to/3.jpg"]], $result->take(-2)->all());
-        $this->assertEquals([2 => ["image" => "/path/to/3.jpg"], 1 => ["image" => "/path/to/2.jpg"], 0 => ["image" => "/path/to/1.jpg"]], $result->reverse()->all());
+        $this->assertEquals([['image' => '/path/to/1.jpg'], ['image' => '/path/to/2.jpg'], ['image' => '/path/to/3.jpg']], $result->all());
+        $this->assertEquals(['/path/to/1.jpg', '/path/to/2.jpg', '/path/to/3.jpg'], $result->flatten()->all());
+        $this->assertEquals([['image' => '/path/to/1.jpg'], ['image' => '/path/to/2.jpg']], $result->take(2)->all());
+        $this->assertEquals([1 => ['image' => '/path/to/2.jpg'], 2 => ['image' => '/path/to/3.jpg']], $result->take(-2)->all());
+        $this->assertEquals([2 => ['image' => '/path/to/3.jpg'], 1 => ['image' => '/path/to/2.jpg'], 0 => ['image' => '/path/to/1.jpg']], $result->reverse()->all());
 
-        $filteredResult = $result->filter(function($item){
-            return $item['image'] != '/path/to/2.jpg';
+        $filteredResult = $result->filter(function ($item) {
+            return '/path/to/2.jpg' != $item['image'];
         })->all();
-        $this->assertEquals([0 => ["image" => "/path/to/1.jpg"], 2 => ["image" => "/path/to/3.jpg"]], $filteredResult);
+        $this->assertEquals([0 => ['image' => '/path/to/1.jpg'], 2 => ['image' => '/path/to/3.jpg']], $filteredResult);
     }
 
     public function testReplaceAttrValue()
     {
-        $html =<<<STR
+        $html = <<<STR
     <div>
      <a href="https://querylist.cc" alt="abc">QueryList</a>
     </div>
@@ -420,21 +428,21 @@ STR;
         $link = $ql->find('a:eq(0)');
 
         // 设置元素属性值
-        $link->attr('href','https://baidu.com');
-        $link->attr('alt','百度');
+        $link->attr('href', 'https://baidu.com');
+        $link->attr('alt', '百度');
 
         // 设置元素内容
         $link->text('百度一下');
 
-        $this->assertEquals('<a href="https://baidu.com" alt="百度">百度一下</a>',$ql->find('div')->html());
+        $this->assertEquals('<a href="https://baidu.com" alt="百度">百度一下</a>', $ql->find('div')->html());
 
         $link->html('<p>百度一下</p>');
-        $this->assertEquals('<a href="https://baidu.com" alt="百度"><p>百度一下</p></a>',$ql->find('div')->html());
+        $this->assertEquals('<a href="https://baidu.com" alt="百度"><p>百度一下</p></a>', $ql->find('div')->html());
     }
 
     public function testAppendElement()
     {
-        $html =<<<STR
+        $html = <<<STR
     <div>
      <a href="https://querylist.cc" alt="abc">QueryList</a>
     </div>
@@ -448,14 +456,14 @@ STR;
 
         $rt = [];
         $rt[] = $div->find('img')->attr('src');
-        $rt[]= $ql->find('div')->html();
+        $rt[] = $ql->find('div')->html();
 
-        $this->assertEquals('ok','ok');
+        $this->assertEquals('ok', 'ok');
     }
 
     public function testReplaceElement()
     {
-        $html =<<<STR
+        $html = <<<STR
     <div>
      <a  href="https://qq.com">QQ</a>
      <a class="ql" href="https://querylist.cc" alt="abc">QueryList</a>
@@ -465,19 +473,19 @@ STR;
 
         $ql = QueryList::html($html);
 
-        $ql->find('a')->map(function($a){
+        $ql->find('a')->map(function ($a) {
             $text = $a->text();
             $a->replaceWith('<span>'.$text.'</span>');
         });
 
         $rt = $ql->find('div')->html();
 
-        $this->assertEquals('ok','ok');
+        $this->assertEquals('ok', 'ok');
     }
 
     public function testRemoveAttr()
     {
-        $html =<<<STR
+        $html = <<<STR
     <div>
      <a  href="https://qq.com" alt="123">QQ</a>
      <a class="ql" href="https://querylist.cc" alt="abc">QueryList</a>
@@ -491,12 +499,12 @@ STR;
 
         $rt = $ql->find('div')->html();
 
-        $this->assertEquals('ok','ok');
+        $this->assertEquals('ok', 'ok');
     }
 
     public function testGetElement()
     {
-        $html =<<<STR
+        $html = <<<STR
     <div>
      <a  href="https://qq.com">QQ</a>
      <a class="ql" href="https://querylist.cc" alt="abc">QueryList</a>
@@ -516,6 +524,6 @@ STR;
         // 获取临近的前一个元素的属性
         $rt['prev'] = $link->prev()->attr('href');
 
-        $this->assertEquals('ok','ok');
+        $this->assertEquals('ok', 'ok');
     }
 }

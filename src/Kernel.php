@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the jiannei/laravel-crawler.
+ *
+ * (c) jiannei <longjian.huang@foxmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Jiannei\LaravelCrawler;
 
 use Jiannei\LaravelCrawler\Contracts\ServiceProviderContract;
@@ -25,6 +34,7 @@ class Kernel
 
     /**
      * Kernel constructor.
+     *
      * @param $ql
      */
     public function __construct(QueryList $ql)
@@ -35,7 +45,7 @@ class Kernel
 
     public function bootstrap()
     {
-        //注册服务提供者
+        // 注册服务提供者
         $this->registerProviders();
 
         return $this;
@@ -66,6 +76,4 @@ class Kernel
     {
         $instance->register($this);
     }
-
-
 }

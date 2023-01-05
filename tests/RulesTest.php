@@ -1,7 +1,15 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Tests;
+/*
+ * This file is part of the jiannei/laravel-crawler.
+ *
+ * (c) jiannei <longjian.huang@foxmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
 
+namespace Jiannei\LaravelCrawler\Tests;
 
 use Illuminate\Support\Collection;
 use Jiannei\LaravelCrawler\QueryList;
@@ -30,14 +38,14 @@ STR;
     public function testGetDataByRules()
     {
         $rules = [
-            'a' => ['a','text'],
-            'img_src' => ['img','src'],
-            'img_alt' => ['img','alt']
+            'a' => ['a', 'text'],
+            'img_src' => ['img', 'src'],
+            'img_alt' => ['img', 'alt'],
         ];
         $range = 'ul>li';
         $data = QueryList::rules($rules)->range($range)->html($this->html)->query()->getData();
-        $this->assertInstanceOf(Collection::class,$data);
-        $this->assertCount(3,$data);
-        $this->assertEquals('http://querylist.com/2.jpg',$data[1]['img_src']);
+        $this->assertInstanceOf(Collection::class, $data);
+        $this->assertCount(3, $data);
+        $this->assertEquals('http://querylist.com/2.jpg', $data[1]['img_src']);
     }
 }
