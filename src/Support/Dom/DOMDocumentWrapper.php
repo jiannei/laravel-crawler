@@ -294,6 +294,7 @@ class DOMDocumentWrapper
     protected function documentFragmentToMarkup($fragment)
     {
         debug('documentFragmentToMarkup');
+
         $tmp = $fragment->isDocumentFragment;
         $fragment->isDocumentFragment = false;
         $markup = $fragment->markup();
@@ -301,9 +302,8 @@ class DOMDocumentWrapper
         $markup = substr($markup, strpos($markup, '<body>') + 6);
         $markup = substr($markup, 0, strrpos($markup, '</body>'));
         $fragment->isDocumentFragment = $tmp;
-        if (Dom::$debug) {
-            debug('documentFragmentToMarkup: '.substr($markup, 0, 150));
-        }
+
+        debug('documentFragmentToMarkup: '.substr($markup, 0, 150));
 
         return $markup;
     }

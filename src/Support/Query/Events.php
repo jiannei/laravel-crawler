@@ -11,6 +11,7 @@
 
 namespace Jiannei\LaravelCrawler\Support\Query;
 
+use DOMNode;
 use Jiannei\LaravelCrawler\Support\Dom\DOMEvent;
 
 /**
@@ -63,10 +64,7 @@ abstract class Events
             }
             $i = 0;
             while ($node) {
-                debug(
-                    'Triggering '.($i ? 'bubbled ' : '')."event '{$type}' on "
-                    ."node \n"
-                ); // .phpQueryObject::whois($node)."\n");
+                debug('Triggering '.($i ? 'bubbled ' : '')."event '{$type}' on "."node \n"); // .phpQueryObject::whois($node)."\n");
                 $event->currentTarget = $node;
                 $eventNode = self::getNode($documentID, $node);
                 if (isset($eventNode->eventHandlers)) {

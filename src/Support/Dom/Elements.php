@@ -57,7 +57,7 @@ class Elements
     public function each(callable $callback)
     {
         foreach ($this->elements as $key => $element) {
-            $break = $callback(new self(Dom::pq($element)), $key);
+            $break = $callback(new self(Dom::parse($element)), $key);
             if (false === $break) {
                 break;
             }
@@ -77,7 +77,7 @@ class Elements
     {
         $collection = new Collection();
         $this->elements->each(function ($dom) use (&$collection, $callback) {
-            $collection->push($callback(new self(Dom::pq($dom))));
+            $collection->push($callback(new self(Dom::parse($dom))));
         });
 
         return $collection;

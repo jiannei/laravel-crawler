@@ -440,7 +440,7 @@ class Parser implements Iterator
             }
         } else {
             if (is_string($newStack)) {
-                $new->elements = Dom::pq($newStack, $this->getDocumentID())->stack();
+                $new->elements = Dom::parse($newStack, $this->getDocumentID())->stack();
             } else {
                 $new->elements = $newStack;
             }
@@ -878,7 +878,7 @@ class Parser implements Iterator
             case 'enabled':
                 $this->elements = $this->map(
                     function ($node) {
-                        return Dom::pq($node)->not(':disabled') ? $node : null;
+                        return Dom::parse($node)->not(':disabled') ? $node : null;
                     }
                 )->elements;
                 break;
@@ -916,21 +916,21 @@ class Parser implements Iterator
             case 'only-child':
                 $this->elements = $this->map(
                     function ($node) {
-                        return 0 == Dom::pq($node)->siblings()->size() ? $node : null;
+                        return 0 == Dom::parse($node)->siblings()->size() ? $node : null;
                     }
                 )->elements;
                 break;
             case 'first-child':
                 $this->elements = $this->map(
                     function ($node) {
-                        return 0 == Dom::pq($node)->prevAll()->size() ? $node : null;
+                        return 0 == Dom::parse($node)->prevAll()->size() ? $node : null;
                     }
                 )->elements;
                 break;
             case 'last-child':
                 $this->elements = $this->map(
                     function ($node) {
-                        return 0 == Dom::pq($node)->nextAll()->size() ? $node : null;
+                        return 0 == Dom::parse($node)->nextAll()->size() ? $node : null;
                     }
                 )->elements;
                 break;
@@ -947,7 +947,7 @@ class Parser implements Iterator
                 if ('even' == $param || 'odd' == $param) {
                     $mapped = $this->map(
                         function ($node, $param) {
-                            $index = Dom::pq($node)->prevAll()->size() + 1;
+                            $index = Dom::parse($node)->prevAll()->size() + 1;
                             if ('even' == $param && ($index % 2) == 0) {
                                 return $node;
                             } else {
@@ -964,7 +964,7 @@ class Parser implements Iterator
                     if (mb_strlen($param) > 1 && 1 === preg_match('/^(\d*)n([-+]?)(\d*)/', $param)) { // an+b
                         $mapped = $this->map(
                             function ($node, $param) {
-                                $prevs = Dom::pq($node)->prevAll()->size();
+                                $prevs = Dom::parse($node)->prevAll()->size();
                                 $index = 1 + $prevs;
 
                                 preg_match("/^(\d*)n([-+]?)(\d*)/", $param, $matches);
@@ -1008,7 +1008,7 @@ class Parser implements Iterator
                     } else { // index
                         $mapped = $this->map(
                             function ($node, $index) {
-                                $prevs = Dom::pq($node)->prevAll()->size();
+                                $prevs = Dom::parse($node)->prevAll()->size();
                                 if ($prevs && $prevs == $index - 1) {
                                     return $node;
                                 } else {
@@ -1431,7 +1431,7 @@ class Parser implements Iterator
             foreach ($this->stack(1) as $alreadyAdded => $node) {
                 // for now, limit events for textarea
                 if ('textarea' == $node->tagName) {
-                    $oldHtml = Dom::pq($node, $this->getDocumentID())->markup();
+                    $oldHtml = Dom::parse($node, $this->getDocumentID())->markup();
                 }
                 foreach ($nodes as $newNode) {
                     $node->appendChild(
@@ -2019,7 +2019,7 @@ class Parser implements Iterator
         }
 
         $this->elementsBackup = $this->elements;
-        $found = Dom::pq($selector, $this->getDocumentID());
+        $found = Dom::parse($selector, $this->getDocumentID());
         $this->merge($found->elements);
 
         return $this->newInstance();
@@ -2290,7 +2290,7 @@ class Parser implements Iterator
         } else {
             $_val = null;
             foreach ($this->stack(1) as $node) {
-                $node = Dom::pq($node, $this->getDocumentID());
+                $node = Dom::parse($node, $this->getDocumentID());
                 if (is_array($val) && in_array($node->attr('type'), ['checkbox', 'radio'])) {
                     $isChecked = in_array($node->attr('value'), $val)
                         || in_array($node->attr('name'), $val);
@@ -2312,7 +2312,7 @@ class Parser implements Iterator
                             }
                         }
                         foreach ($node['option']->stack(1) as $option) {
-                            $option = Dom::pq($option, $this->getDocumentID());
+                            $option = Dom::parse($option, $this->getDocumentID());
                             $selected = false;
                             // XXX: workaround for string comparsion, see issue #96
                             // http://code.google.com/p/phpquery/issues/detail?id=96

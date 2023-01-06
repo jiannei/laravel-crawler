@@ -12,8 +12,8 @@
 namespace Jiannei\LaravelCrawler\Support\Query;
 
 use DOMDocument;
+use DOMElement;
 use DOMNode;
-use DOMNodeList;
 use Exception;
 use Jiannei\LaravelCrawler\Support\Dom\DOMDocumentWrapper;
 
@@ -24,12 +24,6 @@ use Jiannei\LaravelCrawler\Support\Dom\DOMDocumentWrapper;
  */
 abstract class Dom
 {
-    /**
-     * XXX: Workaround for mbstring problems.
-     *
-     * @var bool
-     */
-    public static $debug = false;
     public static $documents = [];
     public static $defaultDocumentID = null;
 
@@ -60,13 +54,13 @@ abstract class Dom
      *   and use object's stack as root node(s) for query:
      *   pq('div.myClass', $pq)
      *
-     * @param string|DOMNode|DOMNodeList|array $arg1    HTML markup, CSS Selector, DOMNode or array of DOMNodes
+     * @param Parser|DOMElement|DOMNode $arg1    HTML markup, CSS Selector, DOMNode or array of DOMNodes
      * @param string|Parser|DOMNode            $context DOM ID from $pq->getDocumentID(), phpQuery object (determines also query root) or DOMNode (determines also query root)
      *
      * @return Parser|false
      *                      phpQuery object or false in case of error
      */
-    public static function pq($arg1, $context = null)
+    public static function parse($arg1, $context = null)
     {
         if ($arg1 instanceof DOMNode && !isset($context)) {
             foreach (self::$documents as $documentWrapper) {
@@ -77,104 +71,26 @@ abstract class Dom
             }
         }
 
-        if (!$context) {
-            $domId = self::$defaultDocumentID;
-            if (!$domId) {
-                throw new Exception("Can't use last created DOM, because there isn't any. Use phpQuery::newDocument() first.");
-            }
-        } else {
-            if ($context instanceof Parser) {
-                $domId = $context->getDocumentID();
-            } else {
-                if ($context instanceof DOMDocument) {
-                    $domId = self::getDocumentID($context);
-                    if (!$domId) {
-                        $domId = self::newDocument($context)->getDocumentID();
-                    }
-                } else {
-                    if ($context instanceof DOMNode) {
-                        $domId = self::getDocumentID($context);
-                        if (!$domId) {
-                            throw new Exception('Orphaned DOMNode');
-                        }
-                    } else {
-                        $domId = $context;
-                    }
-                }
-            }
+        $domId = $context ?: self::$defaultDocumentID;
+        if (!$domId) {
+            throw new Exception("Can't use last created DOM, because there isn't any. Use phpQuery::newDocument() first.");
         }
 
-        if ($arg1 instanceof Parser) {
-            /**
-             * Return $arg1 or import $arg1 stack if document differs:
-             * pq(pq('<div/>')).
-             */
-            if ($arg1->getDocumentID() == $domId) {
-                return $arg1;
-            }
-            $class = get_class($arg1);
-            // support inheritance by passing old object to overloaded constructor
-            $phpQuery = 'phpQuery' != $class ? new $class($arg1, $domId) : new Parser($domId);
-            $phpQuery->elements = [];
-            foreach ($arg1->elements as $node) {
-                $phpQuery->elements[] = $phpQuery->document->importNode($node, true);
-            }
-
-            return $phpQuery;
+        /*
+        * Wrap DOM nodes with phpQuery object, import into document when needed:
+        * pq(array($domNode1, $domNode2))
+        */
+        $parser = new Parser($domId);
+        if (!is_array($arg1)) {
+            $arg1 = [$arg1];
+        }
+        $parser->elements = [];
+        foreach ($arg1 as $node) {
+            $sameDocument = $node->ownerDocument instanceof DOMDocument && !$node->ownerDocument->isSameNode($parser->document);
+            $parser->elements[] = $sameDocument ? $parser->document->importNode($node, true) : $node;
         }
 
-        if ($arg1 instanceof DOMNode || (is_array($arg1) && isset($arg1[0]) && $arg1[0] instanceof DOMNode)) {
-            /*
-         * Wrap DOM nodes with phpQuery object, import into document when needed:
-         * pq(array($domNode1, $domNode2))
-         */
-            $phpQuery = new Parser($domId);
-            if (!($arg1 instanceof DOMNODELIST) && !is_array($arg1)) {
-                $arg1 = [$arg1];
-            }
-            $phpQuery->elements = [];
-            foreach ($arg1 as $node) {
-                $sameDocument = $node->ownerDocument instanceof DOMDocument
-                    && !$node->ownerDocument->isSameNode($phpQuery->document);
-                $phpQuery->elements[] = $sameDocument
-                    ? $phpQuery->document->importNode($node, true)
-                    : $node;
-            }
-
-            return $phpQuery;
-        }
-
-        if (self::isMarkup($arg1)) {
-            /**
-             * Import HTML:
-             * pq('<div/>').
-             */
-            $phpQuery = new Parser($domId);
-
-            return $phpQuery->newInstance($phpQuery->documentWrapper->import($arg1));
-        }
-
-        /**
-         * Run CSS query:
-         * pq('div.myClass').
-         */
-        $phpQuery = new Parser($domId);
-        if ($context && $context instanceof Parser) {
-            $phpQuery->elements = $context->elements;
-        } else {
-            if ($context && $context instanceof DOMNODELIST) {
-                $phpQuery->elements = [];
-                foreach ($context as $node) {
-                    $phpQuery->elements[] = $node;
-                }
-            } else {
-                if ($context && $context instanceof DOMNode) {
-                    $phpQuery->elements = [$context];
-                }
-            }
-        }
-
-        return $phpQuery->find($arg1);
+        return $parser;
     }
 
     /**
@@ -187,7 +103,9 @@ abstract class Dom
     public static function selectDocument($id)
     {
         $id = self::getDocumentID($id);
+
         debug("Selecting document '$id' as default one");
+
         self::$defaultDocumentID = self::getDocumentID($id);
     }
 

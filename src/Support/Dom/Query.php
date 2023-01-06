@@ -177,7 +177,7 @@ class Query
             foreach ($rangeElements as $element) {
                 foreach ($this->rules as $key => $reg_value) {
                     $rule = $this->parseRule($reg_value);
-                    $contentElements = Dom::pq($element)->find($rule['selector']);
+                    $contentElements = Dom::parse($element)->find($rule['selector']);
                     $data[$i][$key] = $this->extractContent($contentElements, $key, $rule);
                 }
                 ++$i;
@@ -314,8 +314,11 @@ class Query
                 $tag_str .= $tag_str ? ','.$tag : $tag;
             }
             $doc = Dom::newDocument($html);
-            Dom::pq($doc)->find($tag_str)->remove();
-            $html = Dom::pq($doc)->htmlOuter();
+
+            $doc->find($tag_str)->remove();
+
+            $html =$doc->htmlOuter();
+
             $doc->unloadDocument();
         }
 
