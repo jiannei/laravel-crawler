@@ -413,7 +413,7 @@ class Parser implements Iterator
         foreach ($args as $callback) {
             if (is_array($return)) {
                 foreach ($return as $k => $v) {
-                    dump(phpQuery::callbackRun($callback, [$v]),'aaaa');
+                    dump(phpQuery::callbackRun($callback, [$v]), 'aaaa');
                     $return[$k] = phpQuery::callbackRun($callback, [$v]);
                 }
             } else {
@@ -423,7 +423,6 @@ class Parser implements Iterator
 
         return $return;
     }
-
 
     /**
      * Returns new instance of actual class.
@@ -578,7 +577,7 @@ class Parser implements Iterator
                 $isTag = extension_loaded('mbstring') ? mb_ereg_match('^[\w|\||-]+$', $s) || '*' == $s : preg_match('@^[\w|\||-]+$@', $s) || '*' == $s;
                 if ($isTag) {
                     $XQuery .= $s;
-                    // ID
+                // ID
                 } else {
                     if ('#' == $s[0]) {
                         if ($delimiterBefore) {
@@ -1031,7 +1030,6 @@ class Parser implements Iterator
         }
     }
 
-
     /**
      * Enter description here...
      *
@@ -1473,7 +1471,6 @@ class Parser implements Iterator
         return $this->documentWrapper->markup($this->elements);
     }
 
-
     /**
      * Enter description here...
      *
@@ -1542,7 +1539,6 @@ class Parser implements Iterator
     {
         return $this->insert($content, __FUNCTION__);
     }
-
 
     /**
      * Enter description here...
@@ -2534,8 +2530,8 @@ class Parser implements Iterator
     /**
      * Enter description here...
      *
-     * @param    $key
-     * @param    $value
+     * @param $key
+     * @param $value
      */
     public function data($key, $value = null)
     {
@@ -2555,7 +2551,7 @@ class Parser implements Iterator
     /**
      * Enter description here...
      *
-     * @param    $key
+     * @param $key
      */
     public function removeData($key)
     {
@@ -2605,7 +2601,6 @@ class Parser implements Iterator
      * Proper functionality is choosed automagicaly.
      *
      * @return Parser
-     *
      */
     #[\ReturnTypeWillChange]
     public function next($cssSelector = null)

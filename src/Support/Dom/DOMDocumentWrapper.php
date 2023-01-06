@@ -257,7 +257,7 @@ class DOMDocumentWrapper
     /**
      * @param $fragment DOMDocumentWrapper
      * @param $charset
-     * @param  null  $markup
+     * @param null $markup
      *
      * @return bool $document
      */
@@ -358,6 +358,7 @@ class DOMDocumentWrapper
 
         if ($this->isDocumentFragment) {
             phpQuery::debug('Getting markup, DocumentFragment detected');
+
             return $this->documentFragmentToMarkup($this);
         }
 

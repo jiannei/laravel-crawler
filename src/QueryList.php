@@ -104,8 +104,8 @@ class QueryList
     /**
      * Bind a custom method to the QueryList object.
      *
-     * @param  string  $name  Invoking the name
-     * @param  Closure  $provide  Called method
+     * @param string  $name    Invoking the name
+     * @param Closure $provide Called method
      *
      * @return $this
      */

@@ -11,7 +11,6 @@
 
 namespace Jiannei\LaravelCrawler\Support\Query;
 
-
 use Jiannei\LaravelCrawler\Support\Dom\DOMEvent;
 
 /**
@@ -26,8 +25,8 @@ abstract class QueryEvents
      * Trigger a type of event on every matched element.
      *
      * @param DOMNode|Parser|string $document
-     * @param                   $type
-     * @param                   $data
+     * @param                       $type
+     * @param                       $data
      *
      * @TODO exclusive events (with !)
      * @TODO global events (test)
