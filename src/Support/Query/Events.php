@@ -19,7 +19,7 @@ use Jiannei\LaravelCrawler\Support\Dom\DOMEvent;
  * @author Tobiasz Cudnik
  * @static
  */
-abstract class QueryEvents
+abstract class Events
 {
     /**
      * Trigger a type of event on every matched element.
@@ -35,7 +35,7 @@ abstract class QueryEvents
     public static function trigger($document, $type, $data = [], $node = null)
     {
         // trigger: function(type, data, elem, donative, extra) {
-        $documentID = phpQuery::getDocumentID($document);
+        $documentID = Dom::getDocumentID($document);
         $namespace = null;
         if (false !== strpos($type, '.')) {
             list($name, $namespace) = explode('.', $type);
@@ -44,10 +44,9 @@ abstract class QueryEvents
         }
         if (!$node) {
             if (self::issetGlobal($documentID, $type)) {
-                $pq = phpQuery::getDocument($documentID);
+                $pq = Dom::getDocument($documentID);
                 // TODO check add($pq->document)
-                $pq->find('*')->add($pq->document)
-                    ->trigger($type, $data);
+                $pq->find('*')->add($pq->document)->trigger($type, $data);
             }
         } else {
             if (isset($data[0]) && $data[0] instanceof DOMEvent) {
@@ -64,7 +63,7 @@ abstract class QueryEvents
             }
             $i = 0;
             while ($node) {
-                phpQuery::debug(
+                debug(
                     'Triggering '.($i ? 'bubbled ' : '')."event '{$type}' on "
                     ."node \n"
                 ); // .phpQueryObject::whois($node)."\n");
@@ -85,12 +84,12 @@ abstract class QueryEvents
                             continue;
                         }
                         foreach ($handlers as $handler) {
-                            phpQuery::debug("Calling event handler\n");
+                            debug("Calling event handler\n");
                             $event->data = $handler['data']
                                 ? $handler['data']
                                 : null;
                             $params = array_merge([$event], $data);
-                            $return = phpQuery::callbackRun($handler['callback'], $params);
+                            $return = Dom::callbackRun($handler['callback'], $params);
                             if (false === $return) {
                                 $event->bubbles = false;
                             }
@@ -109,7 +108,7 @@ abstract class QueryEvents
 
     protected static function getNode($documentID, $node)
     {
-        foreach (phpQuery::$documents[$documentID]->eventsNodes as $eventNode) {
+        foreach (Dom::$documents[$documentID]->eventsNodes as $eventNode) {
             if ($node->isSameNode($eventNode)) {
                 return $eventNode;
             }
@@ -118,13 +117,13 @@ abstract class QueryEvents
 
     protected static function setNode($documentID, $node)
     {
-        phpQuery::$documents[$documentID]->eventsNodes[] = $node;
+        Dom::$documents[$documentID]->eventsNodes[] = $node;
 
-        return phpQuery::$documents[$documentID]->eventsNodes[count(phpQuery::$documents[$documentID]->eventsNodes) - 1];
+        return Dom::$documents[$documentID]->eventsNodes[count(Dom::$documents[$documentID]->eventsNodes) - 1];
     }
 
     protected static function issetGlobal($documentID, $type)
     {
-        return isset(phpQuery::$documents[$documentID]) ? in_array($type, phpQuery::$documents[$documentID]->eventsGlobal) : false;
+        return isset(Dom::$documents[$documentID]) ? in_array($type, Dom::$documents[$documentID]->eventsGlobal) : false;
     }
 }

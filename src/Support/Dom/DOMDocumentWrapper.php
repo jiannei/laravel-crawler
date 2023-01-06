@@ -16,7 +16,7 @@ use DOMNode;
 use DOMNodeList;
 use DOMXPath;
 use Exception;
-use Jiannei\LaravelCrawler\Support\Query\phpQuery;
+use Jiannei\LaravelCrawler\Support\Query\Dom;
 
 class DOMDocumentWrapper
 {
@@ -76,15 +76,15 @@ class DOMDocumentWrapper
         }
 
         if ($this->isDocumentFragment) {// 部分 dom
-            phpQuery::debug("Full markup load (HTML), DocumentFragment detected, using charset '$charset'");
+            debug("Full markup load (HTML), DocumentFragment detected, using charset '$charset'");
             $return = $this->documentFragmentLoadMarkup($this, $charset, $markup);
         } else {// 完整 dom
             if (!$documentCharset) {
-                phpQuery::debug("Full markup load (HTML), appending charset: '$charset'");
+                debug("Full markup load (HTML), appending charset: '$charset'");
                 $markup = $this->charsetAppendToHTML($markup, $charset);
             }
 
-            phpQuery::debug("Full markup load (HTML), documentCreate('$charset')");
+            debug("Full markup load (HTML), documentCreate('$charset')");
             $this->document = new DOMDocument('1.0', $charset);
             $return = @$this->document->loadHTML($markup);
         }
@@ -200,7 +200,7 @@ class DOMDocumentWrapper
 
         if (is_array($source) || $source instanceof DOMNodeList) {
             // dom nodes
-            phpQuery::debug('Importing nodes to document');
+            debug('Importing nodes to document');
             foreach ($source as $node) {
                 $return[] = $this->document->importNode($node, true);
             }
@@ -293,7 +293,7 @@ class DOMDocumentWrapper
 
     protected function documentFragmentToMarkup($fragment)
     {
-        phpQuery::debug('documentFragmentToMarkup');
+        debug('documentFragmentToMarkup');
         $tmp = $fragment->isDocumentFragment;
         $fragment->isDocumentFragment = false;
         $markup = $fragment->markup();
@@ -301,8 +301,8 @@ class DOMDocumentWrapper
         $markup = substr($markup, strpos($markup, '<body>') + 6);
         $markup = substr($markup, 0, strrpos($markup, '</body>'));
         $fragment->isDocumentFragment = $tmp;
-        if (phpQuery::$debug) {
-            phpQuery::debug('documentFragmentToMarkup: '.substr($markup, 0, 150));
+        if (Dom::$debug) {
+            debug('documentFragmentToMarkup: '.substr($markup, 0, 150));
         }
 
         return $markup;
@@ -347,25 +347,25 @@ class DOMDocumentWrapper
             } else {
                 $loop = $nodes;
             }
-            phpQuery::debug('Getting markup, moving selected nodes ('.count($loop).') to new DocumentFragment');
+            debug('Getting markup, moving selected nodes ('.count($loop).') to new DocumentFragment');
             $fake = $this->documentFragmentCreate($loop);
             $markup = $this->documentFragmentToMarkup($fake);
 
-            phpQuery::debug('Markup: '.substr($markup, 0, 250));
+            debug('Markup: '.substr($markup, 0, 250));
 
             return $markup;
         }
 
         if ($this->isDocumentFragment) {
-            phpQuery::debug('Getting markup, DocumentFragment detected');
+            debug('Getting markup, DocumentFragment detected');
 
             return $this->documentFragmentToMarkup($this);
         }
 
-        phpQuery::debug('Getting markup ('.'HTML'."), final with charset '{$this->charset}'");
+        debug('Getting markup ('.'HTML'."), final with charset '{$this->charset}'");
         $markup = $this->document->saveHTML();
 
-        phpQuery::debug('Markup: '.substr($markup, 0, 250));
+        debug('Markup: '.substr($markup, 0, 250));
 
         return $markup;
     }

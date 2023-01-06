@@ -12,7 +12,6 @@
 namespace Jiannei\LaravelCrawler\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Jiannei\LaravelCrawler\Support\Query\phpQuery;
 
 class LaravelServiceProvider extends ServiceProvider
 {
@@ -23,7 +22,7 @@ class LaravelServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        phpQuery::$debug = config('crawler.debug', false);
+
     }
 
     protected function setupConfig()

@@ -23,7 +23,7 @@ use Jiannei\LaravelCrawler\Support\Dom\DOMDocumentWrapper;
  *
  * @author Tobiasz Cudnik <tobiasz.cudnik/gmail.com>
  */
-abstract class phpQuery
+abstract class Dom
 {
     /**
      * XXX: Workaround for mbstring problems.
@@ -33,26 +33,6 @@ abstract class phpQuery
     public static $debug = false;
     public static $documents = [];
     public static $defaultDocumentID = null;
-
-    /**
-     * Static namespace for plugins.
-     *
-     * @var object
-     */
-    public static $plugins = [];
-    /**
-     * List of loaded plugins.
-     *
-     * @var
-     */
-    public static $pluginsLoaded = [];
-    public static $pluginsMethods = [];
-    public static $pluginsStaticMethods = [];
-    public static $extendMethods = [];
-    /**
-     * @TODO implement
-     */
-    public static $extendStaticMethods = [];
 
     /**
      * Multi-purpose function.
@@ -208,7 +188,7 @@ abstract class phpQuery
     public static function selectDocument($id)
     {
         $id = self::getDocumentID($id);
-        self::debug("Selecting document '$id' as default one");
+        debug("Selecting document '$id' as default one");
         self::$defaultDocumentID = self::getDocumentID($id);
     }
 
@@ -221,14 +201,14 @@ abstract class phpQuery
      *
      * @return Parser
      *
-     * @see phpQuery::selectDocument()
+     * @see Dom::selectDocument()
      */
     public static function getDocument($id = null)
     {
         if ($id) {
-            phpQuery::selectDocument($id);
+            Dom::selectDocument($id);
         } else {
-            $id = phpQuery::$defaultDocumentID;
+            $id = Dom::$defaultDocumentID;
         }
 
         return new Parser($id);
@@ -244,7 +224,7 @@ abstract class phpQuery
      */
     public static function newDocument($markup = null)
     {
-        $documentID = phpQuery::createDocumentWrapper($markup ?? '');
+        $documentID = Dom::createDocumentWrapper($markup ?? '');
 
         return new Parser($documentID);
     }
@@ -278,9 +258,9 @@ abstract class phpQuery
         $wrapper = new DOMDocumentWrapper($html);
 
         // bind document
-        phpQuery::$documents[$wrapper->id] = $wrapper;
+        Dom::$documents[$wrapper->id] = $wrapper;
         // remember last loaded document
-        phpQuery::selectDocument($wrapper->id);
+        Dom::selectDocument($wrapper->id);
 
         return $wrapper->id;
     }
@@ -294,11 +274,11 @@ abstract class phpQuery
     {
         if (isset($id)) {
             if ($id = self::getDocumentID($id)) {
-                unset(phpQuery::$documents[$id]);
+                unset(Dom::$documents[$id]);
             }
         } else {
-            foreach (phpQuery::$documents as $k => $v) {
-                unset(phpQuery::$documents[$k]);
+            foreach (Dom::$documents as $k => $v) {
+                unset(Dom::$documents[$k]);
             }
         }
     }
@@ -319,13 +299,6 @@ abstract class phpQuery
         return !is_array($input) && '<' == substr(trim($input), 0, 1);
     }
 
-    public static function debug($text)
-    {
-        if (self::$debug) {
-            Log::debug($text);
-        }
-    }
-
     /**
      * Returns source's document ID.
      *
@@ -336,14 +309,14 @@ abstract class phpQuery
     public static function getDocumentID($source)
     {
         if ($source instanceof DOMDocument) {
-            foreach (phpQuery::$documents as $id => $document) {
+            foreach (Dom::$documents as $id => $document) {
                 if ($source->isSameNode($document->document)) {
                     return $id;
                 }
             }
         } else {
             if ($source instanceof DOMNode) {
-                foreach (phpQuery::$documents as $id => $document) {
+                foreach (Dom::$documents as $id => $document) {
                     if ($source->ownerDocument->isSameNode($document->document)) {
                         return $id;
                     }
@@ -352,7 +325,7 @@ abstract class phpQuery
                 if ($source instanceof Parser) {
                     return $source->getDocumentID();
                 } else {
-                    if (is_string($source) && isset(phpQuery::$documents[$source])) {
+                    if (is_string($source) && isset(Dom::$documents[$source])) {
                         return $source;
                     }
                 }
@@ -419,13 +392,13 @@ abstract class phpQuery
     protected static function dataSetupNode($node, $documentID)
     {
         // search are return if alredy exists
-        foreach (phpQuery::$documents[$documentID]->dataNodes as $dataNode) {
+        foreach (Dom::$documents[$documentID]->dataNodes as $dataNode) {
             if ($node->isSameNode($dataNode)) {
                 return $dataNode;
             }
         }
         // if doesn't, add it
-        phpQuery::$documents[$documentID]->dataNodes[] = $node;
+        Dom::$documents[$documentID]->dataNodes[] = $node;
 
         return $node;
     }
@@ -433,7 +406,7 @@ abstract class phpQuery
     protected static function dataRemoveNode($node, $documentID)
     {
         // search are return if alredy exists
-        foreach (phpQuery::$documents[$documentID]->dataNodes as $k => $dataNode) {
+        foreach (Dom::$documents[$documentID]->dataNodes as $k => $dataNode) {
             if ($node->isSameNode($dataNode)) {
                 unset(self::$documents[$documentID]->dataNodes[$k]);
                 unset(self::$documents[$documentID]->data[$dataNode->dataID]);
@@ -446,10 +419,10 @@ abstract class phpQuery
         if (!$documentID) { // TODO check if this works
             $documentID = self::getDocumentID($node);
         }
-        $document = phpQuery::$documents[$documentID];
+        $document = Dom::$documents[$documentID];
         $node = self::dataSetupNode($node, $documentID);
         if (!isset($node->dataID)) {
-            $node->dataID = ++phpQuery::$documents[$documentID]->uuid;
+            $node->dataID = ++Dom::$documents[$documentID]->uuid;
         }
         $id = $node->dataID;
         if (!isset($document->data[$id])) {
@@ -472,7 +445,7 @@ abstract class phpQuery
         if (!$documentID) { // TODO check if this works
             $documentID = self::getDocumentID($node);
         }
-        $document = phpQuery::$documents[$documentID];
+        $document = Dom::$documents[$documentID];
         $node = self::dataSetupNode($node, $documentID);
         $id = $node->dataID;
         if ($name) {

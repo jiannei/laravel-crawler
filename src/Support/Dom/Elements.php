@@ -12,7 +12,7 @@
 namespace Jiannei\LaravelCrawler\Support\Dom;
 
 use Illuminate\Support\Collection;
-use Jiannei\LaravelCrawler\Support\Query\phpQuery;
+use Jiannei\LaravelCrawler\Support\Query\Dom;
 use Jiannei\LaravelCrawler\Support\Query\Parser;
 
 class Elements
@@ -57,7 +57,7 @@ class Elements
     public function each(callable $callback)
     {
         foreach ($this->elements as $key => $element) {
-            $break = $callback(new self(phpQuery::pq($element)), $key);
+            $break = $callback(new self(Dom::pq($element)), $key);
             if (false === $break) {
                 break;
             }
@@ -77,7 +77,7 @@ class Elements
     {
         $collection = new Collection();
         $this->elements->each(function ($dom) use (&$collection, $callback) {
-            $collection->push($callback(new self(phpQuery::pq($dom))));
+            $collection->push($callback(new self(Dom::pq($dom))));
         });
 
         return $collection;

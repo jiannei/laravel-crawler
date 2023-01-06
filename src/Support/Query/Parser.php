@@ -90,17 +90,17 @@ class Parser implements Iterator
     public function __construct($documentID)
     {
         $id = $documentID instanceof self ? $documentID->getDocumentID() : $documentID;
-        if (!isset(phpQuery::$documents[$id])) {
+        if (!isset(Dom::$documents[$id])) {
             throw new Exception("Document with ID '{$id}' isn't loaded. Use phpQuery::newDocument(\$html) or phpQuery::newDocumentFile(\$file) first.");
         }
 
         $this->documentID = $id;
-        $this->documentWrapper = &phpQuery::$documents[$id];
-        $this->document = &$this->documentWrapper->document;
-        $this->xpath = &$this->documentWrapper->xpath;
-        $this->charset = &$this->documentWrapper->charset;
-        $this->documentFragment = &$this->documentWrapper->isDocumentFragment;
-        $this->root = &$this->documentWrapper->root;
+        $this->documentWrapper = Dom::$documents[$id];
+        $this->document = $this->documentWrapper->document;
+        $this->xpath = $this->documentWrapper->xpath;
+        $this->charset = $this->documentWrapper->charset;
+        $this->documentFragment = $this->documentWrapper->isDocumentFragment;
+        $this->root = $this->documentWrapper->root;
         $this->elements = [$this->root];
     }
 
@@ -142,7 +142,7 @@ class Parser implements Iterator
      */
     public function getDocument()
     {
-        return phpQuery::getDocument($this->getDocumentID());
+        return Dom::getDocument($this->getDocumentID());
     }
 
     /**
@@ -172,12 +172,12 @@ class Parser implements Iterator
      */
     public function unloadDocument()
     {
-        phpQuery::unloadDocuments($this->getDocumentID());
+        Dom::unloadDocuments($this->getDocumentID());
     }
 
     protected function debug($in)
     {
-        phpQuery::debug(json_encode($in));
+        debug(json_encode($in));
     }
 
     protected function isRegexp($pattern)
@@ -413,11 +413,11 @@ class Parser implements Iterator
         foreach ($args as $callback) {
             if (is_array($return)) {
                 foreach ($return as $k => $v) {
-                    dump(phpQuery::callbackRun($callback, [$v]), 'aaaa');
-                    $return[$k] = phpQuery::callbackRun($callback, [$v]);
+                    dump(Dom::callbackRun($callback, [$v]), 'aaaa');
+                    $return[$k] = Dom::callbackRun($callback, [$v]);
                 }
             } else {
-                $return = phpQuery::callbackRun($callback, [$return]);
+                $return = Dom::callbackRun($callback, [$return]);
             }
         }
 
@@ -440,7 +440,7 @@ class Parser implements Iterator
             }
         } else {
             if (is_string($newStack)) {
-                $new->elements = phpQuery::pq($newStack, $this->getDocumentID())->stack();
+                $new->elements = Dom::pq($newStack, $this->getDocumentID())->stack();
             } else {
                 $new->elements = $newStack;
             }
@@ -692,7 +692,7 @@ class Parser implements Iterator
                                                     $delimiterBefore = 2;
                                                 // ERRORS
                                                 } else {
-                                                    phpQuery::debug("Unrecognized token '$s'");
+                                                    debug("Unrecognized token '$s'");
                                                 }
                                             }
                                         }
@@ -823,7 +823,7 @@ class Parser implements Iterator
                 break;
             case 'submit':
             case 'reset':
-                $this->elements = phpQuery::merge(
+                $this->elements = Dom::merge(
                     $this->map(
                         [$this, 'is'],
                         "input[type=$class]"
@@ -878,7 +878,7 @@ class Parser implements Iterator
             case 'enabled':
                 $this->elements = $this->map(
                     function ($node) {
-                        return phpQuery::pq($node)->not(':disabled') ? $node : null;
+                        return Dom::pq($node)->not(':disabled') ? $node : null;
                     }
                 )->elements;
                 break;
@@ -916,21 +916,21 @@ class Parser implements Iterator
             case 'only-child':
                 $this->elements = $this->map(
                     function ($node) {
-                        return 0 == phpQuery::pq($node)->siblings()->size() ? $node : null;
+                        return 0 == Dom::pq($node)->siblings()->size() ? $node : null;
                     }
                 )->elements;
                 break;
             case 'first-child':
                 $this->elements = $this->map(
                     function ($node) {
-                        return 0 == phpQuery::pq($node)->prevAll()->size() ? $node : null;
+                        return 0 == Dom::pq($node)->prevAll()->size() ? $node : null;
                     }
                 )->elements;
                 break;
             case 'last-child':
                 $this->elements = $this->map(
                     function ($node) {
-                        return 0 == phpQuery::pq($node)->nextAll()->size() ? $node : null;
+                        return 0 == Dom::pq($node)->nextAll()->size() ? $node : null;
                     }
                 )->elements;
                 break;
@@ -947,7 +947,7 @@ class Parser implements Iterator
                 if ('even' == $param || 'odd' == $param) {
                     $mapped = $this->map(
                         function ($node, $param) {
-                            $index = phpQuery::pq($node)->prevAll()->size() + 1;
+                            $index = Dom::pq($node)->prevAll()->size() + 1;
                             if ('even' == $param && ($index % 2) == 0) {
                                 return $node;
                             } else {
@@ -964,7 +964,7 @@ class Parser implements Iterator
                     if (mb_strlen($param) > 1 && 1 === preg_match('/^(\d*)n([-+]?)(\d*)/', $param)) { // an+b
                         $mapped = $this->map(
                             function ($node, $param) {
-                                $prevs = phpQuery::pq($node)->prevAll()->size();
+                                $prevs = Dom::pq($node)->prevAll()->size();
                                 $index = 1 + $prevs;
 
                                 preg_match("/^(\d*)n([-+]?)(\d*)/", $param, $matches);
@@ -978,7 +978,7 @@ class Parser implements Iterator
                                     return ($index - $b) % $a == 0
                                         ? $node
                                         : null;
-                                    phpQuery::debug($a.'*'.floor($index / $a)."+$b-1 == ".($a * floor($index / $a) + $b - 1)." ?= $prevs");
+                                    debug($a.'*'.floor($index / $a)."+$b-1 == ".($a * floor($index / $a) + $b - 1)." ?= $prevs");
 
                                     return $a * floor($index / $a) + $b - 1 == $prevs
                                         ? $node
@@ -1008,7 +1008,7 @@ class Parser implements Iterator
                     } else { // index
                         $mapped = $this->map(
                             function ($node, $index) {
-                                $prevs = phpQuery::pq($node)->prevAll()->size();
+                                $prevs = Dom::pq($node)->prevAll()->size();
                                 if ($prevs && $prevs == $index - 1) {
                                     return $node;
                                 } else {
@@ -1037,7 +1037,7 @@ class Parser implements Iterator
      */
     public function is($selector, $nodes = null)
     {
-        phpQuery::debug(['Is:', $selector]);
+        debug(['Is:', $selector]);
         if (!$selector) {
             return false;
         }
@@ -1080,7 +1080,7 @@ class Parser implements Iterator
         }
         $newStack = [];
         foreach ($this->elements as $index => $node) {
-            $result = phpQuery::callbackRun($callback, [$index, $node]);
+            $result = Dom::callbackRun($callback, [$index, $node]);
             if (is_null($result) || (!is_null($result) && $result)) {
                 $newStack[] = $node;
             }
@@ -1290,7 +1290,7 @@ class Parser implements Iterator
     public function trigger($type, $data = [])
     {
         foreach ($this->elements as $node) {
-            QueryEvents::trigger($this->getDocumentID(), $type, $data, $node);
+            Events::trigger($this->getDocumentID(), $type, $data, $node);
         }
 
         return $this;
@@ -1338,7 +1338,7 @@ class Parser implements Iterator
     /**
      * Enter description here...
      *
-     * @param string|phpQuery $content
+     * @param string|dom $content
      *
      * @return Parser
      *
@@ -1372,7 +1372,7 @@ class Parser implements Iterator
                 'target' => $node,
                 'type' => 'DOMNodeRemoved',
             ]);
-            QueryEvents::trigger(
+            Events::trigger(
                 $this->getDocumentID(),
                 $event->type,
                 [$event],
@@ -1390,7 +1390,7 @@ class Parser implements Iterator
                 'target' => $node,
                 'type' => 'change',
             ]);
-            QueryEvents::trigger(
+            Events::trigger(
                 $this->getDocumentID(),
                 $event->type,
                 [$event],
@@ -1419,7 +1419,7 @@ class Parser implements Iterator
      *
      * @param $html
      *
-     * @return string|phpQuery
+     * @return string|dom
      * @TODO force html result
      */
     public function html($html = null, $callback1 = null, $callback2 = null, $callback3 = null)
@@ -1431,7 +1431,7 @@ class Parser implements Iterator
             foreach ($this->stack(1) as $alreadyAdded => $node) {
                 // for now, limit events for textarea
                 if ('textarea' == $node->tagName) {
-                    $oldHtml = phpQuery::pq($node, $this->getDocumentID())->markup();
+                    $oldHtml = Dom::pq($node, $this->getDocumentID())->markup();
                 }
                 foreach ($nodes as $newNode) {
                     $node->appendChild(
@@ -1452,7 +1452,7 @@ class Parser implements Iterator
             $return = $this->documentWrapper->markup($this->elements, true);
             $args = func_get_args();
             foreach (array_slice($args, 1) as $callback) {
-                $return = phpQuery::callbackRun($callback, [$return]);
+                $return = Dom::callbackRun($callback, [$return]);
             }
 
             return $return;
@@ -1563,7 +1563,7 @@ class Parser implements Iterator
     /**
      * Enter description here...
      *
-     * @param  string|phpQuery
+     * @param  string|dom
      *
      * @return Parser
      */
@@ -1607,7 +1607,7 @@ class Parser implements Iterator
                 if ($to) {
                     // INSERT TO
                     $insertFrom = $this->elements;
-                    if (phpQuery::isMarkup($target)) {
+                    if (Dom::isMarkup($target)) {
                         // $target is new markup, import it
                         $insertTo = $this->documentWrapper->import($target);
                     // insert into selected element
@@ -1686,7 +1686,7 @@ class Parser implements Iterator
                 }
                 break;
         }
-        phpQuery::debug('From '.count($insertFrom).'; To '.count($insertTo).' nodes');
+        debug('From '.count($insertFrom).'; To '.count($insertTo).' nodes');
         foreach ($insertTo as $insertNumber => $toNode) {
             // we need static relative elements in some cases
             switch ($type) {
@@ -1749,7 +1749,7 @@ class Parser implements Iterator
                     'target' => $insert,
                     'type' => 'DOMNodeInserted',
                 ]);
-                QueryEvents::trigger(
+                Events::trigger(
                     $this->getDocumentID(),
                     $event->type,
                     [$event],
@@ -1841,7 +1841,7 @@ class Parser implements Iterator
                 $text .= "\n";
             }
             foreach ($args as $callback) {
-                $text = phpQuery::callbackRun($callback, [$text]);
+                $text = Dom::callbackRun($callback, [$text]);
             }
             $return .= $text;
         }
@@ -1956,9 +1956,9 @@ class Parser implements Iterator
     public function not($selector = null)
     {
         if (is_string($selector)) {
-            phpQuery::debug(['not', $selector]);
+            debug(['not', $selector]);
         } else {
-            phpQuery::debug('not');
+            debug('not');
         }
         $stack = [];
         if ($selector instanceof self || $selector instanceof DOMNode) {
@@ -2019,7 +2019,7 @@ class Parser implements Iterator
         }
 
         $this->elementsBackup = $this->elements;
-        $found = phpQuery::pq($selector, $this->getDocumentID());
+        $found = Dom::pq($selector, $this->getDocumentID());
         $this->merge($found->elements);
 
         return $this->newInstance();
@@ -2174,7 +2174,7 @@ class Parser implements Iterator
             }
         }
         if ($event) {
-            QueryEvents::trigger(
+            Events::trigger(
                 $this->getDocumentID(),
                 $event->type,
                 [$event],
@@ -2290,7 +2290,7 @@ class Parser implements Iterator
         } else {
             $_val = null;
             foreach ($this->stack(1) as $node) {
-                $node = phpQuery::pq($node, $this->getDocumentID());
+                $node = Dom::pq($node, $this->getDocumentID());
                 if (is_array($val) && in_array($node->attr('type'), ['checkbox', 'radio'])) {
                     $isChecked = in_array($node->attr('value'), $val)
                         || in_array($node->attr('name'), $val);
@@ -2312,7 +2312,7 @@ class Parser implements Iterator
                             }
                         }
                         foreach ($node['option']->stack(1) as $option) {
-                            $option = phpQuery::pq($option, $this->getDocumentID());
+                            $option = Dom::pq($option, $this->getDocumentID());
                             $selected = false;
                             // XXX: workaround for string comparsion, see issue #96
                             // http://code.google.com/p/phpquery/issues/detail?id=96
@@ -2485,7 +2485,7 @@ class Parser implements Iterator
             $paramStructure = array_slice($paramStructure, 1);
         }
         foreach ($this->elements as $v) {
-            phpQuery::callbackRun($callback, [$v], $paramStructure);
+            Dom::callbackRun($callback, [$v], $paramStructure);
         }
 
         return $this;
@@ -2500,7 +2500,7 @@ class Parser implements Iterator
     {
         $params = func_get_args();
         $params[0] = $this;
-        phpQuery::callbackRun($callback, $params);
+        Dom::callbackRun($callback, $params);
 
         return $this;
     }
@@ -2538,10 +2538,10 @@ class Parser implements Iterator
         if (!isset($value)) {
             // TODO? implement specific jQuery behavior od returning parent values
             // is child which we look up doesn't exist
-            return phpQuery::data($this->get(0), $key, $value, $this->getDocumentID());
+            return Dom::data($this->get(0), $key, $value, $this->getDocumentID());
         } else {
             foreach ($this as $node) {
-                phpQuery::data($node, $key, $value, $this->getDocumentID());
+                Dom::data($node, $key, $value, $this->getDocumentID());
             }
 
             return $this;
@@ -2556,7 +2556,7 @@ class Parser implements Iterator
     public function removeData($key)
     {
         foreach ($this as $node) {
-            phpQuery::removeData($node, $key, $this->getDocumentID());
+            Dom::removeData($node, $key, $this->getDocumentID());
         }
 
         return $this;

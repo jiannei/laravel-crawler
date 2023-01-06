@@ -11,7 +11,7 @@
 
 namespace Jiannei\LaravelCrawler\Tests;
 
-use Jiannei\LaravelCrawler\Support\Query\phpQuery;
+use Jiannei\LaravelCrawler\Support\Query\Dom;
 
 class QueryTest extends TestCase
 {
@@ -28,7 +28,7 @@ class QueryTest extends TestCase
 </div>
 STR;
 
-        $doc = phpQuery::newDocument($html);
+        $doc = Dom::newDocument($html);
 
         $src = $doc->find('.two img:eq(0)')->attr('src');
 

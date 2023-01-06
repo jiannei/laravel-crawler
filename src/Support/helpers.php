@@ -9,6 +9,8 @@
  * with this source code in the file LICENSE.
  */
 
+use Illuminate\Support\Facades\Log;
+
 if (!function_exists('mb_internal_encoding')) {
     function mb_internal_encoding($enc)
     {
@@ -107,4 +109,13 @@ if (!function_exists('pq')) {
             $args
         );
     }
+}
+
+if (!function_exists('debug')) {
+    function debug($text): void
+    {
+        if (config('crawler.debug', false)) {
+            Log::debug($text);
+        }
+    };
 }

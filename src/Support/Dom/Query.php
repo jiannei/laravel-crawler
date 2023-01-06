@@ -14,7 +14,7 @@ namespace Jiannei\LaravelCrawler\Support\Dom;
 use Closure;
 use Illuminate\Support\Collection;
 use Jiannei\LaravelCrawler\QueryList;
-use Jiannei\LaravelCrawler\Support\Query\phpQuery;
+use Jiannei\LaravelCrawler\Support\Query\Dom;
 use Jiannei\LaravelCrawler\Support\Query\Parser;
 
 class Query
@@ -57,7 +57,7 @@ class Query
     {
         $this->html = value($html);
         $this->destroyDocument();
-        $this->parser = phpQuery::newDocument($this->html);
+        $this->parser = Dom::newDocument($this->html);
 
         return $this->ql;
     }
@@ -153,7 +153,7 @@ class Query
     {
         if (is_callable($callback)) {
             if (empty($this->range)) {
-                $data = new Collection($callback($data->all(), null));
+                $data = collect($callback($data->all(), null));
             } else {
                 $data = $data->map($callback);
             }
@@ -177,14 +177,14 @@ class Query
             foreach ($rangeElements as $element) {
                 foreach ($this->rules as $key => $reg_value) {
                     $rule = $this->parseRule($reg_value);
-                    $contentElements = phpQuery::pq($element)->find($rule['selector']);
+                    $contentElements = Dom::pq($element)->find($rule['selector']);
                     $data[$i][$key] = $this->extractContent($contentElements, $key, $rule);
                 }
                 ++$i;
             }
         }
 
-        return new Collection($data);
+        return collect($data);
     }
 
     protected function extractContent(Parser $pqObj, $ruleName, $rule)
@@ -313,9 +313,9 @@ class Query
             foreach ($tags as $tag) {
                 $tag_str .= $tag_str ? ','.$tag : $tag;
             }
-            $doc = phpQuery::newDocument($html);
-            phpQuery::pq($doc)->find($tag_str)->remove();
-            $html = phpQuery::pq($doc)->htmlOuter();
+            $doc = Dom::newDocument($html);
+            Dom::pq($doc)->find($tag_str)->remove();
+            $html = Dom::pq($doc)->htmlOuter();
             $doc->unloadDocument();
         }
 
