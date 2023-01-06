@@ -22,7 +22,6 @@ class LaravelServiceProvider extends ServiceProvider
 
     public function boot()
     {
-
     }
 
     protected function setupConfig()

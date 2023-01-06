@@ -15,7 +15,6 @@ use DOMDocument;
 use DOMNode;
 use DOMNodeList;
 use Exception;
-use Illuminate\Support\Facades\Log;
 use Jiannei\LaravelCrawler\Support\Dom\DOMDocumentWrapper;
 
 /**
