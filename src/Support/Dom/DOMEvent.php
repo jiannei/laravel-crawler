@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Jiannei\LaravelCrawler\Support\Query;
+namespace Jiannei\LaravelCrawler\Support\Dom;
 
 /**
  * DOMEvent class.

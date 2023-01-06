@@ -15,15 +15,15 @@ use Closure;
 use Illuminate\Support\Collection;
 use Jiannei\LaravelCrawler\QueryList;
 use Jiannei\LaravelCrawler\Support\Query\phpQuery;
-use Jiannei\LaravelCrawler\Support\Query\phpQueryObject;
+use Jiannei\LaravelCrawler\Support\Query\Parser;
 
 class Query
 {
     protected $html;
     /**
-     * @var phpQueryObject
+     * @var Parser
      */
-    protected $document;
+    protected $parser;
     protected $rules;
     protected $range = null;
     protected $ql;
@@ -44,7 +44,7 @@ class Query
      */
     public function getHtml($rel = true)
     {
-        return $rel ? $this->document->htmlOuter() : $this->html;
+        return $rel ? $this->parser->htmlOuter() : $this->html;
     }
 
     /**
@@ -53,11 +53,11 @@ class Query
      *
      * @return QueryList
      */
-    public function setHtml($html, $charset = null)
+    public function setHtml($html)
     {
         $this->html = value($html);
         $this->destroyDocument();
-        $this->document = phpQuery::newDocumentHTML($this->html, $charset);
+        $this->parser = phpQuery::newDocument($this->html);
 
         return $this->ql;
     }
@@ -80,17 +80,15 @@ class Query
     /**
      * Searches for all elements that match the specified expression.
      *
-     * @param $selector A string containing a selector expression to match elements against
+     * @param string $selector a string containing a selector expression to match elements against
      *
      * @return Elements
      */
     public function find($selector)
     {
-        $elements = $this->document->find($selector);
+        $elements = $this->parser->find($selector);
 
         return new Elements($elements);
-
-//        return (new Dom($this->document))->find($selector);
     }
 
     /**
@@ -170,11 +168,11 @@ class Query
         if (empty($this->range)) {
             foreach ($this->rules as $key => $reg_value) {
                 $rule = $this->parseRule($reg_value);
-                $contentElements = $this->document->find($rule['selector']);
+                $contentElements = $this->parser->find($rule['selector']);
                 $data[$key] = $this->extractContent($contentElements, $key, $rule);
             }
         } else {
-            $rangeElements = $this->document->find($this->range);
+            $rangeElements = $this->parser->find($this->range);
             $i = 0;
             foreach ($rangeElements as $element) {
                 foreach ($this->rules as $key => $reg_value) {
@@ -189,7 +187,7 @@ class Query
         return new Collection($data);
     }
 
-    protected function extractContent(phpQueryObject $pqObj, $ruleName, $rule)
+    protected function extractContent(Parser $pqObj, $ruleName, $rule)
     {
         switch ($rule['attr']) {
             case 'text':
@@ -261,9 +259,8 @@ class Query
         foreach ($tagsArr[0] as $tag) {
             $p[] = "/(<(?:\/".$tag.'|'.$tag.')[^>]*>)/i';
         }
-        $html = preg_replace($p, '', trim($html));
 
-        return $html;
+        return preg_replace($p, '', trim($html));
     }
 
     /**
@@ -316,8 +313,7 @@ class Query
             foreach ($tags as $tag) {
                 $tag_str .= $tag_str ? ','.$tag : $tag;
             }
-//            phpQuery::$defaultCharset = $this->inputEncoding?$this->inputEncoding:$this->htmlEncoding;
-            $doc = phpQuery::newDocumentHTML($html);
+            $doc = phpQuery::newDocument($html);
             phpQuery::pq($doc)->find($tag_str)->remove();
             $html = phpQuery::pq($doc)->htmlOuter();
             $doc->unloadDocument();
@@ -328,8 +324,8 @@ class Query
 
     protected function destroyDocument()
     {
-        if ($this->document instanceof phpQueryObject) {
-            $this->document->unloadDocument();
+        if ($this->parser instanceof Parser) {
+            $this->parser->unloadDocument();
         }
     }
 

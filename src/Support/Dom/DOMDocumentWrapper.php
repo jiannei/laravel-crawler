@@ -9,13 +9,14 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Jiannei\LaravelCrawler\Support\Query;
+namespace Jiannei\LaravelCrawler\Support\Dom;
 
 use DOMDocument;
 use DOMNode;
 use DOMNodeList;
 use DOMXPath;
 use Exception;
+use Jiannei\LaravelCrawler\Support\Query\phpQuery;
 
 class DOMDocumentWrapper
 {
@@ -28,7 +29,6 @@ class DOMDocumentWrapper
     public $xpath;
     public $uuid = 0;
     public $data = [];
-    public $dataNodes = [];
     public $eventsNodes = [];
     public $eventsGlobal = [];
 
@@ -328,7 +328,7 @@ class DOMDocumentWrapper
             if ($this->isDocumentFragment && !$innerMarkup) {
                 foreach ($nodes as $i => $node) {
                     if ($node->isSameNode($this->root)) {
-                        $nodes = array_slice($nodes, 0, $i) + phpQuery::DOMNodeListToArray($node->childNodes) + array_slice($nodes, $i + 1);
+                        $nodes = array_slice($nodes, 0, $i) + $this->DOMNodeListToArray($node->childNodes) + array_slice($nodes, $i + 1);
                     }
                 }
             }
@@ -367,5 +367,18 @@ class DOMDocumentWrapper
         phpQuery::debug('Markup: '.substr($markup, 0, 250));
 
         return $markup;
+    }
+
+    protected function DOMNodeListToArray($DOMNodeList)
+    {
+        $array = [];
+        if (!$DOMNodeList) {
+            return $array;
+        }
+        foreach ($DOMNodeList as $node) {
+            $array[] = $node;
+        }
+
+        return $array;
     }
 }

@@ -11,8 +11,8 @@
 
 namespace Jiannei\LaravelCrawler\Support\Query;
 
-use Jiannei\LaravelCrawler\Query\DOMNode;
-use Jiannei\LaravelCrawler\Query\unknown_type;
+
+use Jiannei\LaravelCrawler\Support\Dom\DOMEvent;
 
 /**
  * Event handling class.
@@ -20,14 +20,14 @@ use Jiannei\LaravelCrawler\Query\unknown_type;
  * @author Tobiasz Cudnik
  * @static
  */
-abstract class phpQueryEvents
+abstract class QueryEvents
 {
     /**
      * Trigger a type of event on every matched element.
      *
-     * @param DOMNode|phpQueryObject|string $document
-     * @param unknown_type                  $type
-     * @param unknown_type                  $data
+     * @param DOMNode|Parser|string $document
+     * @param                   $type
+     * @param                   $data
      *
      * @TODO exclusive events (with !)
      * @TODO global events (test)
@@ -65,7 +65,6 @@ abstract class phpQueryEvents
             }
             $i = 0;
             while ($node) {
-                // TODO whois
                 phpQuery::debug(
                     'Triggering '.($i ? 'bubbled ' : '')."event '{$type}' on "
                     ."node \n"
@@ -109,67 +108,6 @@ abstract class phpQueryEvents
         }
     }
 
-    /**
-     * Binds a handler to one or more events (like click) for each matched element.
-     * Can also bind custom events.
-     *
-     * @param DOMNode|phpQueryObject|string $document
-     * @param unknown_type                  $type
-     * @param unknown_type                  $data     Optional
-     * @param unknown_type                  $callback
-     *
-     * @TODO support '!' (exclusive) events
-     * @TODO support more than event in $type (space-separated)
-     * @TODO support binding to global events
-     */
-    public static function add($document, $node, $type, $data, $callback = null)
-    {
-        phpQuery::debug("Binding '$type' event");
-        $documentID = phpQuery::getDocumentID($document);
-        //		if (is_null($callback) && is_callable($data)) {
-        //			$callback = $data;
-        //			$data = null;
-        //		}
-        $eventNode = self::getNode($documentID, $node);
-        if (!$eventNode) {
-            $eventNode = self::setNode($documentID, $node);
-        }
-        if (!isset($eventNode->eventHandlers[$type])) {
-            $eventNode->eventHandlers[$type] = [];
-        }
-        $eventNode->eventHandlers[$type][] = [
-            'callback' => $callback,
-            'data' => $data,
-        ];
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @param DOMNode|phpQueryObject|string $document
-     * @param unknown_type                  $type
-     * @param unknown_type                  $callback
-     *
-     * @TODO namespace events
-     * @TODO support more than event in $type (space-separated)
-     */
-    public static function remove($document, $node, $type = null, $callback = null)
-    {
-        $documentID = phpQuery::getDocumentID($document);
-        $eventNode = self::getNode($documentID, $node);
-        if (is_object($eventNode) && isset($eventNode->eventHandlers[$type])) {
-            if ($callback) {
-                foreach ($eventNode->eventHandlers[$type] as $k => $handler) {
-                    if ($handler['callback'] == $callback) {
-                        unset($eventNode->eventHandlers[$type][$k]);
-                    }
-                }
-            } else {
-                unset($eventNode->eventHandlers[$type]);
-            }
-        }
-    }
-
     protected static function getNode($documentID, $node)
     {
         foreach (phpQuery::$documents[$documentID]->eventsNodes as $eventNode) {
@@ -188,8 +126,6 @@ abstract class phpQueryEvents
 
     protected static function issetGlobal($documentID, $type)
     {
-        return isset(phpQuery::$documents[$documentID])
-            ? in_array($type, phpQuery::$documents[$documentID]->eventsGlobal)
-            : false;
+        return isset(phpQuery::$documents[$documentID]) ? in_array($type, phpQuery::$documents[$documentID]->eventsGlobal) : false;
     }
 }

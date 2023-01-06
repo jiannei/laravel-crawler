@@ -11,16 +11,17 @@
 
 namespace Jiannei\LaravelCrawler\Support\Query;
 
-use ArrayAccess;
-use Countable;
+use Closure;
 use DOMDocument;
 use DOMElement;
 use DOMNode;
 use DOMXPath;
 use Exception;
 use Iterator;
+use Jiannei\LaravelCrawler\Support\Dom\DOMDocumentWrapper;
+use Jiannei\LaravelCrawler\Support\Dom\DOMEvent;
 
-class phpQueryObject implements Iterator, Countable, ArrayAccess
+class Parser implements Iterator
 {
     public $documentID = null;
     /**
@@ -82,74 +83,25 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      *
      * @throws Exception
      */
     public function __construct($documentID)
     {
-        //		if ($documentID instanceof self)
-        //			var_dump($documentID->getDocumentID());
-        $id = $documentID instanceof self
-            ? $documentID->getDocumentID()
-            : $documentID;
-        //		var_dump($id);
+        $id = $documentID instanceof self ? $documentID->getDocumentID() : $documentID;
         if (!isset(phpQuery::$documents[$id])) {
-            //			var_dump(phpQuery::$documents);
             throw new Exception("Document with ID '{$id}' isn't loaded. Use phpQuery::newDocument(\$html) or phpQuery::newDocumentFile(\$file) first.");
         }
+
         $this->documentID = $id;
         $this->documentWrapper = &phpQuery::$documents[$id];
         $this->document = &$this->documentWrapper->document;
         $this->xpath = &$this->documentWrapper->xpath;
         $this->charset = &$this->documentWrapper->charset;
         $this->documentFragment = &$this->documentWrapper->isDocumentFragment;
-        // TODO check $this->DOM->documentElement;
-        //		$this->root = $this->document->documentElement;
         $this->root = &$this->documentWrapper->root;
-        //		$this->toRoot();
         $this->elements = [$this->root];
-    }
-
-    /**
-     * @param $attr
-     *
-     * @return
-     */
-    public function __get($attr)
-    {
-        switch ($attr) {
-            // FIXME doesnt work at all ?
-            case 'length':
-                return $this->size();
-                break;
-            default:
-                return $this->$attr;
-        }
-    }
-
-    /**
-     * Saves actual object to $var by reference.
-     * Useful when need to break chain.
-     *
-     * @param phpQueryObject $var
-     *
-     * @return phpQueryObject
-     */
-    public function toReference(&$var)
-    {
-        return $var = $this;
-    }
-
-    public function documentFragment($state = null)
-    {
-        if ($state) {
-            phpQuery::$documents[$this->getDocumentID()]['documentFragment'] = $state;
-
-            return $this;
-        }
-
-        return $this->documentFragment;
     }
 
     /**
@@ -157,9 +109,8 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
      */
     protected function isRoot($node)
     {
-        //		return $node instanceof DOMDOCUMENT || $node->tagName == 'html';
-        return $node instanceof DOMDOCUMENT
-            || ($node instanceof DOMELEMENT && 'html' == $node->tagName)
+        return $node instanceof DOMDocument
+            || ($node instanceof DOMElement && 'html' == $node->tagName)
             || $this->root->isSameNode($node);
     }
 
@@ -172,9 +123,9 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
      * Enter description here...
      * NON JQUERY METHOD.
      *
-     * Watch out, it doesn't creates new instance, can be reverted with end().
+     * Watch out, it doesn't create new instance, can be reverted with end().
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function toRoot()
     {
@@ -185,32 +136,9 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     }
 
     /**
-     * Saves object's DocumentID to $var by reference.
-     * <code>
-     * $myDocumentId;
-     * phpQuery::newDocument('<div/>')
-     *     ->getDocumentIDRef($myDocumentId)
-     *     ->find('div')->...
-     * </code>.
-     *
-     * @param $domId
-     *
-     * @return phpQueryObject
-     *
-     * @see phpQuery::newDocumentFile
-     * @see phpQuery::newDocument
-     */
-    public function getDocumentIDRef(&$documentID)
-    {
-        $documentID = $this->getDocumentID();
-
-        return $this;
-    }
-
-    /**
      * Returns object with stack set to document root.
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function getDocument()
     {
@@ -228,7 +156,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Get object's Document ID.
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function getDocumentID()
     {
@@ -240,108 +168,21 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
      * CAUTION! None further operations will be possible on this document.
      * All objects refering to it will be useless.
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function unloadDocument()
     {
         phpQuery::unloadDocuments($this->getDocumentID());
     }
 
-    public function isHTML()
-    {
-        return $this->documentWrapper->isHTML;
-    }
-
-    public function isXHTML()
-    {
-        return $this->documentWrapper->isXHTML;
-    }
-
-    public function isXML()
-    {
-        return $this->documentWrapper->isXML;
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @see http://docs.jquery.com/Ajax/serialize
-     *
-     * @return string
-     */
-    public function serialize()
-    {
-        return phpQuery::param($this->serializeArray());
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @see http://docs.jquery.com/Ajax/serializeArray
-     *
-     * @return array
-     */
-    public function serializeArray($submit = null)
-    {
-        $source = $this->filter('form, input, select, textarea')
-            ->find('input, select, textarea')
-            ->andSelf()
-            ->not('form');
-        $return = [];
-        //		$source->dumpDie();
-        foreach ($source as $input) {
-            $input = phpQuery::pq($input);
-            if ($input->is('[disabled]')) {
-                continue;
-            }
-            if (!$input->is('[name]')) {
-                continue;
-            }
-            if ($input->is('[type=checkbox]') && !$input->is('[checked]')) {
-                continue;
-            }
-            // jquery diff
-            if ($submit && $input->is('[type=submit]')) {
-                if ($submit instanceof DOMELEMENT && !$input->elements[0]->isSameNode($submit)) {
-                    continue;
-                } else {
-                    if (is_string($submit) && $input->attr('name') != $submit) {
-                        continue;
-                    }
-                }
-            }
-            $return[] = [
-                'name' => $input->attr('name'),
-                'value' => $input->val(),
-            ];
-        }
-
-        return $return;
-    }
-
     protected function debug($in)
     {
-        if (!phpQuery::$debug) {
-            return;
-        }
-
         phpQuery::debug(json_encode($in));
-        // print('<pre>');
-        // print_r($in);
-        // file debug
-        //		file_put_contents(dirname(__FILE__).'/phpQuery.log', print_r($in, true)."\n", FILE_APPEND);
-        // quite handy debug trace
-        //		if ( is_array($in))
-        //			print_r(array_slice(debug_backtrace(), 3));
-        // print("</pre>\n");
     }
 
     protected function isRegexp($pattern)
     {
-        return in_array(
-            $pattern[mb_strlen($pattern) - 1],
-            ['^', '*', '$']
-        );
+        return in_array($pattern[mb_strlen($pattern) - 1], ['^', '*', '$']);
     }
 
     /**
@@ -355,22 +196,14 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
      */
     protected function isChar($char)
     {
-        return extension_loaded('mbstring') && phpQuery::$mbstringSupport
-            ? mb_eregi('\w', $char)
-            : preg_match('@\w@', $char);
+        return extension_loaded('mbstring') ? mb_eregi('\w', $char) : preg_match('@\w@', $char);
     }
 
     protected function parseSelector($query)
     {
         // clean spaces
         // TODO include this inside parsing ?
-        $query = trim(
-            preg_replace(
-                '@\s+@',
-                ' ',
-                preg_replace('@\s*(>|\\+|~)\s*@', '\\1', $query)
-            )
-        );
+        $query = trim(preg_replace('@\s+@', ' ', preg_replace('@\s*(>|\\+|~)\s*@', '\\1', $query)));
         $queries = [[]];
         if (!$query) {
             return $queries;
@@ -390,6 +223,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
             $_query[] = \mb_substr($query, $i, 1);
         }
         $query = $_query;
+
         // it works, but i dont like it...
         $i = 0;
         while ($i < $strlen) {
@@ -397,10 +231,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
             $tmp = '';
             // TAG
             if ($this->isChar($c) || in_array($c, $tagChars)) {
-                while (
-                    isset($query[$i])
-                    && ($this->isChar($query[$i]) || in_array($query[$i], $tagChars))
-                ) {
+                while (isset($query[$i]) && ($this->isChar($query[$i]) || in_array($query[$i], $tagChars))) {
                     $tmp .= $query[$i];
                     ++$i;
                 }
@@ -549,6 +380,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
                 }
             }
         }
+
         foreach ($queries as $k => $q) {
             if (isset($q[0])) {
                 if (isset($q[0][0]) && ':' == $q[0][0]) {
@@ -581,6 +413,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
         foreach ($args as $callback) {
             if (is_array($return)) {
                 foreach ($return as $k => $v) {
+                    dump(phpQuery::callbackRun($callback, [$v]),'aaaa');
                     $return[$k] = phpQuery::callbackRun($callback, [$v]);
                 }
             } else {
@@ -591,75 +424,6 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
         return $return;
     }
 
-    /**
-     * Return matched DOM nodes.
-     * jQuery difference.
-     *
-     * @param int $index
-     *
-     * @return array|string Returns string if $index != null
-     *
-     * @todo implement callbacks
-     * @todo return only arrays ?
-     * @todo maybe other name...
-     */
-    public function getString($index = null, $callback1 = null, $callback2 = null, $callback3 = null)
-    {
-        if (!is_null($index) && is_int($index)) {
-            $return = $this->eq($index)->text();
-        } else {
-            $return = [];
-            for ($i = 0; $i < $this->size(); ++$i) {
-                $return[] = $this->eq($i)->text();
-            }
-        }
-        // pass thou callbacks
-        $args = func_get_args();
-        $args = array_slice($args, 1);
-        foreach ($args as $callback) {
-            $return = phpQuery::callbackRun($callback, [$return]);
-        }
-
-        return $return;
-    }
-
-    /**
-     * Return matched DOM nodes.
-     * jQuery difference.
-     *
-     * @param int $index
-     *
-     * @return array|string Returns string if $index != null
-     *
-     * @todo implement callbacks
-     * @todo return only arrays ?
-     * @todo maybe other name...
-     */
-    public function getStrings($index = null, $callback1 = null, $callback2 = null, $callback3 = null)
-    {
-        if (!is_null($index) && is_int($index)) {
-            $return = $this->eq($index)->text();
-        } else {
-            $return = [];
-            for ($i = 0; $i < $this->size(); ++$i) {
-                $return[] = $this->eq($i)->text();
-            }
-            // pass thou callbacks
-            $args = func_get_args();
-            $args = array_slice($args, 1);
-        }
-        foreach ($args as $callback) {
-            if (is_array($return)) {
-                foreach ($return as $k => $v) {
-                    $return[$k] = phpQuery::callbackRun($callback, [$v]);
-                }
-            } else {
-                $return = phpQuery::callbackRun($callback, [$return]);
-            }
-        }
-
-        return $return;
-    }
 
     /**
      * Returns new instance of actual class.
@@ -668,11 +432,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
      */
     public function newInstance($newStack = null)
     {
-        $class = get_class($this);
-        // support inheritance by passing old object to overloaded constructor
-        $new = 'phpQuery' != $class
-            ? new $class($this, $this->getDocumentID())
-            : new phpQueryObject($this->getDocumentID());
+        $new = new static($this);
         $new->previous = $this;
         if (is_null($newStack)) {
             $new->elements = $this->elements;
@@ -737,13 +497,13 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
         if ($compare && !method_exists($this, $compare)) {
             return false;
         }
+
         $stack = [];
         if (!$this->elements) {
             $this->debug('Stack empty, skipping...');
         }
-        //		var_dump($this->elements[0]->nodeType);
-        // element, document
-        foreach ($this->stack([1, 9, 13]) as $k => $stackNode) {
+
+        foreach ($this->stack([1, 9, 13]) as $stackNode) {
             $detachAfter = false;
             // to work on detached nodes we need temporary place them somewhere
             // thats because context xpath queries sucks ;]
@@ -754,18 +514,12 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
                     $detachAfter = $testNode;
                     break;
                 }
-                $testNode = isset($testNode->parentNode)
-                    ? $testNode->parentNode
-                    : null;
+                $testNode = $testNode->parentNode ?? null;
             }
             // XXX tmp ?
-            $xpath = $this->documentWrapper->isXHTML
-                ? $this->getNodeXpath($stackNode, 'html')
-                : $this->getNodeXpath($stackNode);
+            $xpath = $this->getNodeXpath($stackNode);
             // FIXME pseudoclasses-only query, support XML
-            $query = '//' == $XQuery && '/html[1]' == $xpath
-                ? '//*'
-                : $xpath.$XQuery;
+            $query = '//' == $XQuery && '/html[1]' == $xpath ? '//*' : $xpath.$XQuery;
             $this->debug("XPATH: {$query}");
             // run query, get elements
             $nodes = $this->xpath->query($query);
@@ -773,33 +527,22 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
             if (!$nodes->length) {
                 $this->debug('Nothing found');
             }
-            $debug = [];
+
             foreach ($nodes as $node) {
                 $matched = false;
                 if ($compare) {
-                    phpQuery::$debug ?
-                        $this->debug('Found: '.$this->whois($node).", comparing with {$compare}()")
-                        : null;
-                    $phpQueryDebug = phpQuery::$debug;
-                    phpQuery::$debug = false;
                     // TODO ??? use phpQuery::callbackRun()
                     if (call_user_func_array([$this, $compare], [$selector, $node])) {
                         $matched = true;
                     }
-                    phpQuery::$debug = $phpQueryDebug;
                 } else {
                     $matched = true;
                 }
                 if ($matched) {
-                    if (phpQuery::$debug) {
-                        $debug[] = $this->whois($node);
-                    }
                     $stack[] = $node;
                 }
             }
-            if (phpQuery::$debug) {
-                $this->debug('Matched '.count($debug).': '.implode(', ', $debug));
-            }
+
             if ($detachAfter) {
                 $this->root->removeChild($detachAfter);
             }
@@ -810,66 +553,31 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      */
-    public function find($selectors, $context = null, $noHistory = false)
+    public function find($selectors)
     {
-        if (!$noHistory) { // backup last stack /for end()/
-            $this->elementsBackup = $this->elements;
-        }
-        // allow to define context
-        // TODO combine code below with phpQuery::pq() context guessing code
-        //   as generic function
-        if ($context) {
-            if (!is_array($context) && $context instanceof DOMELEMENT) {
-                $this->elements = [$context];
-            } else {
-                if (is_array($context)) {
-                    $this->elements = [];
-                    foreach ($context as $c) {
-                        if ($c instanceof DOMELEMENT) {
-                            $this->elements[] = $c;
-                        }
-                    }
-                } else {
-                    if ($context instanceof self) {
-                        $this->elements = $context->elements;
-                    }
-                }
-            }
-        }
+        // backup last stack /for end()/
+        $this->elementsBackup = $this->elements;
+
         $queries = $this->parseSelector($selectors);
+
         $this->debug(['FIND', $selectors, $queries]);
+
         $XQuery = '';
         // remember stack state because of multi-queries
         $oldStack = $this->elements;
         // here we will be keeping found elements
         $stack = [];
+
         foreach ($queries as $selector) {
             $this->elements = $oldStack;
             $delimiterBefore = false;
             foreach ($selector as $s) {
                 // TAG
-                $isTag = extension_loaded('mbstring') && phpQuery::$mbstringSupport
-                    ? mb_ereg_match('^[\w|\||-]+$', $s) || '*' == $s
-                    : preg_match('@^[\w|\||-]+$@', $s) || '*' == $s;
+                $isTag = extension_loaded('mbstring') ? mb_ereg_match('^[\w|\||-]+$', $s) || '*' == $s : preg_match('@^[\w|\||-]+$@', $s) || '*' == $s;
                 if ($isTag) {
-                    if ($this->isXML()) {
-                        // namespace support
-                        if (false !== \mb_strpos($s, '|')) {
-                            $ns = $tag = null;
-                            list($ns, $tag) = explode('|', $s);
-                            $XQuery .= "$ns:$tag";
-                        } else {
-                            if ('*' == $s) {
-                                $XQuery .= '*';
-                            } else {
-                                $XQuery .= "*[local-name()='$s']";
-                            }
-                        }
-                    } else {
-                        $XQuery .= $s;
-                    }
+                    $XQuery .= $s;
                     // ID
                 } else {
                     if ('#' == $s[0]) {
@@ -948,7 +656,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
                                         foreach ($subElements as $node) {
                                             // search first DOMElement sibling
                                             $test = $node->nextSibling;
-                                            while ($test && !($test instanceof DOMELEMENT)) {
+                                            while ($test && !($test instanceof DOMElement)) {
                                                 $test = $test->nextSibling;
                                             }
                                             if ($test && $this->is($subSelector, $test)) {
@@ -1119,26 +827,18 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
                 $this->elements = phpQuery::merge(
                     $this->map(
                         [$this, 'is'],
-                        "input[type=$class]",
-                        new CallbackParam()
+                        "input[type=$class]"
                     ),
                     $this->map(
                         [$this, 'is'],
-                        "button[type=$class]",
-                        new CallbackParam()
+                        "button[type=$class]"
                     )
                 );
                 break;
-            //				$stack = array();
-            //				foreach($this->elements as $node)
-            //					if ($node->is('input[type=submit]') || $node->is('button[type=submit]'))
-            //						$stack[] = $el;
-            //				$this->elements = $stack;
             case 'input':
                 $this->elements = $this->map(
                     [$this, 'is'],
                     'input',
-                    new CallbackParam()
                 )->elements;
                 break;
             case 'password':
@@ -1150,13 +850,12 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
                 $this->elements = $this->map(
                     [$this, 'is'],
                     "input[type=$class]",
-                    new CallbackParam()
                 )->elements;
                 break;
             case 'parent':
                 $this->elements = $this->map(
                     function ($node) {
-                        return $node instanceof DOMELEMENT && $node->childNodes->length
+                        return $node instanceof DOMElement && $node->childNodes->length
                             ? $node : null;
                     }
                 )->elements;
@@ -1164,7 +863,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
             case 'empty':
                 $this->elements = $this->map(
                     function ($node) {
-                        return $node instanceof DOMELEMENT && $node->childNodes->length
+                        return $node instanceof DOMElement && $node->childNodes->length
                             ? null : $node;
                     }
                 )->elements;
@@ -1175,7 +874,6 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
                 $this->elements = $this->map(
                     [$this, 'is'],
                     "[$class]",
-                    new CallbackParam()
                 )->elements;
                 break;
             case 'enabled':
@@ -1261,7 +959,6 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
                                 }
                             }
                         },
-                        new CallbackParam(),
                         $param
                     );
                 } else {
@@ -1307,7 +1004,6 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
                                 //									? $node
                                 //									: null;
                             },
-                            new CallbackParam(),
                             $param
                         );
                     } else { // index
@@ -1324,7 +1020,6 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
                                     }
                                 }
                             },
-                            new CallbackParam(),
                             $param
                         );
                     }
@@ -1336,15 +1031,11 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
         }
     }
 
-    protected function __pseudoClassParam($paramsString)
-    {
-        // TODO;
-    }
 
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function is($selector, $nodes = null)
     {
@@ -1379,7 +1070,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
      * - $index int
      * - $node DOMNode
      *
-     * @return phpQueryObject
+     * @return Parser
      *
      * @see http://docs.jquery.com/Traversing/filter
      */
@@ -1398,15 +1089,13 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
         }
         $this->elements = $newStack;
 
-        return $_skipHistory
-            ? $this
-            : $this->newInstance();
+        return $_skipHistory ? $this : $this->newInstance();
     }
 
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      *
      * @see http://docs.jquery.com/Traversing/filter
      */
@@ -1439,7 +1128,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
             foreach ($this->stack() as $node) {
                 $break = false;
                 foreach ($selector as $s) {
-                    if (!($node instanceof DOMELEMENT)) {
+                    if (!($node instanceof DOMElement)) {
                         // all besides DOMElement
                         if ('[' == $s[0]) {
                             $attr = trim($s, '[]');
@@ -1479,7 +1168,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
                                             }
                                         } else {
                                             if ($this->isRegexp($attr)) {
-                                                $val = extension_loaded('mbstring') && phpQuery::$mbstringSupport
+                                                $val = extension_loaded('mbstring')
                                                     ? quotemeta(trim($val, '"\''))
                                                     : preg_quote(trim($val, '"\''), '@');
                                                 // switch last character
@@ -1498,7 +1187,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
                                                 }
                                                 // cut last character
                                                 $attr = substr($attr, 0, -1);
-                                                $isMatch = extension_loaded('mbstring') && phpQuery::$mbstringSupport
+                                                $isMatch = extension_loaded('mbstring')
                                                     ? mb_ereg_match($pattern, $node->getAttribute($attr))
                                                     : preg_match("@{$pattern}@", $node->getAttribute($attr));
                                                 if (!$isMatch) {
@@ -1588,96 +1277,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
      */
     protected static function unQuote($value)
     {
-        return '\'' == $value[0] || '"' == $value[0]
-            ? substr($value, 1, -1)
-            : $value;
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @see http://docs.jquery.com/Ajax/load
-     *
-     * @return phpQuery
-     *
-     * @todo Support $selector
-     */
-    public function load($url, $data = null, $callback = null)
-    {
-        if ($data && !is_array($data)) {
-            $callback = $data;
-            $data = null;
-        }
-        if (false !== \mb_strpos($url, ' ')) {
-            $matches = null;
-            if (extension_loaded('mbstring') && phpQuery::$mbstringSupport) {
-                mb_ereg('^([^ ]+) (.*)$', $url, $matches);
-            } else {
-                preg_match('^([^ ]+) (.*)$', $url, $matches);
-            }
-            $url = $matches[1];
-            $selector = $matches[2];
-            // FIXME this sucks, pass as callback param
-            $this->_loadSelector = $selector;
-        }
-        $ajax = [
-            'url' => $url,
-            'type' => $data ? 'POST' : 'GET',
-            'data' => $data,
-            'complete' => $callback,
-            'success' => [$this, '__loadSuccess'],
-        ];
-        phpQuery::ajax($ajax);
-
-        return $this;
-    }
-
-    /**
-     * @param $html
-     *
-     * @return
-     */
-    public function __loadSuccess($html)
-    {
-        if ($this->_loadSelector) {
-            $html = phpQuery::newDocument($html)->find($this->_loadSelector);
-            unset($this->_loadSelector);
-        }
-        foreach ($this->stack(1) as $node) {
-            phpQuery::pq($node, $this->getDocumentID())
-                ->markup($html);
-        }
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @return phpQuery
-     *
-     * @todo
-     */
-    public function css()
-    {
-        // TODO
-        return $this;
-    }
-
-    /**
-     * @todo
-     */
-    public function show()
-    {
-        // TODO
-        return $this;
-    }
-
-    /**
-     * @todo
-     */
-    public function hide()
-    {
-        // TODO
-        return $this;
+        return '\'' == $value[0] || '"' == $value[0] ? substr($value, 1, -1) : $value;
     }
 
     /**
@@ -1686,53 +1286,13 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
      * @param $type
      * @param $data
      *
-     * @return phpQueryObject
+     * @return Parser
      * @TODO support more than event in $type (space-separated)
      */
     public function trigger($type, $data = [])
     {
         foreach ($this->elements as $node) {
-            phpQueryEvents::trigger($this->getDocumentID(), $type, $data, $node);
-        }
-
-        return $this;
-    }
-
-    /**
-     * This particular method triggers all bound event handlers on an element (for a specific event type) WITHOUT executing the browsers default actions.
-     *
-     * @param $type
-     * @param $data
-     *
-     * @return phpQueryObject
-     * @TODO
-     */
-    public function triggerHandler($type, $data = [])
-    {
-        // TODO;
-    }
-
-    /**
-     * Binds a handler to one or more events (like click) for each matched element.
-     * Can also bind custom events.
-     *
-     * @param $type
-     * @param $data     Optional
-     * @param $callback
-     *
-     * @return phpQueryObject
-     * @TODO support '!' (exclusive) events
-     * @TODO support more than event in $type (space-separated)
-     */
-    public function bind($type, $data, $callback = null)
-    {
-        // TODO check if $data is callable, not using is_callable
-        if (!isset($callback)) {
-            $callback = $data;
-            $data = null;
-        }
-        foreach ($this->elements as $node) {
-            phpQueryEvents::add($this->getDocumentID(), $node, $type, $data, $callback);
+            QueryEvents::trigger($this->getDocumentID(), $type, $data, $node);
         }
 
         return $this;
@@ -1741,278 +1301,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @param $type
-     * @param $callback
-     *
-     * @return unknown
-     * @TODO namespace events
-     * @TODO support more than event in $type (space-separated)
-     */
-    public function unbind($type = null, $callback = null)
-    {
-        foreach ($this->elements as $node) {
-            phpQueryEvents::remove($this->getDocumentID(), $node, $type, $callback);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @return phpQueryObject
-     */
-    public function change($callback = null)
-    {
-        if ($callback) {
-            return $this->bind('change', $callback);
-        }
-
-        return $this->trigger('change');
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @return phpQueryObject
-     */
-    public function submit($callback = null)
-    {
-        if ($callback) {
-            return $this->bind('submit', $callback);
-        }
-
-        return $this->trigger('submit');
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @return phpQueryObject
-     */
-    public function click($callback = null)
-    {
-        if ($callback) {
-            return $this->bind('click', $callback);
-        }
-
-        return $this->trigger('click');
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @param  string|phpQuery
-     *
-     * @return phpQueryObject
-     */
-    public function wrapAllOld($wrapper)
-    {
-        $wrapper = phpQuery::pq($wrapper)->_clone();
-        if (!$wrapper->length() || !$this->length()) {
-            return $this;
-        }
-        $wrapper->insertBefore($this->elements[0]);
-        $deepest = $wrapper->elements[0];
-        while ($deepest->firstChild && $deepest->firstChild instanceof DOMELEMENT) {
-            $deepest = $deepest->firstChild;
-        }
-        phpQuery::pq($deepest)->append($this);
-
-        return $this;
-    }
-
-    /**
-     * Enter description here...
-     *
-     * TODO testme...
-     *
-     * @param  string|phpQuery
-     *
-     * @return phpQueryObject
-     */
-    public function wrapAll($wrapper)
-    {
-        if (!$this->length()) {
-            return $this;
-        }
-
-        return phpQuery::pq($wrapper, $this->getDocumentID())
-            ->clone()
-            ->insertBefore($this->get(0))
-            ->map([$this, '___wrapAllCallback'])
-            ->append($this);
-    }
-
-    /**
-     * @param $node
-     *
-     * @return
-     */
-    public function ___wrapAllCallback($node)
-    {
-        $deepest = $node;
-        while ($deepest->firstChild && $deepest->firstChild instanceof DOMELEMENT) {
-            $deepest = $deepest->firstChild;
-        }
-
-        return $deepest;
-    }
-
-    /**
-     * Enter description here...
-     * NON JQUERY METHOD.
-     *
-     * @param  string|phpQuery
-     *
-     * @return phpQueryObject
-     */
-    public function wrapAllPHP($codeBefore, $codeAfter)
-    {
-        return $this
-            ->slice(0, 1)
-            ->beforePHP($codeBefore)
-            ->end()
-            ->slice(-1)
-            ->afterPHP($codeAfter)
-            ->end();
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @param  string|phpQuery
-     *
-     * @return phpQueryObject
-     */
-    public function wrap($wrapper)
-    {
-        foreach ($this->stack() as $node) {
-            phpQuery::pq($node, $this->getDocumentID())->wrapAll($wrapper);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @param  string|phpQuery
-     *
-     * @return phpQueryObject
-     */
-    public function wrapPHP($codeBefore, $codeAfter)
-    {
-        foreach ($this->stack() as $node) {
-            phpQuery::pq($node, $this->getDocumentID())->wrapAllPHP($codeBefore, $codeAfter);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @param  string|phpQuery
-     *
-     * @return phpQueryObject
-     */
-    public function wrapInner($wrapper)
-    {
-        foreach ($this->stack() as $node) {
-            phpQuery::pq($node, $this->getDocumentID())->contents()->wrapAll($wrapper);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @param  string|phpQuery
-     *
-     * @return phpQueryObject
-     */
-    public function wrapInnerPHP($codeBefore, $codeAfter)
-    {
-        foreach ($this->stack(1) as $node) {
-            phpQuery::pq($node, $this->getDocumentID())->contents()
-                ->wrapAllPHP($codeBefore, $codeAfter);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @return phpQueryObject
-     * @testme Support for text nodes
-     */
-    public function contents()
-    {
-        $stack = [];
-        foreach ($this->stack(1) as $el) {
-            // FIXME (fixed) http://code.google.com/p/phpquery/issues/detail?id=56
-            //			if (! isset($el->childNodes))
-            //				continue;
-            foreach ($el->childNodes as $node) {
-                $stack[] = $node;
-            }
-        }
-
-        return $this->newInstance($stack);
-    }
-
-    /**
-     * Enter description here...
-     *
-     * jQuery difference.
-     *
-     * @return phpQueryObject
-     */
-    public function contentsUnwrap()
-    {
-        foreach ($this->stack(1) as $node) {
-            if (!$node->parentNode) {
-                continue;
-            }
-            $childNodes = [];
-            // any modification in DOM tree breaks childNodes iteration, so cache them first
-            foreach ($node->childNodes as $chNode) {
-                $childNodes[] = $chNode;
-            }
-            foreach ($childNodes as $chNode) { //				$node->parentNode->appendChild($chNode);
-                $node->parentNode->insertBefore($chNode, $node);
-            }
-            $node->parentNode->removeChild($node);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Enter description here...
-     *
-     * jQuery difference.
-     */
-    public function switchWith($markup)
-    {
-        $markup = phpQuery::pq($markup, $this->getDocumentID());
-        $content = null;
-        foreach ($this->stack(1) as $node) {
-            phpQuery::pq($node)
-                ->contents()->toReference($content)->end()
-                ->replaceWith($markup->clone()->append($content));
-        }
-
-        return $this;
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function eq($num)
     {
@@ -2029,7 +1318,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function size()
     {
@@ -2039,7 +1328,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      *
      * @deprecated Use length as attribute
      */
@@ -2048,66 +1337,12 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
         return $this->size();
     }
 
-    #[\ReturnTypeWillChange]
-    public function count()
-    {
-        return $this->size();
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @return phpQueryObject
-     *
-     * @todo $level
-     */
-    public function end($level = 1)
-    {
-        //		$this->elements = array_pop( $this->history );
-        //		return $this;
-        //		$this->previous->DOM = $this->DOM;
-        //		$this->previous->XPath = $this->XPath;
-        return $this->previous
-            ? $this->previous
-            : $this;
-    }
-
-    /**
-     * Enter description here...
-     * Normal use ->clone() .
-     *
-     * @return phpQueryObject
-     */
-    public function _clone()
-    {
-        $newStack = [];
-        // pr(array('copy... ', $this->whois()));
-        // $this->dumpHistory('copy');
-        $this->elementsBackup = $this->elements;
-        foreach ($this->elements as $node) {
-            $newStack[] = $node->cloneNode(true);
-        }
-        $this->elements = $newStack;
-
-        return $this->newInstance();
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @return phpQueryObject
-     */
-    public function replaceWithPHP($code)
-    {
-        return $this->replaceWith(phpQuery::php($code));
-    }
-
     /**
      * Enter description here...
      *
      * @param string|phpQuery $content
      *
-     * @return phpQueryObject
+     * @return Parser
      *
      * @see http://docs.jquery.com/Manipulation/replaceWith#content
      */
@@ -2119,27 +1354,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @param string $selector
-     *
-     * @return phpQueryObject
-     *
-     * @todo this works ?
-     */
-    public function replaceAll($selector)
-    {
-        foreach (phpQuery::pq($selector, $this->getDocumentID()) as $node) {
-            phpQuery::pq($node, $this->getDocumentID())
-                ->after($this->_clone())
-                ->remove();
-        }
-
-        return $this;
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function remove($selector = null)
     {
@@ -2159,7 +1374,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
                 'target' => $node,
                 'type' => 'DOMNodeRemoved',
             ]);
-            phpQueryEvents::trigger(
+            QueryEvents::trigger(
                 $this->getDocumentID(),
                 $event->type,
                 [$event],
@@ -2177,7 +1392,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
                 'target' => $node,
                 'type' => 'change',
             ]);
-            phpQueryEvents::trigger(
+            QueryEvents::trigger(
                 $this->getDocumentID(),
                 $event->type,
                 [$event],
@@ -2197,28 +1412,8 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     public function markup($markup = null, $callback1 = null, $callback2 = null, $callback3 = null)
     {
         $args = func_get_args();
-        if ($this->documentWrapper->isXML) {
-            return call_user_func_array([$this, 'xml'], $args);
-        } else {
-            return call_user_func_array([$this, 'html'], $args);
-        }
-    }
 
-    /**
-     * jQuey difference.
-     *
-     * @param $markup
-     *
-     * @return
-     */
-    public function markupOuter($callback1 = null, $callback2 = null, $callback3 = null)
-    {
-        $args = func_get_args();
-        if ($this->documentWrapper->isXML) {
-            return call_user_func_array([$this, 'xmlOuter'], $args);
-        } else {
-            return call_user_func_array([$this, 'htmlOuter'], $args);
-        }
+        return call_user_func_array([$this, 'html'], $args);
     }
 
     /**
@@ -2237,7 +1432,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
             $this->empty();
             foreach ($this->stack(1) as $alreadyAdded => $node) {
                 // for now, limit events for textarea
-                if (($this->isXHTML() || $this->isHTML()) && 'textarea' == $node->tagName) {
+                if ('textarea' == $node->tagName) {
                     $oldHtml = phpQuery::pq($node, $this->getDocumentID())->markup();
                 }
                 foreach ($nodes as $newNode) {
@@ -2248,7 +1443,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
                     );
                 }
                 // for now, limit events for textarea
-                if (($this->isXHTML() || $this->isHTML()) && 'textarea' == $node->tagName) {
+                if ('textarea' == $node->tagName) {
                     $this->markupEvents($html, $oldHtml, $node);
                 }
             }
@@ -2267,91 +1462,22 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     }
 
     /**
-     * @TODO force xml result
-     */
-    public function xml($xml = null, $callback1 = null, $callback2 = null, $callback3 = null)
-    {
-        $args = func_get_args();
-
-        return call_user_func_array([$this, 'html'], $args);
-    }
-
-    /**
      * Enter description here...
      *
      * @TODO force html result
      *
      * @return string
      */
-    public function htmlOuter($callback1 = null, $callback2 = null, $callback3 = null)
+    public function htmlOuter()
     {
-        $markup = $this->documentWrapper->markup($this->elements);
-        // pass thou callbacks
-        $args = func_get_args();
-        foreach ($args as $callback) {
-            $markup = phpQuery::callbackRun($callback, [$markup]);
-        }
-
-        return $markup;
+        return $this->documentWrapper->markup($this->elements);
     }
 
-    /**
-     * @TODO force xml result
-     */
-    public function xmlOuter($callback1 = null, $callback2 = null, $callback3 = null)
-    {
-        $args = func_get_args();
-
-        return call_user_func_array([$this, 'htmlOuter'], $args);
-    }
-
-    public function __toString()
-    {
-        return $this->markupOuter();
-    }
-
-    /**
-     * Just like html(), but returns markup with VALID (dangerous) PHP tags.
-     *
-     * @return phpQueryObject
-     *
-     * @todo support returning markup with PHP tags when called without param
-     */
-    public function php($code = null)
-    {
-        return $this->markupPHP($code);
-    }
 
     /**
      * Enter description here...
      *
-     * @param $code
-     *
-     * @return
-     */
-    public function markupPHP($code = null)
-    {
-        return isset($code)
-            ? $this->markup(phpQuery::php($code))
-            : phpQuery::markupToPHP($this->markup());
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @param $code
-     *
-     * @return
-     */
-    public function markupOuterPHP()
-    {
-        return phpQuery::markupToPHP($this->markupOuter());
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function children($selector = null)
     {
@@ -2380,7 +1506,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function ancestors($selector = null)
     {
@@ -2390,7 +1516,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function append($content)
     {
@@ -2400,17 +1526,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
-     */
-    public function appendPHP($content)
-    {
-        return $this->insert("<php><!-- {$content} --></php>", 'append');
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function appendTo($seletor)
     {
@@ -2420,29 +1536,18 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function prepend($content)
     {
         return $this->insert($content, __FUNCTION__);
     }
 
-    /**
-     * Enter description here...
-     *
-     * @return phpQueryObject
-     *
-     * @todo accept many arguments, which are joined, arrays maybe also
-     */
-    public function prependPHP($content)
-    {
-        return $this->insert("<php><!-- {$content} --></php>", 'prepend');
-    }
 
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function prependTo($seletor)
     {
@@ -2452,7 +1557,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function before($content)
     {
@@ -2462,19 +1567,9 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
-     */
-    public function beforePHP($content)
-    {
-        return $this->insert("<php><!-- {$content} --></php>", 'before');
-    }
-
-    /**
-     * Enter description here...
-     *
      * @param  string|phpQuery
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function insertBefore($seletor)
     {
@@ -2484,31 +1579,11 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function after($content)
     {
         return $this->insert($content, __FUNCTION__);
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @return phpQueryObject
-     */
-    public function afterPHP($content)
-    {
-        return $this->insert("<php><!-- {$content} --></php>", 'after');
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @return phpQueryObject
-     */
-    public function insertAfter($seletor)
-    {
-        return $this->insert($seletor, __FUNCTION__);
     }
 
     /**
@@ -2517,7 +1592,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
      * @param $target
      * @param $type
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function insert($target, $type)
     {
@@ -2678,7 +1753,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
                     'target' => $insert,
                     'type' => 'DOMNodeInserted',
                 ]);
-                phpQueryEvents::trigger(
+                QueryEvents::trigger(
                     $this->getDocumentID(),
                     $event->type,
                     [$event],
@@ -2698,7 +1773,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     public function index($subject)
     {
         $index = -1;
-        $subject = $subject instanceof phpQueryObject
+        $subject = $subject instanceof Parser
             ? $subject->elements[0]
             : $subject;
         foreach ($this->newInstance() as $k => $node) {
@@ -2716,7 +1791,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
      * @param $start
      * @param $end
      *
-     * @return phpQueryObject
+     * @return Parser
      * @testme
      */
     public function slice($start, $end = null)
@@ -2741,7 +1816,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function reverse()
     {
@@ -2796,101 +1871,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
-     */
-    public function plugin($class, $file = null)
-    {
-        phpQuery::plugin($class, $file);
-
-        return $this;
-    }
-
-    /**
-     * Deprecated, use $pq->plugin() instead.
-     *
-     * @param $class
-     * @param $file
-     *
-     * @return
-     *
-     * @deprecated
-     */
-//    public static function extend($class, $file = null)
-//    {
-//        return $this->plugin($class, $file);
-//    }
-
-    /**
-     * @param $method
-     * @param $args
-     *
-     * @return
-     */
-    public function __call($method, $args)
-    {
-        $aliasMethods = ['clone', 'empty'];
-        if (isset(phpQuery::$extendMethods[$method])) {
-            array_unshift($args, $this);
-
-            return phpQuery::callbackRun(
-                phpQuery::$extendMethods[$method],
-                $args
-            );
-        } else {
-            if (isset(phpQuery::$pluginsMethods[$method])) {
-                array_unshift($args, $this);
-                $class = phpQuery::$pluginsMethods[$method];
-                $realClass = "phpQueryObjectPlugin_$class";
-                $return = call_user_func_array(
-                    [$realClass, $method],
-                    $args
-                );
-
-                // XXX deprecate ?
-                return is_null($return)
-                    ? $this
-                    : $return;
-            } else {
-                if (in_array($method, $aliasMethods)) {
-                    return call_user_func_array([$this, '_'.$method], $args);
-                } else {
-                    throw new Exception("Method '{$method}' doesnt exist");
-                }
-            }
-        }
-    }
-
-    /**
-     * Safe rename of next().
-     *
-     * Use it ONLY when need to call next() on an iterated object (in same time).
-     * Normaly there is no need to do such thing ;)
-     *
-     * @return phpQueryObject
-     */
-    public function _next($selector = null)
-    {
-        return $this->newInstance(
-            $this->getElementSiblings('nextSibling', $selector, true)
-        );
-    }
-
-    /**
-     * Use prev() and next().
-     *
-     * @return phpQueryObject
-     *
-     * @deprecated
-     */
-    public function _prev($selector = null)
-    {
-        return $this->prev($selector);
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function prev($selector = null)
     {
@@ -2900,7 +1881,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     }
 
     /**
-     * @return phpQueryObject
+     * @return Parser
      *
      * @todo
      */
@@ -2912,7 +1893,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     }
 
     /**
-     * @return phpQueryObject
+     * @return Parser
      *
      * @todo FIXME: returns source elements insted of next siblings
      */
@@ -2931,7 +1912,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
             $test = $node;
             while (isset($test->{$direction}) && $test->{$direction}) {
                 $test = $test->{$direction};
-                if (!$test instanceof DOMELEMENT) {
+                if (!$test instanceof DOMElement) {
                     continue;
                 }
                 $stack[] = $test;
@@ -2953,7 +1934,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function siblings($selector = null)
     {
@@ -2974,7 +1955,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function not($selector = null)
     {
@@ -3031,16 +2012,16 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @param  string|phpQueryObject
+     * @param  string|Parser
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function add($selector = null)
     {
         if (!$selector) {
             return $this;
         }
-        $stack = [];
+
         $this->elementsBackup = $this->elements;
         $found = phpQuery::pq($selector, $this->getDocumentID());
         $this->merge($found->elements);
@@ -3061,9 +2042,8 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
 
     protected function elementsContainsNode($nodeToCheck, $elementsStack = null)
     {
-        $loop = !is_null($elementsStack)
-            ? $elementsStack
-            : $this->elements;
+        $loop = !is_null($elementsStack) ? $elementsStack : $this->elements;
+
         foreach ($loop as $node) {
             if ($node->isSameNode($nodeToCheck)) {
                 return true;
@@ -3076,7 +2056,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function parent($selector = null)
     {
@@ -3098,7 +2078,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function parents($selector = null)
     {
@@ -3153,9 +2133,6 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     protected function attrEvents($attr, $oldAttr, $oldValue, $node)
     {
         // skip events for XML documents
-        if (!$this->isXHTML() && !$this->isHTML()) {
-            return;
-        }
         $event = null;
         // identify
         $isInputValue = 'input' == $node->tagName
@@ -3201,7 +2178,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
             }
         }
         if ($event) {
-            phpQueryEvents::trigger(
+            QueryEvents::trigger(
                 $this->getDocumentID(),
                 $event->type,
                 [$event],
@@ -3235,9 +2212,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
 
                     return $return;
                 } else {
-                    return $node->hasAttribute($attr)
-                        ? $node->getAttribute($attr)
-                        : null;
+                    return $node->hasAttribute($attr) ? $node->getAttribute($attr) : null;
                 }
             }
         }
@@ -3276,47 +2251,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
-     *
-     * @todo check CDATA ???
-     */
-    public function attrPHP($attr, $code)
-    {
-        if (!is_null($code)) {
-            $value = '<'.'?php '.$code.' ?'.'>';
-            // TODO tempolary solution
-            // http://code.google.com/p/phpquery/issues/detail?id=17
-            //			if (function_exists('mb_detect_encoding') && mb_detect_encoding($value) == 'ASCII')
-            //				$value	= mb_convert_encoding($value, 'UTF-8', 'HTML-ENTITIES');
-        }
-        foreach ($this->stack(1) as $node) {
-            if (!is_null($code)) {
-                //				$attrNode = $this->DOM->createAttribute($attr);
-                $node->setAttribute($attr, $value);
-            //				$attrNode->value = $value;
-                //				$node->appendChild($attrNode);
-            } else {
-                if ('*' == $attr) {
-                    // jQuery diff
-                    $return = [];
-                    foreach ($node->attributes as $n => $v) {
-                        $return[$n] = $v->value;
-                    }
-
-                    return $return;
-                } else {
-                    return $node->getAttribute($attr);
-                }
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function removeAttr($attr)
     {
@@ -3419,7 +2354,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function andSelf()
     {
@@ -3433,7 +2368,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function addClass($className)
     {
@@ -3447,24 +2382,6 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
                     trim($node->getAttribute('class').' '.$className)
                 );
             }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @return phpQueryObject
-     */
-    public function addClassPHP($className)
-    {
-        foreach ($this->stack(1) as $node) {
-            $classes = $node->getAttribute('class');
-            $newValue = $classes
-                ? $classes.' <'.'?php '.$className.' ?'.'>'
-                : '<'.'?php '.$className.' ?'.'>';
-            $node->setAttribute('class', $newValue);
         }
 
         return $this;
@@ -3491,7 +2408,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function removeClass($className)
     {
@@ -3513,7 +2430,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function toggleClass($className)
     {
@@ -3542,9 +2459,9 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
      * Result:
      * [ <p></p> ]
      *
-     * @return phpQueryObject
+     * @return Parser
      */
-    public function _empty()
+    public function empty()
     {
         foreach ($this->stack(1) as $node) {
             // thx to 'dave at dgx dot cz'
@@ -3562,7 +2479,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
      * @param array        $arg1     will ba passed as third and futher args to callback
      * @param array        $arg2     Will ba passed as fourth and futher args to callback, and so on...
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function each($callback, $param1 = null, $param2 = null, $param3 = null)
     {
@@ -3581,7 +2498,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Run callback on actual object.
      *
-     * @return phpQueryObject
+     * @return Parser
      */
     public function callback($callback, $param1 = null, $param2 = null, $param3 = null)
     {
@@ -3595,7 +2512,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @return phpQueryObject
+     * @return Parser
      *
      * @todo add $scope and $args as in each() ???
      */
@@ -3611,17 +2528,14 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
         $params = func_get_args();
         array_unshift($params, $this->elements);
 
-        return $this->newInstance(
-            call_user_func_array(['phpQuery', 'map'], $params)
-        //			phpQuery::map($this->elements, $callback)
-        );
+        return $this->newInstance(call_user_func_array(['phpQuery', 'map'], $params));
     }
 
     /**
      * Enter description here...
      *
-     * @param  <type>  $key
-     * @param  <type>  $value
+     * @param    $key
+     * @param    $value
      */
     public function data($key, $value = null)
     {
@@ -3641,7 +2555,7 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     /**
      * Enter description here...
      *
-     * @param  <type>  $key
+     * @param    $key
      */
     public function removeData($key)
     {
@@ -3690,9 +2604,8 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
      *
      * Proper functionality is choosed automagicaly.
      *
-     * @return phpQueryObject
+     * @return Parser
      *
-     * @see phpQueryObject::_next()
      */
     #[\ReturnTypeWillChange]
     public function next($cssSelector = null)
@@ -3708,7 +2621,9 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
             if ($this->valid) {
                 ++$this->current;
             } else {
-                return $this->_next($cssSelector);
+                return $this->newInstance(
+                    $this->getElementSiblings('nextSibling', $cssSelector, true)
+                );
             }
         }
     }
@@ -3720,34 +2635,6 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     }
 
     // ITERATOR INTERFACE END
-    // ARRAYACCESS INTERFACE
-
-    #[\ReturnTypeWillChange]
-    public function offsetExists($offset)
-    {
-        return $this->find($offset)->size() > 0;
-    }
-
-    #[\ReturnTypeWillChange]
-    public function offsetGet($offset)
-    {
-        return $this->find($offset);
-    }
-
-    #[\ReturnTypeWillChange]
-    public function offsetSet($offset, $value)
-    {
-        //		$this->find($offset)->replaceWith($value);
-        $this->find($offset)->html($value);
-    }
-
-    #[\ReturnTypeWillChange]
-    public function offsetUnset($offset)
-    {
-        // empty
-        throw new Exception("Can't do unset, use array interface only for calling queries and replacing HTML.");
-    }
-    // ARRAYACCESS INTERFACE END
 
     /**
      * Returns node's XPath.
@@ -3760,170 +2647,30 @@ class phpQueryObject implements Iterator, Countable, ArrayAccess
     protected function getNodeXpath($oneNode = null, $namespace = null)
     {
         $return = [];
-        $loop = $oneNode
-            ? [$oneNode]
-            : $this->elements;
-        //		if ($namespace)
-        //			$namespace .= ':';
+        $loop = $oneNode ? [$oneNode] : $this->elements;
         foreach ($loop as $node) {
-            if ($node instanceof DOMDOCUMENT) {
+            if ($node instanceof DOMDocument) {
                 $return[] = '';
                 continue;
             }
             $xpath = [];
-            while (!($node instanceof DOMDOCUMENT)) {
+            while (!($node instanceof DOMDocument)) {
                 $i = 1;
                 $sibling = $node;
                 while ($sibling->previousSibling) {
                     $sibling = $sibling->previousSibling;
-                    $isElement = $sibling instanceof DOMELEMENT;
+                    $isElement = $sibling instanceof DOMElement;
                     if ($isElement && $sibling->tagName == $node->tagName) {
                         ++$i;
                     }
                 }
-                $xpath[] = $this->isXML()
-                    ? "*[local-name()='{$node->tagName}'][{$i}]"
-                    : "{$node->tagName}[{$i}]";
+                $xpath[] = "{$node->tagName}[{$i}]";
                 $node = $node->parentNode;
             }
             $xpath = implode('/', array_reverse($xpath));
             $return[] = '/'.$xpath;
         }
 
-        return $oneNode
-            ? $return[0]
-            : $return;
-    }
-
-    // HELPERS
-    public function whois($oneNode = null)
-    {
-        $return = [];
-        $loop = $oneNode
-            ? [$oneNode]
-            : $this->elements;
-        foreach ($loop as $node) {
-            if (isset($node->tagName)) {
-                $tag = in_array($node->tagName, ['php', 'js'])
-                    ? strtoupper($node->tagName)
-                    : $node->tagName;
-                $return[] = $tag
-                    .($node->getAttribute('id')
-                        ? '#'.$node->getAttribute('id') : '')
-                    .($node->getAttribute('class')
-                        ? '.'.implode('.', explode(' ', $node->getAttribute('class'))) : '')
-                    .($node->getAttribute('name')
-                        ? '[name="'.$node->getAttribute('name').'"]' : '')
-                    .($node->getAttribute('value') && false === strpos($node->getAttribute('value'), '<'.'?php')
-                        ? '[value="'.substr(str_replace("\n", '', $node->getAttribute('value')), 0, 15).'"]' : '')
-                    .($node->getAttribute('value') && false !== strpos($node->getAttribute('value'), '<'.'?php')
-                        ? '[value=PHP]' : '')
-                    .($node->getAttribute('selected')
-                        ? '[selected]' : '')
-                    .($node->getAttribute('checked')
-                        ? '[checked]' : '');
-            } else {
-                if ($node instanceof DOMTEXT) {
-                    if (trim($node->textContent)) {
-                        $return[] = 'Text:'.substr(str_replace("\n", ' ', $node->textContent), 0, 15);
-                    }
-                } else {
-                }
-            }
-        }
-
-        return $oneNode && isset($return[0])
-            ? $return[0]
-            : $return;
-    }
-
-    /**
-     * Dump htmlOuter and preserve chain. Usefull for debugging.
-     *
-     * @return phpQueryObject
-     */
-    public function dump()
-    {
-        echo 'DUMP #'.(phpQuery::$dumpCount++).' ';
-//        $debug = phpQuery::$debug;
-//        phpQuery::$debug = false;
-        //		print __FILE__.':'.__LINE__."\n";
-        phpQuery::debug($this->htmlOuter());
-
-        return $this;
-    }
-
-    public function dumpWhois()
-    {
-        echo 'DUMP #'.(phpQuery::$dumpCount++).' ';
-//        $debug = phpQuery::$debug;
-//        phpQuery::$debug = false;
-        //		print __FILE__.':'.__LINE__."\n";
-        // var_dump('whois', $this->whois());
-
-        phpQuery::debug($this->whois());
-
-        // phpQuery::$debug = $debug;
-
-        return $this;
-    }
-
-    public function dumpLength()
-    {
-        echo 'DUMP #'.(phpQuery::$dumpCount++).' ';
-//        $debug = phpQuery::$debug;
-//        phpQuery::$debug = false;
-        //		print __FILE__.':'.__LINE__."\n";
-//        var_dump('length', $this->length());
-//        phpQuery::$debug = $debug;
-
-        phpQuery::debug($this->length());
-
-        return $this;
-    }
-
-    public function dumpTree($html = true, $title = true)
-    {
-        $output = $title
-            ? 'DUMP #'.(phpQuery::$dumpCount++)." \n" : '';
-        $debug = phpQuery::$debug;
-        phpQuery::$debug = false;
-        foreach ($this->stack() as $node) {
-            $output .= $this->__dumpTree($node);
-        }
-        phpQuery::$debug = $debug;
-        echo $html
-            ? nl2br(str_replace(' ', '&nbsp;', $output))
-            : $output;
-
-        return $this;
-    }
-
-    private function __dumpTree($node, $intend = 0)
-    {
-        $whois = $this->whois($node);
-        $return = '';
-        if ($whois) {
-            $return .= str_repeat(' - ', $intend).$whois."\n";
-        }
-        if (isset($node->childNodes)) {
-            foreach ($node->childNodes as $chNode) {
-                $return .= $this->__dumpTree($chNode, $intend + 1);
-            }
-        }
-
-        return $return;
-    }
-
-    /**
-     * Dump htmlOuter and stop script execution. Usefull for debugging.
-     */
-    public function dumpDie()
-    {
-//        print __FILE__.':'.__LINE__;
-
-//        var_dump($this->htmlOuter());
-
-        exit();
+        return $oneNode ? $return[0] : $return;
     }
 }

@@ -15,16 +15,14 @@ use Closure;
 use Illuminate\Support\Collection;
 use Jiannei\LaravelCrawler\Services\MultiRequestService;
 use Jiannei\LaravelCrawler\Support\Dom\Query;
-use Jiannei\LaravelCrawler\Support\Query\phpQuery;
-use Jiannei\LaravelCrawler\Support\Query\phpQueryObject;
 
 /**
  * Class QueryList.
  *
  * @method string              getHtml($rel = true)
  * @method QueryList           setHtml($html)
- * @method QueryList           html($html)
- * @method phpQueryObject      find($selector)
+ * @method Query               html($html)
+ * @method Query               find($selector)
  * @method QueryList           rules(array $rules)
  * @method QueryList           range($range)
  * @method QueryList           removeHead()
@@ -32,13 +30,13 @@ use Jiannei\LaravelCrawler\Support\Query\phpQueryObject;
  * @method Collection          getData(Closure $callback = null)
  * @method array               queryData(Closure $callback = null)
  * @method QueryList           setData(Collection $data)
- * @method QueryList           encoding(string $outputEncoding,string $inputEncoding = null)
- * @method QueryList           get($url,$args = null,$otherArgs = [])
- * @method QueryList           post($url,$args = null,$otherArgs = [])
- * @method QueryList           postJson($url,$args = null,$otherArgs = [])
+ * @method QueryList           encoding(string $outputEncoding, string $inputEncoding = null)
+ * @method QueryList           get($url, $args = null, $otherArgs = [])
+ * @method QueryList           post($url, $args = null, $otherArgs = [])
+ * @method QueryList           postJson($url, $args = null, $otherArgs = [])
  * @method MultiRequestService multiGet($urls)
  * @method MultiRequestService multiPost($urls)
- * @method QueryList           use($plugins,...$opt)
+ * @method QueryList           use ($plugins, ...$opt)
  * @method QueryList           pipe(Closure $callback = null)
  */
 class QueryList
@@ -104,18 +102,10 @@ class QueryList
     }
 
     /**
-     * Destroy all documents.
-     */
-    public static function destructDocuments()
-    {
-        phpQuery::$documents = [];
-    }
-
-    /**
      * Bind a custom method to the QueryList object.
      *
-     * @param string  $name    Invoking the name
-     * @param Closure $provide Called method
+     * @param  string  $name  Invoking the name
+     * @param  Closure  $provide  Called method
      *
      * @return $this
      */

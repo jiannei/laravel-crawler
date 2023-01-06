@@ -28,7 +28,7 @@ class QueryTest extends TestCase
 </div>
 STR;
 
-        $doc = phpQuery::newDocumentHTML($html);
+        $doc = phpQuery::newDocument($html);
 
         $src = $doc->find('.two img:eq(0)')->attr('src');
 

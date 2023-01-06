@@ -35,7 +35,7 @@ namespace Jiannei\LaravelCrawler\Support\Query;
  * @TODO??? return fake forwarding function created via create_function
  * @TODO honor paramStructure
  */
-class Callback implements ICallbackNamed
+class Callback
 {
     public $callback = null;
     public $params = null;
