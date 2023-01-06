@@ -82,10 +82,10 @@ abstract class phpQuery
      *   pq('div.myClass', $pq)
      *
      * @param string|DOMNode|DOMNodeList|array $arg1    HTML markup, CSS Selector, DOMNode or array of DOMNodes
-     * @param string|Parser|DOMNode    $context DOM ID from $pq->getDocumentID(), phpQuery object (determines also query root) or DOMNode (determines also query root)
+     * @param string|Parser|DOMNode            $context DOM ID from $pq->getDocumentID(), phpQuery object (determines also query root) or DOMNode (determines also query root)
      *
      * @return Parser|false
-     *                              phpQuery object or false in case of error
+     *                      phpQuery object or false in case of error
      */
     public static function pq($arg1, $context = null)
     {
@@ -124,7 +124,6 @@ abstract class phpQuery
                 }
             }
         }
-
 
         if ($arg1 instanceof Parser) {
             /**
@@ -360,7 +359,6 @@ abstract class phpQuery
             }
         }
     }
-
 
     /**
      * @param $callback Callback
