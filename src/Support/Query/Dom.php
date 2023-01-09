@@ -55,7 +55,7 @@ abstract class Dom
      *   pq('div.myClass', $pq)
      *
      * @param Parser|DOMElement|DOMNode $arg1    HTML markup, CSS Selector, DOMNode or array of DOMNodes
-     * @param string|Parser|DOMNode            $context DOM ID from $pq->getDocumentID(), phpQuery object (determines also query root) or DOMNode (determines also query root)
+     * @param string|Parser|DOMNode     $context DOM ID from $pq->getDocumentID(), phpQuery object (determines also query root) or DOMNode (determines also query root)
      *
      * @return Parser|false
      *                      phpQuery object or false in case of error
