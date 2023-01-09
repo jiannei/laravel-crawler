@@ -14,10 +14,6 @@ namespace Jiannei\LaravelCrawler;
 use Closure;
 use GuzzleHttp\Cookie\CookieJar;
 use Illuminate\Support\Collection;
-use Jiannei\LaravelCrawler\Services\EncodeService;
-use Jiannei\LaravelCrawler\Services\HttpService;
-use Jiannei\LaravelCrawler\Services\MultiRequestService;
-use Jiannei\LaravelCrawler\Services\PluginService;
 use Jiannei\LaravelCrawler\Support\Dom\Elements;
 use Jiannei\LaravelCrawler\Support\Http\GHttp;
 use Jiannei\LaravelCrawler\Support\Query\Dom;
@@ -112,7 +108,7 @@ class QueryList
         return $callback($this);
     }
 
-    protected function use($plugins,...$opt)
+    protected function use($plugins, ...$opt)
     {
         if (is_array($plugins)) {
             foreach ($plugins as $plugin) {
@@ -460,7 +456,7 @@ class QueryList
 
             $doc->find($tag_str)->remove();
 
-            $html =$doc->htmlOuter();
+            $html = $doc->htmlOuter();
 
             $doc->unloadDocument();
         }
