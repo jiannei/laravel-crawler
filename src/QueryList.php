@@ -13,23 +13,14 @@ namespace Jiannei\LaravelCrawler;
 
 use Closure;
 use Illuminate\Support\Collection;
+use Jiannei\LaravelCrawler\Services\EncodeService;
+use Jiannei\LaravelCrawler\Services\HttpService;
 use Jiannei\LaravelCrawler\Services\MultiRequestService;
+use Jiannei\LaravelCrawler\Services\PluginService;
 use Jiannei\LaravelCrawler\Support\Dom\Elements;
 use Jiannei\LaravelCrawler\Support\Query\Dom;
 use Jiannei\LaravelCrawler\Support\Query\Parser;
 
-/**
- * Class QueryList.
- *
- * @method QueryList           encoding(string $outputEncoding, string $inputEncoding = null)
- * @method QueryList           get($url, $args = null, $otherArgs = [])
- * @method QueryList           post($url, $args = null, $otherArgs = [])
- * @method QueryList           postJson($url, $args = null, $otherArgs = [])
- * @method MultiRequestService multiGet($urls)
- * @method MultiRequestService multiPost($urls)
- * @method QueryList           use ($plugins, ...$opt)
- * @method QueryList           pipe(Closure $callback = null)
- */
 class QueryList
 {
     protected $kernel;
@@ -53,19 +44,17 @@ class QueryList
      */
     public function __construct()
     {
-        $this->kernel = (new Kernel($this))->bootstrap();
-        Config::getInstance()->bootstrap($this);
+//        $this->kernel = (new Kernel($this))->bootstrap();
+//        Config::getInstance()->bootstrap($this);
     }
 
     public function __call($name, $arguments)
     {
-        if (method_exists($this, $name)) {
-            $result = $this->$name(...$arguments);
-        } else {
-            $result = $this->kernel->getService($name)->call($this, ...$arguments);
+        if (!method_exists($this, $name)) {
+            throw new \Exception('method not found');
         }
 
-        return $result;
+        return $this->$name(...$arguments);
     }
 
     public static function __callStatic($name, $arguments)
@@ -77,8 +66,7 @@ class QueryList
 
     public function __destruct()
     {
-        unset($this->kernel);
-        $this->destroyDocument();
+        // $this->destroyDocument();
     }
 
     /**
@@ -93,32 +81,57 @@ class QueryList
         return self::$instance;
     }
 
-    /**
-     * Get the Config instance.
-     *
-     * @return Config|null
-     */
-    public static function config()
-    {
-        return Config::getInstance();
-    }
-
-    /**
-     * Bind a custom method to the QueryList object.
-     *
-     * @param string  $name    Invoking the name
-     * @param Closure $provide Called method
-     *
-     * @return $this
-     */
-    public function bind(string $name, Closure $provide)
-    {
-        $this->kernel->bind($name, $provide);
-
-        return $this;
-    }
-
     // ========================
+
+    protected function encoding(string $outputEncoding, string $inputEncoding = null)
+    {
+        return EncodeService::convert($this, $outputEncoding, $inputEncoding);
+    }
+
+    protected function pipe(Closure $callback = null)
+    {
+        return $callback($this);
+    }
+
+    protected function use($plugins,...$opt)
+    {
+        return PluginService::install($this, $plugins, ...$opt);
+    }
+
+    protected function get(...$args)
+    {
+        return HttpService::get($this, ...$args);
+    }
+
+    protected function post(...$args)
+    {
+        return HttpService::get($this, ...$args);
+    }
+
+    protected function postJson(...$args)
+    {
+        return HttpService::postJson($this, ...$args);
+    }
+
+    protected function multiGet(...$args)
+    {
+        return new MultiRequestService($this, 'get', ...$args);
+    }
+
+    protected function multiPost(...$args)
+    {
+        return new MultiRequestService($this, 'post', ...$args);
+    }
+
+    protected function queryData(Closure $callback = null)
+    {
+        return $this->query()->getData($callback)->all();
+    }
+
+    protected function html($html)
+    {
+        return $this->setHtml($html);
+    }
 
     /**
      * @param $html
