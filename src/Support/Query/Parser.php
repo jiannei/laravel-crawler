@@ -413,7 +413,6 @@ class Parser implements Iterator
         foreach ($args as $callback) {
             if (is_array($return)) {
                 foreach ($return as $k => $v) {
-                    dump(Dom::callbackRun($callback, [$v]), 'aaaa');
                     $return[$k] = Dom::callbackRun($callback, [$v]);
                 }
             } else {
@@ -1099,7 +1098,7 @@ class Parser implements Iterator
      */
     public function filter($selectors, $_skipHistory = false)
     {
-        if ($selectors instanceof Callback or $selectors instanceof Closure) {
+        if ($selectors instanceof Closure) {
             return $this->filterCallback($selectors, $_skipHistory);
         }
         if (!$_skipHistory) {

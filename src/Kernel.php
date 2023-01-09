@@ -51,7 +51,7 @@ class Kernel
         return $this;
     }
 
-    public function registerProviders()
+    protected function registerProviders()
     {
         foreach ($this->providers as $provider) {
             $this->register(new $provider());

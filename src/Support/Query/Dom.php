@@ -263,11 +263,6 @@ abstract class Dom
             return;
         }
 
-        if ($callback instanceof Callback) {
-            $paramStructure = $callback->params;
-            $callback = $callback->callback;
-        }
-
         if (!$paramStructure) {
             return call_user_func_array($callback, $params);
         }
