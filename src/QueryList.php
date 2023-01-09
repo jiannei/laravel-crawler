@@ -12,12 +12,14 @@
 namespace Jiannei\LaravelCrawler;
 
 use Closure;
+use GuzzleHttp\Cookie\CookieJar;
 use Illuminate\Support\Collection;
 use Jiannei\LaravelCrawler\Services\EncodeService;
 use Jiannei\LaravelCrawler\Services\HttpService;
 use Jiannei\LaravelCrawler\Services\MultiRequestService;
 use Jiannei\LaravelCrawler\Services\PluginService;
 use Jiannei\LaravelCrawler\Support\Dom\Elements;
+use Jiannei\LaravelCrawler\Support\Http\GHttp;
 use Jiannei\LaravelCrawler\Support\Query\Dom;
 use Jiannei\LaravelCrawler\Support\Query\Parser;
 
@@ -38,6 +40,8 @@ class QueryList
      * @var Collection
      */
     protected $data;
+
+    protected static $cookieJar = null;
 
     /**
      * QueryList constructor.
@@ -85,7 +89,22 @@ class QueryList
 
     protected function encoding(string $outputEncoding, string $inputEncoding = null)
     {
-        return EncodeService::convert($this, $outputEncoding, $inputEncoding);
+        $html = $this->getHtml();
+        $inputEncoding || $inputEncoding = $this->detect($html);
+        $html = iconv($inputEncoding, $outputEncoding.'//IGNORE', $html);
+        $this->setHtml($html);
+
+        return $this;
+    }
+
+    protected function detect($string)
+    {
+        $charset = mb_detect_encoding($string, ['ASCII', 'GB2312', 'GBK', 'UTF-8'], true);
+        if ('cp936' == strtolower($charset)) {
+            $charset = 'GBK';
+        }
+
+        return $charset;
     }
 
     protected function pipe(Closure $callback = null)
@@ -95,32 +114,60 @@ class QueryList
 
     protected function use($plugins,...$opt)
     {
-        return PluginService::install($this, $plugins, ...$opt);
+        if (is_array($plugins)) {
+            foreach ($plugins as $plugin) {
+                $plugin::install($this);
+            }
+        } else {
+            $plugins::install($this, ...$opt);
+        }
+
+        return $this;
     }
 
-    protected function get(...$args)
+    protected static function getCookieJar()
     {
-        return HttpService::get($this, ...$args);
+        if (null == self::$cookieJar) {
+            self::$cookieJar = new CookieJar();
+        }
+
+        return self::$cookieJar;
     }
 
-    protected function post(...$args)
+    protected function get($url, $args = null, $otherArgs = [])
     {
-        return HttpService::get($this, ...$args);
+        $otherArgs = array_merge([
+            'cookies' => self::getCookieJar(),
+            'verify' => false,
+        ], $otherArgs);
+        $html = GHttp::get($url, $args, $otherArgs);
+        $this->setHtml($html);
+
+        return $this;
     }
 
-    protected function postJson(...$args)
+    protected function post($url, $args = null, $otherArgs = [])
     {
-        return HttpService::postJson($this, ...$args);
+        $otherArgs = array_merge([
+            'cookies' => self::getCookieJar(),
+            'verify' => false,
+        ], $otherArgs);
+        $html = GHttp::post($url, $args, $otherArgs);
+        $this->setHtml($html);
+
+        return $this;
     }
 
-    protected function multiGet(...$args)
+    protected function postJson($url, $args = null, $otherArgs = [])
     {
-        return new MultiRequestService($this, 'get', ...$args);
-    }
+        $otherArgs = array_merge([
+            'cookies' => self::getCookieJar(),
+            'verify' => false,
+        ], $otherArgs);
+        $html = GHttp::postJson($url, $args, $otherArgs);
+        $this->setHtml($html);
 
-    protected function multiPost(...$args)
-    {
-        return new MultiRequestService($this, 'post', ...$args);
+        return $this;
     }
 
     protected function queryData(Closure $callback = null)
