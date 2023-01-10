@@ -2,6 +2,7 @@
 
 namespace Jiannei\LaravelCrawler;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Symfony\Component\DomCrawler\Crawler as SymfonyCrawler;
@@ -20,11 +21,9 @@ class Crawler extends SymfonyCrawler
         return $this->new($html);
     }
 
-    public function attrs(string $attribute):array
+    public function attrs(string|array $attribute):array
     {
-        return $this->each(function (SymfonyCrawler $node) use ($attribute){
-            return $node->attr($attribute);
-        });
+        return $this->extract(Arr::wrap($attribute));
     }
 
     public function texts(): array

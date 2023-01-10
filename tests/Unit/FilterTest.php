@@ -59,8 +59,12 @@ HTML;
         $imgAttrs = $crawler->filter('img')->eq(0)->extract(['src', 'alt', 'abc']);
         $linkAttrs = $crawler->filter('a')->eq(1)->extract(['href']);
 
+        // 等价于
+        $imgAttrs2 = $crawler->filter('img')->eq(0)->attrs(['src', 'alt', 'abc']);
+
         $this->assertCount(3, $imgAttrs[0]);
         $this->assertCount(1, $linkAttrs);
+        $this->assertEquals($imgAttrs, $imgAttrs2);
     }
 
     public function testGetHtml()
