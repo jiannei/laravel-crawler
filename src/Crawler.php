@@ -20,26 +20,6 @@ class Crawler extends SymfonyCrawler
         return $this->new($html);
     }
 
-    public function rules(array $rules):array
-    {
-        return $this->each(function (SymfonyCrawler $node) use ($rules) {
-            $item = [];
-            foreach ($rules as $field => $rule) {
-                // Todo more check
-                $selector = $rule[0];
-                $method = $rule[1];
-
-                if (!$node->filter($selector)->count()) {
-                    continue;
-                }
-
-                $item[$field] = !in_array($method, ['text', 'html']) ? $node->filter($selector)->attr($method) : $node->filter($selector)->$method();
-            }
-
-            return $item;
-        });
-    }
-
     public function attrs(string $attribute):array
     {
         return $this->each(function (SymfonyCrawler $node) use ($attribute){
@@ -61,25 +41,49 @@ class Crawler extends SymfonyCrawler
         });
     }
 
-    // todo 整合至 rules
-    public function remove(array $rules)
+    public function rules(array $rules):array
     {
+        return $this->each(function (SymfonyCrawler $node) use ($rules) {
+            $item = [];
+            foreach ($rules as $field => $rule) {
+                if (!is_array($rule) || count($rule) !== 2 ) {
+                    throw new \InvalidArgumentException("The [$field] rule is invalid.");
+                }
+
+                $selectors = explode(':',$rule[0]);
+                $method = $rule[1];
+
+                $position = '';
+                $selector = $selectors[0];
+                if (count($selectors) > 1 && in_array($selectors[1],['first', 'last'])) {
+                    $position = $selectors[1];
+                }
+
+                if (!$node->filter($selector)->count()) {
+                    continue;
+                }
+
+                if (!$position) {
+                    $item[$field] = !in_array($method, ['text', 'html','outerHtml']) ? $node->filter($selector)->attr($method) : $node->filter($selector)->$method();
+                }else{
+                    $item[$field] = !in_array($method, ['text', 'html','outerHtml']) ? $node->filter($selector)->$position()->attr($method) : $node->filter($selector)->$position()->$method();
+                }
+            }
+
+            return $item;
+        });
+    }
+
+    public function remove(array $elements): string
+    {
+        $rules = [];
+        foreach ($elements as $element) {
+            $rules[] = [$element,'outerHtml'];
+        }
+
         $html = $this->html();
-        foreach ($rules as $rule) {
-            $rule = explode(':', $rule);
-            $selector = $rule[0];
-            $position = $rule[1] ?? '';
-
-            if (!$this->filter($selector)->count()) {
-                continue;
-            }
-
-            if (!in_array($position, ['first', 'last'])) {
-                $html = Str::remove($this->filter($selector)->outerHtml(), $html);
-            } else {
-                $html = Str::remove($this->filter($selector)->$position()->outerHtml(), $html);
-            }
-
+        foreach ($this->rules($rules) as $items) {
+            $html = Str::remove($items, $html);
         }
 
         return $html;

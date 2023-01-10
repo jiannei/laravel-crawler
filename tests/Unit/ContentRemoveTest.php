@@ -18,16 +18,18 @@ class ContentRemoveTest extends TestCase
 
         <p>这是正文内容段落3......</p>
 
+        <a href="http://querylist.cc">QueryList官网</a>
+
         <span>这是广告</span>
         <p>这是版权声明！</p>
     </div>
 STR;
 
-    public function testSingleRemove()
+    public function testRemove()
     {
         $crawler = Crawler::new($this->html);
 
-        $html = $crawler->filter('#content')->remove(['.tt','span:last','p:last']);
+        $html = $crawler->filter('#content')->remove(['.tt','span:last','p:last','a']);
 
         $expected = <<<STR
 这是正文内容段落1.....
