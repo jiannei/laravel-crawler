@@ -37,7 +37,8 @@
         "guzzlehttp/guzzle": "^7.5"
     },
     "require": {
-        "ext-dom": "*"
+        "ext-dom": "*",
+        "symfony/dom-crawler": "^6.2"
     },
     "scripts": {
         "test": "vendor/bin/phpunit"
