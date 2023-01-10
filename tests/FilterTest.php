@@ -22,8 +22,9 @@ HTML;
 
     public function testFilterFirstDomAttr()
     {
-        $crawler = Crawler::html($this->html);
+        $crawler = Crawler::new($this->html);
 
+        // 获取指定元素单属性值
         $img = [];
         $img[] = $crawler->filter('img')->attr('src');
         $img[] = $crawler->filter('img')->eq(0)->attr('src');
@@ -39,8 +40,9 @@ HTML;
 
     public function testFilterSecondDomAttr()
     {
-        $crawler = Crawler::html($this->html);
+        $crawler = Crawler::new($this->html);
 
+        // 获取指定元素单属性值
         $img = [];
         $img[] = $crawler->filter('img')->eq(1)->attr('alt');
         $img[] = $crawler->filter('.second_pic')->attr('alt');
@@ -50,8 +52,9 @@ HTML;
 
     public function testFilterDomMultiAttr()
     {
-        $crawler = Crawler::html($this->html);
+        $crawler = Crawler::new($this->html);
 
+        // 获取指定单元素多属性值
         $imgAttrs = $crawler->filter('img')->eq(0)->extract(['src', 'alt', 'abc']);
         $linkAttrs = $crawler->filter('a')->eq(1)->extract(['href']);
 
@@ -61,8 +64,9 @@ HTML;
 
     public function testGetHtml()
     {
-        $crawler = Crawler::html($this->html);
+        $crawler = Crawler::new($this->html);
 
+        // 获取指定单元素单属性值-特殊属性：html
         $html = $crawler->filter('#one > .two')->html();
 
         $this->assertTrue(Str::contains($html, ['QueryList官网', 'QueryList文档']));
@@ -70,8 +74,9 @@ HTML;
 
     public function testGetText()
     {
-        $crawler = Crawler::html($this->html);
+        $crawler = Crawler::new($this->html);
 
+        // 获取指定单元素单属性-特殊属性：text
         $text = $crawler->filter('.two')->text();
 
         $this->assertEquals('QueryList官网 QueryList文档', $text);
@@ -79,34 +84,49 @@ HTML;
 
     public function testGetAllAlt()
     {
-        $crawler = Crawler::html($this->html);
+        $crawler = Crawler::new($this->html);
 
+        // 获取多元素单属性值
         $imgAlt = $crawler->filter('.two img')->each(function (\Symfony\Component\DomCrawler\Crawler $node, $i) {
             return $node->attr('alt');
         });
 
+        // 等价于
+        $imgAlt2 = $crawler->filter('.two img')->attrs('alt');
+
         $this->assertEquals(["这是图片", "这是图片2"], $imgAlt);
+        $this->assertEquals($imgAlt, $imgAlt2);
     }
 
     public function testGetAllHtml()
     {
-        $crawler = Crawler::html($this->html);
+        $crawler = Crawler::new($this->html);
 
+        // 获取多元素单属性值-特殊属性：html
         $htmls = $crawler->filter('#one span')->each(function (\Symfony\Component\DomCrawler\Crawler $node) {
             return $node->html();
         });
 
+        // 等价于
+        $htmls2 =  $crawler->filter('#one span')->htmls();
+
         $this->assertEquals(["其它的<b>一些</b>文本","另外<b>一些</b>文本"],$htmls);
+        $this->assertEquals($htmls,$htmls2);
     }
 
     public function testGetAllText()
     {
-        $crawler = Crawler::html($this->html);
+        $crawler = Crawler::new($this->html);
 
+        // 获取多元素单属性值-特殊属性：text
         $texts = $crawler->filter('.two a')->each(function (\Symfony\Component\DomCrawler\Crawler $node) {
             return $node->text();
         });
 
+        // 等价于
+        $texts2 = $crawler->filter('.two a')->texts();
+
         $this->assertEquals(['QueryList官网','QueryList文档'],$texts);
+        $this->assertEquals($texts,$texts2);
     }
 }

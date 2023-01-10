@@ -4,10 +4,32 @@ namespace Jiannei\LaravelCrawler;
 
 use Symfony\Component\DomCrawler\Crawler as SymfonyCrawler;
 
-class Crawler
+class Crawler extends SymfonyCrawler
 {
-    public function html(\DOMNodeList|\DOMNode|array|string $node = null, string $uri = null, string $baseHref = null)
+    public function new(\DOMNodeList|\DOMNode|array|string $node = null, string $uri = null, string $baseHref = null)
     {
-        return new \Symfony\Component\DomCrawler\Crawler(...func_get_args());
+        return new static(...func_get_args());
     }
+
+    public function attrs(string $attribute):array
+    {
+        return $this->each(function (SymfonyCrawler $node) use ($attribute){
+            return $node->attr($attribute);
+        });
+    }
+
+    public function texts(): array
+    {
+        return $this->each(function (SymfonyCrawler $node) {
+            return $node->text();
+        });
+    }
+
+    public function htmls():array
+    {
+        return $this->each(function (SymfonyCrawler $node) {
+            return $node->html();
+        });
+    }
+
 }
