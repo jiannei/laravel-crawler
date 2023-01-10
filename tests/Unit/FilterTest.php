@@ -1,9 +1,10 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Tests;
+namespace Jiannei\LaravelCrawler\Tests\Unit;
 
 use Illuminate\Support\Str;
 use Jiannei\LaravelCrawler\Support\Facades\Crawler;
+use Jiannei\LaravelCrawler\Tests\TestCase;
 
 class FilterTest extends TestCase
 {

@@ -1,8 +1,9 @@
 <?php
 
-namespace Jiannei\LaravelCrawler\Tests;
+namespace Jiannei\LaravelCrawler\Tests\Unit;
 
 use Jiannei\LaravelCrawler\Support\Facades\Crawler;
+use Jiannei\LaravelCrawler\Tests\TestCase;
 
 class FetchTest extends TestCase
 {

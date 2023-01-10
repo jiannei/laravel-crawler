@@ -3,6 +3,7 @@
 namespace Jiannei\LaravelCrawler;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Symfony\Component\DomCrawler\Crawler as SymfonyCrawler;
 
 class Crawler extends SymfonyCrawler
@@ -60,4 +61,27 @@ class Crawler extends SymfonyCrawler
         });
     }
 
+    // todo 整合至 rules
+    public function remove(array $rules)
+    {
+        $html = $this->html();
+        foreach ($rules as $rule) {
+            $rule = explode(':', $rule);
+            $selector = $rule[0];
+            $position = $rule[1] ?? '';
+
+            if (!$this->filter($selector)->count()) {
+                continue;
+            }
+
+            if (!in_array($position, ['first', 'last'])) {
+                $html = Str::remove($this->filter($selector)->outerHtml(), $html);
+            } else {
+                $html = Str::remove($this->filter($selector)->$position()->outerHtml(), $html);
+            }
+
+        }
+
+        return $html;
+    }
 }
