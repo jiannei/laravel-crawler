@@ -4,8 +4,8 @@ namespace Jiannei\LaravelCrawler;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Jiannei\LaravelCrawler\Support\Enums\Element;
 use Symfony\Component\DomCrawler\Crawler as SymfonyCrawler;
 
 class Crawler extends SymfonyCrawler
@@ -32,6 +32,8 @@ class Crawler extends SymfonyCrawler
      */
     public function fetch(string $url, array|string|null $query = null): static
     {
+        Log::debug(__FUNCTION__,compact('url','query'));
+
         $html = Http::get(...func_get_args())->body();
 
         return $this->new($html);
@@ -87,7 +89,7 @@ class Crawler extends SymfonyCrawler
                     throw new \InvalidArgumentException("The [$field] rule is invalid.");
                 }
 
-                $selectors = explode(':',$rule[0]);
+                $selectors = explode(';',$rule[0]);// todo
                 $method = $rule[1];
 
                 $position = '';
@@ -96,14 +98,13 @@ class Crawler extends SymfonyCrawler
                     $position = $selectors[1];
                 }
 
-                if (!$node->filter($selector)->count()) {
-                    continue;
-                }
-
-                if (!$position) {
-                    $item[$field] = !in_array($method, ['text', 'html','outerHtml']) ? $node->filter($selector)->attr($method) : $node->filter($selector)->$method();
-                }else{
-                    $item[$field] = !in_array($method, ['text', 'html','outerHtml']) ? $node->filter($selector)->$position()->attr($method) : $node->filter($selector)->$position()->$method();
+                $item[$field] = null;
+                if ($node->filter($selector)->count()) {
+                    if (!$position) {
+                        $item[$field] = !in_array($method, ['text', 'html','outerHtml']) ? $node->filter($selector)->attr($method) : $node->filter($selector)->$method();
+                    }else{
+                        $item[$field] = !in_array($method, ['text', 'html','outerHtml']) ? $node->filter($selector)->$position()->attr($method) : $node->filter($selector)->$position()->$method();
+                    }
                 }
             }
 
@@ -114,17 +115,12 @@ class Crawler extends SymfonyCrawler
     /**
      * 移除指定元素
      *
-     * @param  string|array  $elements
+     * @param  string|array  $patterns
      * @return string
      */
-    public function remove(string|array $elements): string
+    public function remove(string|array $patterns): string
     {
-        $elements = Arr::wrap($elements);
-
-        $rules = [];
-        foreach ($elements as $element) {
-            $rules[] = [$element,'outerHtml'];
-        }
+        $rules = $this->patternToRule($patterns);
 
         $html = $this->html();
         foreach ($this->rules($rules) as $items) {
@@ -140,5 +136,23 @@ class Crawler extends SymfonyCrawler
         ]*/
 
         return $html;
+    }
+
+    /**
+     * 移除/替换/追加操作规则解析
+     *
+     * @param  string|array  $patterns
+     * @return array
+     */
+    protected function patternToRule(string|array $patterns): array
+    {
+        $patterns = Arr::wrap($patterns);
+
+        $rules = [];
+        foreach ($patterns as $pattern) {
+            $rules[] = [$pattern,'outerHtml'];
+        }
+
+        return $rules;
     }
 }

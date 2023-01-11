@@ -30,7 +30,7 @@ STR;
     {
         $crawler = Crawler::new($this->html);
 
-        $html = $crawler->filter('#content')->remove(['.tt','span:last','p:last','a']);
+        $html = $crawler->filter('#content')->remove(['.tt','span;last','p;last','a']);
 
         $expected = <<<STR
 这是正文内容段落1.....
