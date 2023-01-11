@@ -1,8 +1,16 @@
 <?php
 
+/*
+ * This file is part of the jiannei/laravel-crawler.
+ *
+ * (c) jiannei <longjian.huang@foxmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Jiannei\LaravelCrawler\Tests\Unit;
 
-use Jiannei\LaravelCrawler\Support\Enums\Element;
 use Jiannei\LaravelCrawler\Support\Facades\Crawler;
 use Jiannei\LaravelCrawler\Tests\TestCase;
 
@@ -30,7 +38,7 @@ STR;
     {
         $crawler = Crawler::new($this->html);
 
-        $html = $crawler->filter('#content')->remove(['.tt','span;last','p;last','a']);
+        $html = $crawler->filter('#content')->remove(['.tt', 'span;last', 'p;last', 'a']);
 
         $expected = <<<STR
 这是正文内容段落1.....
@@ -40,7 +48,6 @@ STR;
         <p>这是正文内容段落3......</p>
 STR;
 
-        $this->assertEquals($expected,trim($html));
+        $this->assertEquals($expected, trim($html));
     }
-
 }
