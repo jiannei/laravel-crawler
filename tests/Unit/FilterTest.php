@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the jiannei/laravel-crawler.
+ *
+ * (c) jiannei <longjian.huang@foxmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Jiannei\LaravelCrawler\Tests\Unit;
 
 use Illuminate\Support\Str;
@@ -99,7 +108,7 @@ HTML;
         // 等价于
         $imgAlt2 = $crawler->filter('.two img')->attrs('alt');
 
-        $this->assertEquals(["这是图片", "这是图片2"], $imgAlt);
+        $this->assertEquals(['这是图片', '这是图片2'], $imgAlt);
         $this->assertEquals($imgAlt, $imgAlt2);
     }
 
@@ -113,10 +122,10 @@ HTML;
         });
 
         // 等价于
-        $htmls2 =  $crawler->filter('#one span')->htmls();
+        $htmls2 = $crawler->filter('#one span')->htmls();
 
-        $this->assertEquals(["其它的<b>一些</b>文本","另外<b>一些</b>文本"],$htmls);
-        $this->assertEquals($htmls,$htmls2);
+        $this->assertEquals(['其它的<b>一些</b>文本', '另外<b>一些</b>文本'], $htmls);
+        $this->assertEquals($htmls, $htmls2);
     }
 
     public function testGetAllText()
@@ -131,7 +140,7 @@ HTML;
         // 等价于
         $texts2 = $crawler->filter('.two a')->texts();
 
-        $this->assertEquals(['QueryList官网','QueryList文档'],$texts);
-        $this->assertEquals($texts,$texts2);
+        $this->assertEquals(['QueryList官网', 'QueryList文档'], $texts);
+        $this->assertEquals($texts, $texts2);
     }
 }
