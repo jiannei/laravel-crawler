@@ -13,7 +13,6 @@ namespace Jiannei\LaravelCrawler;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Symfony\Component\DomCrawler\Crawler as SymfonyCrawler;
 
@@ -32,15 +31,14 @@ class Crawler extends SymfonyCrawler
     /**
      * 获取远程html后构建爬虫对象
      *
-     * @param array|string|null $query
+     * @param  string  $url
+     * @param  array|string|null  $query
      *
      * @return $this
      */
     public function fetch(string $url, array|string|null $query = null): static
     {
-        Log::debug(__FUNCTION__, compact('url', 'query'));
-
-        $html = Http::get(...func_get_args())->body();
+        $html = Http::withOptions(config('crawler.http.options',[]))->get(...func_get_args())->body();
 
         return $this->new($html);
     }
