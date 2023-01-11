@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the jiannei/laravel-crawler.
+ *
+ * (c) jiannei <longjian.huang@foxmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Jiannei\LaravelCrawler\Tests\Unit;
 
 use Jiannei\LaravelCrawler\Support\Facades\Crawler;
@@ -26,7 +35,7 @@ class FetchTest extends TestCase
         $rules = [
             'title' => ['h1', 'text'],
             'author' => ['#author_baidu>strong', 'text'],
-            'content' => ['.post_content','html']
+            'content' => ['.post_content', 'html'],
         ];
 
         // 解析文章详情
@@ -54,7 +63,7 @@ class FetchTest extends TestCase
         ];
 
         // 解析文章列表
-        $articles = $crawler->filter('.bl li')->each(function ($node) use ($rules) {
+        $articles = $crawler->filter('.bl li')->each(function ($node) {
             return [
                 'title' => $node->filter('h2>a')->text(),
                 'link' => $node->filter('h2>a')->attr('href'),
@@ -66,6 +75,6 @@ class FetchTest extends TestCase
         // 等价于
         $articles2 = $crawler->filter('.bl li')->rules($rules);
 
-        $this->assertEquals($articles,$articles2);
+        $this->assertEquals($articles, $articles2);
     }
 }
