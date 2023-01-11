@@ -5,15 +5,31 @@ namespace Jiannei\LaravelCrawler;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Jiannei\LaravelCrawler\Support\Enums\Element;
 use Symfony\Component\DomCrawler\Crawler as SymfonyCrawler;
 
 class Crawler extends SymfonyCrawler
 {
+    /**
+     * 构建一个新的爬虫对象
+     *
+     * @param  \DOMNodeList|\DOMNode|array|string|null  $node
+     * @param  string|null  $uri
+     * @param  string|null  $baseHref
+     * @return $this
+     */
     public function new(\DOMNodeList|\DOMNode|array|string $node = null, string $uri = null, string $baseHref = null): static
     {
         return new static(...func_get_args());
     }
 
+    /**
+     * 获取远程html后构建爬虫对象
+     *
+     * @param  string  $url
+     * @param  array|string|null  $query
+     * @return $this
+     */
     public function fetch(string $url, array|string|null $query = null): static
     {
         $html = Http::get(...func_get_args())->body();
@@ -21,11 +37,22 @@ class Crawler extends SymfonyCrawler
         return $this->new($html);
     }
 
+    /**
+     * 获取元素的属性值
+     *
+     * @param  string|array  $attribute
+     * @return array
+     */
     public function attrs(string|array $attribute):array
     {
         return $this->extract(Arr::wrap($attribute));
     }
 
+    /**
+     * 获取多元素的文本内容
+     *
+     * @return array
+     */
     public function texts(): array
     {
         return $this->each(function (SymfonyCrawler $node) {
@@ -33,6 +60,11 @@ class Crawler extends SymfonyCrawler
         });
     }
 
+    /**
+     * 获取多元素自身html
+     *
+     * @return array
+     */
     public function htmls():array
     {
         return $this->each(function (SymfonyCrawler $node) {
@@ -40,6 +72,12 @@ class Crawler extends SymfonyCrawler
         });
     }
 
+    /**
+     * 组合式获取内容
+     *
+     * @param  array  $rules
+     * @return array
+     */
     public function rules(array $rules):array
     {
         return $this->each(function (SymfonyCrawler $node) use ($rules) {
@@ -73,8 +111,16 @@ class Crawler extends SymfonyCrawler
         });
     }
 
-    public function remove(array $elements): string
+    /**
+     * 移除指定元素
+     *
+     * @param  string|array  $elements
+     * @return string
+     */
+    public function remove(string|array $elements): string
     {
+        $elements = Arr::wrap($elements);
+
         $rules = [];
         foreach ($elements as $element) {
             $rules[] = [$element,'outerHtml'];
@@ -84,6 +130,14 @@ class Crawler extends SymfonyCrawler
         foreach ($this->rules($rules) as $items) {
             $html = Str::remove($items, $html);
         }
+
+        // TODO 移除指定元素属性、元素文本内容(removeHtml/removeText/removeAttr)
+        /*[
+            '.tt' => Element::TEXT,
+            'span:last' => Element::HTML,
+            'p:last' => Element::HTML,
+            'a' => ['href']
+        ]*/
 
         return $html;
     }

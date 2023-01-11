@@ -2,10 +2,11 @@
 
 namespace Jiannei\LaravelCrawler\Tests\Unit;
 
+use Jiannei\LaravelCrawler\Support\Enums\Element;
 use Jiannei\LaravelCrawler\Support\Facades\Crawler;
 use Jiannei\LaravelCrawler\Tests\TestCase;
 
-class ContentRemoveTest extends TestCase
+class RemoveTest extends TestCase
 {
     protected string $html = <<<STR
     <div id="content">
@@ -25,7 +26,7 @@ class ContentRemoveTest extends TestCase
     </div>
 STR;
 
-    public function testRemove()
+    public function testRemoveHtml()
     {
         $crawler = Crawler::new($this->html);
 
