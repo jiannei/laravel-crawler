@@ -37,6 +37,7 @@
         "guzzlehttp/guzzle": "^7.5"
     },
     "require": {
+        "php": "^8.1",
         "ext-dom": "*",
         "symfony/dom-crawler": "^6.2"
     },
