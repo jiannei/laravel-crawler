@@ -38,7 +38,15 @@ STR;
     {
         $crawler = Crawler::new($this->html);
 
-        $html = $crawler->filter('#content')->remove(['.tt', 'span;last', 'p;last', 'a']);
+        $rules = [
+            ['.tt','outerHtml'],
+            ['span','outerHtml','last'],
+            ['p','outerHtml','last'],
+            ['a','outerHtml'],
+        ];
+
+        // ['.tt', 'span' => 'last', 'p' => 'last', 'a']
+        $html = $crawler->filter('#content')->remove($rules);
 
         $expected = <<<STR
 这是正文内容段落1.....

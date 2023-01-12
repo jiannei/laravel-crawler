@@ -31,7 +31,8 @@ class Crawler extends SymfonyCrawler
     /**
      * 获取远程html后构建爬虫对象
      *
-     * @param array|string|null $query
+     * @param  string  $url
+     * @param  array|string|null  $query
      *
      * @return $this
      */
@@ -78,26 +79,36 @@ class Crawler extends SymfonyCrawler
         return $this->each(function (SymfonyCrawler $node) use ($rules) {
             $item = [];
             foreach ($rules as $field => $rule) {
-                if (!is_array($rule) || 2 !== count($rule)) {
+                // [selector,attribute, pseudo-class]
+                // [selector,attribute, position]
+
+                if (!is_array($rule) || count($rule) < 2) {
                     throw new \InvalidArgumentException("The [$field] rule is invalid.");
                 }
 
-                $selectors = explode(';', $rule[0]); // todo
-                $method = $rule[1];
+                @list($selector,$attribute,$position) = $rule;
 
-                $position = '';
-                $selector = $selectors[0];
-                if (count($selectors) > 1 && in_array($selectors[1], ['first', 'last'])) {
-                    $position = $selectors[1];
-                }
+                $element = $node->filter($selector);
 
                 $item[$field] = null;
-                if ($node->filter($selector)->count()) {
-                    if (!$position) {
-                        $item[$field] = !in_array($method, ['text', 'html', 'outerHtml']) ? $node->filter($selector)->attr($method) : $node->filter($selector)->$method();
-                    } else {
-                        $item[$field] = !in_array($method, ['text', 'html', 'outerHtml']) ? $node->filter($selector)->$position()->attr($method) : $node->filter($selector)->$position()->$method();
-                    }
+                if (!$element->count()) {
+                    continue;
+                }
+
+                if ($position === 'first') {
+                    $position = 0;
+                } elseif ($position === 'last') {
+                    $position =  $element->count() - 1;
+                }
+
+                if (!is_null($position)) {
+                    $element = $element->eq($position);
+                }
+
+                if (in_array($attribute, ['text', 'html', 'outerHtml'])) {
+                    $item[$field] = $element->$attribute();
+                }else{
+                    $item[$field] = $element->attr($attribute);
                 }
             }
 
@@ -110,13 +121,12 @@ class Crawler extends SymfonyCrawler
      */
     public function remove(string|array $patterns): string
     {
-        $rules = $this->patternToRule($patterns);
-
         $html = $this->html();
-        foreach ($this->rules($rules) as $items) {
+        foreach ($this->rules($patterns) as $items) {
             $html = Str::remove($items, $html);
         }
 
+        // TODO 连贯操作 rules()->remove()
         // TODO 移除指定元素属性、元素文本内容(removeHtml/removeText/removeAttr)
         /*[
             '.tt' => Element::TEXT,
@@ -130,14 +140,17 @@ class Crawler extends SymfonyCrawler
 
     /**
      * 移除/替换/追加操作规则解析.
+     *
+     * @param  string|array  $patterns
+     * @return array
      */
     protected function patternToRule(string|array $patterns): array
     {
         $patterns = Arr::wrap($patterns);
 
         $rules = [];
-        foreach ($patterns as $pattern) {
-            $rules[] = [$pattern, 'outerHtml'];
+        foreach ($patterns as $index => $pattern) {
+            $rules[] = is_numeric($index) ? [$pattern, 'outerHtml',null] : [$index, 'outerHtml',$pattern];
         }
 
         return $rules;
