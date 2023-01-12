@@ -2,6 +2,8 @@
 
 <p align="center"> crawler.</p>
 
+[![Test](https://github.com/jiannei/laravel-crawler/actions/workflows/test.yml/badge.svg)](https://github.com/jiannei/laravel-crawler/actions/workflows/test.yml)
+[![StyleCI](https://github.styleci.io/repos/585477175/shield?branch=main&style=flat)](https://github.styleci.io/repos/585477175/shield?branch=main&style=flat)
 
 ## Installing
 
