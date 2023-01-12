@@ -28,9 +28,11 @@ class LaravelServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        $this->app['events']->listen(ConnectionFailed::class, ConnectionFailedListener::class);
-        $this->app['events']->listen(RequestSending::class, RequestSendingListener::class);
-        $this->app['events']->listen(ResponseReceived::class, ResponseReceivedListener::class);
+        if ($this->app['config']->get('crawler.debug',false)) {
+            $this->app['events']->listen(ConnectionFailed::class, ConnectionFailedListener::class);
+            $this->app['events']->listen(RequestSending::class, RequestSendingListener::class);
+            $this->app['events']->listen(ResponseReceived::class, ResponseReceivedListener::class);
+        }
     }
 
     protected function setupConfig()
