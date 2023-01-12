@@ -39,10 +39,10 @@ STR;
         $crawler = Crawler::new($this->html);
 
         $rules = [
-            ['.tt','outerHtml'],
-            ['span','outerHtml','last'],
-            ['p','outerHtml','last'],
-            ['a','outerHtml'],
+            ['.tt', 'outerHtml'],
+            ['span', 'outerHtml', 'last'],
+            ['p', 'outerHtml', 'last'],
+            ['a', 'outerHtml'],
         ];
 
         // ['.tt', 'span' => 'last', 'p' => 'last', 'a']
