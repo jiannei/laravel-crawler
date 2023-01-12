@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Log;
 
 class ResponseReceivedListener
 {
-    public function handle(ResponseReceived $event)
+    public function handle(ResponseReceived $event): void
     {
         $request = Message::toString($event->request->toPsrRequest());
         $response = Message::toString($event->response->toPsrResponse());

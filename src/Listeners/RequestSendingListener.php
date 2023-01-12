@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Log;
 
 class RequestSendingListener
 {
-    public function handle(RequestSending $event)
+    public function handle(RequestSending $event): void
     {
         $request = Message::toString($event->request->toPsrRequest());
 

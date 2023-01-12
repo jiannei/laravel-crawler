@@ -32,8 +32,9 @@ class Crawler extends SymfonyCrawler
     /**
      * 获取远程html后构建爬虫对象
      *
-     * @param array|string|null $query
-     *
+     * @param  string  $url
+     * @param  array|string|null  $query
+     * @param  array  $options
      * @return $this
      */
     public function fetch(string $url, array|string|null $query = null, array $options = []): static

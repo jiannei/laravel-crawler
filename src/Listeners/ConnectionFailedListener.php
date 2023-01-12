@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Log;
 
 class ConnectionFailedListener
 {
-    public function handle(ConnectionFailed $event)
+    public function handle(ConnectionFailed $event): void
     {
         $request = Message::toString($event->request->toPsrRequest());
 
