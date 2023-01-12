@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Facade as IlluminateFacade;
 
 /**
  * @method static \Jiannei\LaravelCrawler\Crawler new(\DOMNodeList|\DOMNode|array|string $node = null, string $uri = null, string $baseHref = null)
- * @method static \Jiannei\LaravelCrawler\Crawler fetch(string $url, array|string|null $query = null)
+ * @method static \Jiannei\LaravelCrawler\Crawler fetch(string $url, array|string|null $query = null,array $options = [])
  *
  * @see \Jiannei\LaravelCrawler\Crawler
  */
