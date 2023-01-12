@@ -32,9 +32,8 @@ class Crawler extends SymfonyCrawler
     /**
      * 获取远程html后构建爬虫对象
      *
-     * @param  string  $url
-     * @param  array|string|null  $query
-     * @param  array  $options
+     * @param array|string|null $query
+     *
      * @return $this
      */
     public function fetch(string $url, array|string|null $query = null, array $options = []): static
@@ -52,9 +51,6 @@ class Crawler extends SymfonyCrawler
 
     /**
      * 获取元素的属性值
-     *
-     * @param  string|array  $attribute
-     * @return array
      */
     public function attrs(string|array $attribute): array
     {
@@ -62,9 +58,7 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 获取元素的文本内容
-     *
-     * @return array
+     * 获取元素的文本内容.
      */
     public function texts(): array
     {
@@ -74,9 +68,7 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 获取元素自身html
-     *
-     * @return array
+     * 获取元素自身html.
      */
     public function htmls(): array
     {
@@ -86,10 +78,7 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 按规则批量解析元素
-     *
-     * @param  array  $rules
-     * @return array
+     * 按规则批量解析元素.
      */
     public function rules(array $rules): array
     {
@@ -134,10 +123,7 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 移除元素
-     *
-     * @param  string|array  $patterns
-     * @return string
+     * 移除元素.
      */
     public function remove(string|array $patterns): string
     {
