@@ -39,10 +39,10 @@ class Crawler extends SymfonyCrawler
      */
     public function fetch(string $url, array|string|null $query = null, array $options = []): static
     {
-        $options = array_merge(config('crawler.http.options', []),$options);
+        $options = array_merge(config('crawler.guzzle.options', []),$options);
         if (config('crawler.debug', false) && !isset($options['debug'])) {
             $suffix = Carbon::now()->format('Y-m-d');
-            $options['debug'] = fopen(storage_path("logs/crawler-{$suffix}.log"), 'a+');
+            $options['debug'] = fopen(storage_path("logs/guzzle-{$suffix}.log"), 'a+');
         }
 
         $html = Http::withOptions($options)->get(...func_get_args())->body();

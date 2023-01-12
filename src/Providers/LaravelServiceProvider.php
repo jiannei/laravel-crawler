@@ -11,7 +11,13 @@
 
 namespace Jiannei\LaravelCrawler\Providers;
 
+use Illuminate\Http\Client\Events\ConnectionFailed;
+use Illuminate\Http\Client\Events\RequestSending;
+use Illuminate\Http\Client\Events\ResponseReceived;
 use Illuminate\Support\ServiceProvider;
+use Jiannei\LaravelCrawler\Listeners\ConnectionFailedListener;
+use Jiannei\LaravelCrawler\Listeners\RequestSendingListener;
+use Jiannei\LaravelCrawler\Listeners\ResponseReceivedListener;
 
 class LaravelServiceProvider extends ServiceProvider
 {
@@ -22,6 +28,9 @@ class LaravelServiceProvider extends ServiceProvider
 
     public function boot()
     {
+        $this->app['events']->listen(ConnectionFailed::class, ConnectionFailedListener::class);
+        $this->app['events']->listen(RequestSending::class, RequestSendingListener::class);
+        $this->app['events']->listen(ResponseReceived::class, ResponseReceivedListener::class);
     }
 
     protected function setupConfig()
@@ -33,5 +42,7 @@ class LaravelServiceProvider extends ServiceProvider
         }
 
         $this->mergeConfigFrom($path, 'crawler');
+
+        $this->app['config']->set('logging.channels.crawler',$this->app['config']->get('crawler.log'));
     }
 }
