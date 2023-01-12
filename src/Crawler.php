@@ -12,6 +12,7 @@
 namespace Jiannei\LaravelCrawler;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Symfony\Component\DomCrawler\Crawler as SymfonyCrawler;
@@ -38,7 +39,13 @@ class Crawler extends SymfonyCrawler
      */
     public function fetch(string $url, array|string|null $query = null): static
     {
-        $html = Http::withOptions(config('crawler.http.options', []))->get(...func_get_args())->body();
+        $options = config('crawler.http.options', []);
+        if (config('crawler.debug',false) && !isset($options['debug'])) {
+            $suffix = Carbon::now()->format('Y-m-d');
+            $options['debug'] = fopen(storage_path("logs/crawler-{$suffix}.log"),'a+');
+        }
+
+        $html = Http::withOptions($options)->get(...func_get_args())->body();
 
         return $this->new($html);
     }
