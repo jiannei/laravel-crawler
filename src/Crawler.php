@@ -32,8 +32,9 @@ class Crawler extends SymfonyCrawler
     /**
      * 获取远程html后构建爬虫对象
      *
-     * @param array|string|null $query
-     *
+     * @param  string  $url
+     * @param  array|string|null  $query
+     * @param  array  $options
      * @return $this
      */
     public function fetch(string $url, array|string|null $query = null, array $options = []): static
@@ -51,6 +52,9 @@ class Crawler extends SymfonyCrawler
 
     /**
      * 获取元素的属性值
+     *
+     * @param  string|array  $attribute
+     * @return array
      */
     public function attrs(string|array $attribute): array
     {
@@ -58,7 +62,9 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 获取多元素的文本内容.
+     * 获取元素的文本内容
+     *
+     * @return array
      */
     public function texts(): array
     {
@@ -68,7 +74,9 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 获取多元素自身html.
+     * 获取元素自身html
+     *
+     * @return array
      */
     public function htmls(): array
     {
@@ -78,7 +86,10 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 组合式获取内容.
+     * 按规则批量解析元素
+     *
+     * @param  array  $rules
+     * @return array
      */
     public function rules(array $rules): array
     {
@@ -123,7 +134,10 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 移除指定元素.
+     * 移除元素
+     *
+     * @param  string|array  $patterns
+     * @return string
      */
     public function remove(string|array $patterns): string
     {
@@ -142,20 +156,5 @@ class Crawler extends SymfonyCrawler
         ]*/
 
         return $html;
-    }
-
-    /**
-     * 移除/替换/追加操作规则解析.
-     */
-    protected function patternToRule(string|array $patterns): array
-    {
-        $patterns = Arr::wrap($patterns);
-
-        $rules = [];
-        foreach ($patterns as $index => $pattern) {
-            $rules[] = is_numeric($index) ? [$pattern, 'outerHtml', null] : [$index, 'outerHtml', $pattern];
-        }
-
-        return $rules;
     }
 }
