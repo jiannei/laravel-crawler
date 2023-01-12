@@ -32,14 +32,13 @@ class Crawler extends SymfonyCrawler
     /**
      * 获取远程html后构建爬虫对象
      *
-     * @param  string  $url
-     * @param  array|string|null  $query
-     * @param  array  $options
+     * @param array|string|null $query
+     *
      * @return $this
      */
     public function fetch(string $url, array|string|null $query = null, array $options = []): static
     {
-        $options = array_merge(config('crawler.guzzle.options', []),$options);
+        $options = array_merge(config('crawler.guzzle.options', []), $options);
         if (config('crawler.debug', false) && !isset($options['debug'])) {
             $suffix = Carbon::now()->format('Y-m-d');
             $options['debug'] = fopen(storage_path("logs/guzzle-{$suffix}.log"), 'a+');
@@ -93,7 +92,7 @@ class Crawler extends SymfonyCrawler
                     throw new \InvalidArgumentException("The [$field] rule is invalid.");
                 }
 
-                @list($selector,$attribute,$position) = $rule;
+                @list($selector, $attribute, $position) = $rule;
 
                 $element = $node->filter($selector);
 
@@ -102,10 +101,10 @@ class Crawler extends SymfonyCrawler
                     continue;
                 }
 
-                if ($position === 'first') {
+                if ('first' === $position) {
                     $position = 0;
-                } elseif ($position === 'last') {
-                    $position =  $element->count() - 1;
+                } elseif ('last' === $position) {
+                    $position = $element->count() - 1;
                 }
 
                 if (!is_null($position)) {
@@ -114,7 +113,7 @@ class Crawler extends SymfonyCrawler
 
                 if (in_array($attribute, ['text', 'html', 'outerHtml'])) {
                     $item[$field] = $element->$attribute();
-                }else{
+                } else {
                     $item[$field] = $element->attr($attribute);
                 }
             }
@@ -147,9 +146,6 @@ class Crawler extends SymfonyCrawler
 
     /**
      * 移除/替换/追加操作规则解析.
-     *
-     * @param  string|array  $patterns
-     * @return array
      */
     protected function patternToRule(string|array $patterns): array
     {
@@ -157,7 +153,7 @@ class Crawler extends SymfonyCrawler
 
         $rules = [];
         foreach ($patterns as $index => $pattern) {
-            $rules[] = is_numeric($index) ? [$pattern, 'outerHtml',null] : [$index, 'outerHtml',$pattern];
+            $rules[] = is_numeric($index) ? [$pattern, 'outerHtml', null] : [$index, 'outerHtml', $pattern];
         }
 
         return $rules;

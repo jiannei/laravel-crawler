@@ -43,6 +43,6 @@ class LaravelServiceProvider extends ServiceProvider
 
         $this->mergeConfigFrom($path, 'crawler');
 
-        $this->app['config']->set('logging.channels.crawler',$this->app['config']->get('crawler.log'));
+        $this->app['config']->set('logging.channels.crawler', $this->app['config']->get('crawler.log'));
     }
 }
