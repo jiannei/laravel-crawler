@@ -12,7 +12,6 @@
 namespace Jiannei\LaravelCrawler;
 
 use Illuminate\Support\Arr;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Symfony\Component\DomCrawler\Crawler as SymfonyCrawler;
@@ -30,23 +29,30 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
+     * Http Client
+     *
+     * @param  array  $options
+     * @return \Illuminate\Http\Client\PendingRequest
+     */
+    public function client(array $options = [])
+    {
+        $options = array_merge(config('crawler.guzzle.options', []), $options);
+
+        return Http::throw()->withOptions($options);
+    }
+
+    /**
      * 获取远程html后构建爬虫对象
      *
-     * @param array|string|null $query
+     * @param  array|string|null  $query
      *
      * @return $this
      */
     public function fetch(string $url, array|string|null $query = null, array $options = []): static
     {
-        $options = array_merge(config('crawler.guzzle.options', []), $options);
-        if (config('crawler.debug', false) && !isset($options['debug'])) {
-            $suffix = Carbon::now()->format('Y-m-d');
-            $options['debug'] = fopen(storage_path("logs/guzzle-{$suffix}.log"), 'a+');
-        }
+        $response = $this->client($options)->get($url,$query);
 
-        $html = Http::withOptions($options)->get(...func_get_args())->body();
-
-        return $this->new($html);
+        return $this->new($response->body());
     }
 
     /**

@@ -9,8 +9,10 @@
  * with this source code in the file LICENSE.
  */
 
+// $suffix = now()->format('Y-m-d')
+
 return [
-    'debug' => false, // guzzle debug
+    'debug' => false, // http client debug
 
     'log' => [
         'driver' => 'daily',
@@ -22,6 +24,7 @@ return [
     'guzzle' => [
         // https://docs.guzzlephp.org/en/stable/request-options.html
         'options' => [
+            'debug' => false, // fopen(storage_path("logs/guzzle-{$suffix}.log"), 'a+')
             'connect_timeout' => 10,
             'http_errors' => false,
             'timeout' => 30,
