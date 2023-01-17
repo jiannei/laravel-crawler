@@ -29,9 +29,8 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * Http Client
+     * Http Client.
      *
-     * @param  array  $options
      * @return \Illuminate\Http\Client\PendingRequest
      */
     public function client(array $options = [])
@@ -44,13 +43,13 @@ class Crawler extends SymfonyCrawler
     /**
      * 获取远程html后构建爬虫对象
      *
-     * @param  array|string|null  $query
+     * @param array|string|null $query
      *
      * @return $this
      */
     public function fetch(string $url, array|string|null $query = null, array $options = []): static
     {
-        $response = $this->client($options)->get($url,$query);
+        $response = $this->client($options)->get($url, $query);
 
         return $this->new($response->body());
     }
