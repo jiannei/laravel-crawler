@@ -102,7 +102,7 @@ class FetchTest extends TestCase
             }],
         ]);
 
-        $this->assertEquals(Str::limit($content,120), $result['content']);
+        $this->assertEquals(Str::limit($content, 120), $result['content']);
         $this->assertEquals($title, $result['title']);
         $this->assertEquals($author, $result['author']);
     }
