@@ -30,7 +30,7 @@ class GithubTrendingTest extends TestCase
             'added_stars' => ['div.f6.color-fg-muted.mt-2 > span.d-inline-block.float-sm-right', 'text'],
         ];
 
-        $trending = $crawler->filter('article')->rules($rules);
+        $trending = $crawler->filter('article')->list($rules);
 
         $this->assertIsArray($trending);
     }

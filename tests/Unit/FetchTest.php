@@ -11,6 +11,7 @@
 
 namespace Jiannei\LaravelCrawler\Tests\Unit;
 
+use Illuminate\Support\Str;
 use Jiannei\LaravelCrawler\Support\Facades\Crawler;
 use Jiannei\LaravelCrawler\Tests\TestCase;
 
@@ -22,21 +23,23 @@ class FetchTest extends TestCase
 
         $title = $crawler->filter('h1')->text();
         $author = $crawler->filter('#author_baidu>strong')->text();
-        $content = $crawler->filter('.post_content')->html();
+        $content = $crawler->filter('.post_content')->text();
 
-        $this->assertEquals('巴基斯坦一城镇温度达50.2度：创下全球4月历史温度新高', $title);
-        $this->assertEquals('白猫', $author);
-    }
-
-    public function testRules()
-    {
-        $crawler = Crawler::fetch('https://www.ithome.com/html/discovery/358585.htm');
-
-        $rules = [
+        // 等价于
+        $result = $crawler->multi([
             'title' => ['h1', 'text'],
             'author' => ['#author_baidu>strong', 'text'],
-            'content' => ['.post_content', 'html'],
-        ];
+            'content' => ['.post_content', 'text'],
+        ]);
+
+        $this->assertEquals($title, $result['title']);
+        $this->assertEquals($author, $result['author']);
+        $this->assertEquals($content, $result['content']);
+    }
+
+    public function testList()
+    {
+        $crawler = Crawler::fetch('https://www.ithome.com/html/discovery/358585.htm');
 
         // 解析文章详情
         $article = [
@@ -46,12 +49,16 @@ class FetchTest extends TestCase
         ];
 
         // 等价于
-        $article2 = $crawler->rules($rules);
+        $article2 = $crawler->multi([
+            'title' => ['h1', 'text'],
+            'author' => ['#author_baidu>strong', 'text'],
+            'content' => ['.post_content', 'html'],
+        ]);
 
-        $this->assertEquals($article, $article2[0]);
+        $this->assertEquals($article, $article2);
     }
 
-    public function testRulesAdvanced()
+    public function testListAdvanced()
     {
         $crawler = Crawler::fetch('https://it.ithome.com/ityejie');
 
@@ -73,8 +80,30 @@ class FetchTest extends TestCase
         });
 
         // 等价于
-        $articles2 = $crawler->filter('.bl li')->rules($rules);
+        $articles2 = $crawler->filter('.bl li')->list($rules);
 
         $this->assertEquals($articles, $articles2);
+    }
+
+    public function testTransformResult()
+    {
+        $crawler = Crawler::fetch('https://www.ithome.com/html/discovery/358585.htm');
+
+        $title = $crawler->filter('h1')->text();
+        $author = $crawler->filter('#author_baidu>strong')->text();
+        $content = $crawler->filter('.post_content')->text();
+
+        // 等价于
+        $result = $crawler->multi([
+            'title' => ['h1', 'text'],
+            'author' => ['#author_baidu>strong', 'text'],
+            'content' => ['.post_content', 'text', null, function (\Symfony\Component\DomCrawler\Crawler $crawler, \Illuminate\Support\Stringable $value) {
+                return $value->limit(120);
+            }],
+        ]);
+
+        $this->assertEquals(Str::limit($content,120), $result['content']);
+        $this->assertEquals($title, $result['title']);
+        $this->assertEquals($author, $result['author']);
     }
 }

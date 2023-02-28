@@ -83,44 +83,62 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 按规则批量解析元素.
+     * 解析单个元素.
      */
-    public function rules(array $rules): array
+    public function single(array $rule, SymfonyCrawler $node = null): ?string
+    {
+        @list($selector, $attribute, $position, $closure) = $rule;
+
+        $crawler = $node ?? $this;
+
+        $element = $crawler->filter($selector);
+        if (!$element->count()) {
+            return null;
+        }
+
+        if ('first' === $position) {
+            $position = 0;
+        } elseif ('last' === $position) {
+            $position = $element->count() - 1;
+        }
+
+        if (!is_null($position)) {
+            $element = $element->eq($position);
+        }
+
+        if (in_array($attribute, ['text', 'html', 'outerHtml'])) {
+            $result = $element->$attribute();
+        } else {
+            $result = $element->attr($attribute);
+        }
+
+        return is_callable($closure) ? $closure($crawler, Str::of($result)) : $result;
+    }
+
+    /**
+     * 解析多个元素.
+     */
+    public function multi(array $rules): array
+    {
+        return head($this->list($rules));
+    }
+
+    /**
+     * 解析多个重复元素（列表元素）.
+     */
+    public function list(array $rules): array
     {
         return $this->each(function (SymfonyCrawler $node) use ($rules) {
             $item = [];
             foreach ($rules as $field => $rule) {
                 // [selector,attribute, pseudo-class]
-                // [selector,attribute, position]
+                // [selector,attribute, position,callback]
 
                 if (!is_array($rule) || count($rule) < 2) {
                     throw new \InvalidArgumentException("The [$field] rule is invalid.");
                 }
 
-                @list($selector, $attribute, $position) = $rule;
-
-                $element = $node->filter($selector);
-
-                $item[$field] = null;
-                if (!$element->count()) {
-                    continue;
-                }
-
-                if ('first' === $position) {
-                    $position = 0;
-                } elseif ('last' === $position) {
-                    $position = $element->count() - 1;
-                }
-
-                if (!is_null($position)) {
-                    $element = $element->eq($position);
-                }
-
-                if (in_array($attribute, ['text', 'html', 'outerHtml'])) {
-                    $item[$field] = $element->$attribute();
-                } else {
-                    $item[$field] = $element->attr($attribute);
-                }
+                $item[$field] = $this->single($rule, $node);
             }
 
             return $item;
@@ -133,7 +151,7 @@ class Crawler extends SymfonyCrawler
     public function remove(string|array $patterns): string
     {
         $html = $this->html();
-        foreach ($this->rules($patterns) as $items) {
+        foreach ($this->list($patterns) as $items) {
             $html = Str::remove($items, $html);
         }
 
