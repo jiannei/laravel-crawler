@@ -62,12 +62,25 @@ class Crawler extends SymfonyCrawler
     /**
      * 更简洁的爬取方式.
      */
-    public function pattern(array $pattern): array|Collection
+    public function pattern(array $pattern,string|array $fields = ''): array|Collection
     {
         $crawler = $this->fetch($pattern['url'], $pattern['query'] ?? '', $pattern['options'] ?? []);
-        $group = $pattern['group'] ?? false;
+        $group = $pattern['group'] ?? [];
 
-        return false !== $group ? $crawler->group($group)->parse($pattern['rules']) : $crawler->parse($pattern['rules']);
+        $data = collect();
+        if ($group) {
+            foreach (Arr::wrap($group) as $selector => $rules) {
+                $value = !is_string($selector) ?
+                    $crawler->group($rules)->parse($pattern['rules']) :
+                    $crawler->group($selector)->parse($rules);
+
+                $data->offsetSet($selector,$value);
+            }
+        }else{
+            $data->push($crawler->parse($pattern['rules']));
+        }
+
+        return (is_string($group) || empty($group)) ? $data->first() : collect(Arr::wrap($fields))->combine($data->all());
     }
 
     /**
