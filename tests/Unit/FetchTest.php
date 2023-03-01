@@ -30,7 +30,7 @@ class FetchTest extends TestCase
             'title' => ['h1', 'text'],
             'author' => ['#author_baidu>strong', 'text'],
             'content' => ['.post_content', 'text'],
-        ])->first();
+        ]);
 
         $this->assertEquals($title, $result['title']);
         $this->assertEquals($author, $result['author']);
@@ -53,7 +53,7 @@ class FetchTest extends TestCase
             'title' => ['h1', 'text'],
             'author' => ['#author_baidu>strong', 'text'],
             'content' => ['.post_content', 'html'],
-        ])->first();
+        ]);
 
         $this->assertEquals($article, $article2);
     }
@@ -61,13 +61,6 @@ class FetchTest extends TestCase
     public function testListAdvanced()
     {
         $crawler = Crawler::fetch('https://it.ithome.com/ityejie');
-
-        $rules = [
-            'title' => ['h2>a', 'text'],
-            'link' => ['h2>a', 'href'],
-            'img' => ['a>img', 'src'],
-            'desc' => ['.m', 'text'],
-        ];
 
         // 解析文章列表
         $articles = $crawler->filter('.bl li')->each(function ($node) {
@@ -80,7 +73,12 @@ class FetchTest extends TestCase
         });
 
         // 等价于
-        $articles2 = $crawler->filter('.bl li')->parse($rules)->all();
+        $articles2 = $crawler->group('.bl li')->parse([
+            'title' => ['h2>a', 'text'],
+            'link' => ['h2>a', 'href'],
+            'img' => ['a>img', 'src'],
+            'desc' => ['.m', 'text'],
+        ])->all();
 
         $this->assertEquals($articles, $articles2);
     }
@@ -100,7 +98,7 @@ class FetchTest extends TestCase
             'content' => ['.post_content', 'text', null, function (\Symfony\Component\DomCrawler\Crawler $crawler, \Illuminate\Support\Stringable $value) {
                 return $value->limit(120);
             }],
-        ])->first();
+        ]);
 
         $this->assertEquals(Str::limit($content, 120), $result['content']);
         $this->assertEquals($title, $result['title']);

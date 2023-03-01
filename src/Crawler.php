@@ -19,6 +19,8 @@ use Symfony\Component\DomCrawler\Crawler as SymfonyCrawler;
 
 class Crawler extends SymfonyCrawler
 {
+    private static bool $groupped = false;
+
     /**
      * 构建一个新的爬虫对象
      *
@@ -50,6 +52,8 @@ class Crawler extends SymfonyCrawler
      */
     public function fetch(string $url, array|string|null $query = null, array $options = []): static
     {
+        $this->setGroupFlag(false);
+
         $response = $this->client($options)->get($url, $query);
 
         return $this->new($response->body());
@@ -84,11 +88,21 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
+     * 规则分组.
+     */
+    public function group(string $selector): static
+    {
+        $this->setGroupFlag(true);
+
+        return $this->filter($selector);
+    }
+
+    /**
      * 解析多个元素.
      */
-    public function parse(array $rules): Collection
+    public function parse(array $rules): array|Collection
     {
-        return collect($this->each(function (SymfonyCrawler $node) use ($rules) {
+        $data = $this->each(function (SymfonyCrawler $node) use ($rules) {
             $item = [];
             foreach ($rules as $field => $rule) {
                 if (is_string($rule)) {
@@ -104,7 +118,9 @@ class Crawler extends SymfonyCrawler
             }
 
             return $item;
-        }));
+        });
+
+        return $this->getGroupFlag() ? collect($data) : head($data);
     }
 
     /**
@@ -161,5 +177,21 @@ class Crawler extends SymfonyCrawler
         }
 
         return is_callable($closure) ? $closure($crawler, Str::of($result)) : $result;
+    }
+
+    /**
+     * 设置规则分组标识.
+     */
+    protected function setGroupFlag(bool $flag): void
+    {
+        self::$groupped = $flag;
+    }
+
+    /**
+     * 获取规则分组标识.
+     */
+    protected function getGroupFlag(): bool
+    {
+        return self::$groupped;
     }
 }
