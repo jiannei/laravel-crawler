@@ -100,9 +100,7 @@ class Crawler extends SymfonyCrawler
                     throw new \InvalidArgumentException("The [$field] rule is invalid.");
                 }
 
-                $parsed = $this->parseRule($rule, $node);
-
-                Arr::set($item, $field, count($parsed) > 1 ? $parsed : head($parsed));
+                Arr::set($item, $field, $this->parseRule($rule, $node));
             }
 
             return $item;
@@ -134,33 +132,34 @@ class Crawler extends SymfonyCrawler
     /**
      * 根据规则解析元素.
      */
-    protected function parseRule(array $rule, SymfonyCrawler $node = null): array
+    protected function parseRule(array $rule, SymfonyCrawler $node = null): ?string
     {
         // [selector,attribute, position,callback]
         @list($selector, $attribute, $position, $closure) = $rule;
 
         $crawler = $node ?? $this;
 
-        $elements = $crawler->filter($selector);
+        $element = $crawler->filter($selector);
+        if (!$element->count()) {
+            return null;
+        }
 
         if ('first' === $position) {
             $position = 0;
         } elseif ('last' === $position) {
-            $position = $elements->count() - 1;
+            $position = $element->count() - 1;
         }
 
         if (!is_null($position)) {
-            $elements = $elements->eq($position);
+            $element = $element->eq($position);
         }
 
-        return $elements->each(function (SymfonyCrawler $node,$i) use ($crawler,$position, $attribute, $closure) {
-            if (in_array($attribute, ['text', 'html', 'outerHtml'])) {
-                $result = $node->$attribute();
-            } else {
-                $result = $node->attr($attribute);
-            }
+        if (in_array($attribute, ['text', 'html', 'outerHtml'])) {
+            $result = $element->$attribute();
+        } else {
+            $result = $element->attr($attribute);
+        }
 
-            return is_callable($closure) ? $closure($crawler, Str::of($result)) : $result;
-        });
+        return is_callable($closure) ? $closure($crawler, Str::of($result)) : $result;
     }
 }
