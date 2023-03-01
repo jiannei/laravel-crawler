@@ -19,7 +19,7 @@ use Symfony\Component\DomCrawler\Crawler as SymfonyCrawler;
 
 class Crawler extends SymfonyCrawler
 {
-    private static bool $groupped = false;
+    private static bool $grouped = false;
 
     /**
      * 构建一个新的爬虫对象
@@ -208,7 +208,7 @@ class Crawler extends SymfonyCrawler
      */
     protected function setGroupFlag(bool $flag): void
     {
-        self::$groupped = $flag;
+        self::$grouped = $flag;
     }
 
     /**
@@ -216,6 +216,6 @@ class Crawler extends SymfonyCrawler
      */
     protected function getGroupFlag(): bool
     {
-        return self::$groupped;
+        return self::$grouped;
     }
 }
