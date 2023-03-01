@@ -62,7 +62,7 @@ class Crawler extends SymfonyCrawler
     /**
      * 更简洁的爬取方式.
      */
-    public function pattern(array $pattern,string|array $fields = ''): array|Collection
+    public function pattern(array $pattern, string|array $fields = ''): array|Collection
     {
         $crawler = $this->fetch($pattern['url'], $pattern['query'] ?? '', $pattern['options'] ?? []);
         $group = $pattern['group'] ?? [];
@@ -74,9 +74,9 @@ class Crawler extends SymfonyCrawler
                     $crawler->group($rules)->parse($pattern['rules']) :
                     $crawler->group($selector)->parse($rules);
 
-                $data->offsetSet($selector,$value);
+                $data->offsetSet($selector, $value);
             }
-        }else{
+        } else {
             $data->push($crawler->parse($pattern['rules']));
         }
 
