@@ -26,11 +26,11 @@ class FetchTest extends TestCase
         $content = $crawler->filter('.post_content')->text();
 
         // 等价于
-        $result = $crawler->multi([
+        $result = $crawler->parse([
             'title' => ['h1', 'text'],
             'author' => ['#author_baidu>strong', 'text'],
             'content' => ['.post_content', 'text'],
-        ]);
+        ])->first();
 
         $this->assertEquals($title, $result['title']);
         $this->assertEquals($author, $result['author']);
@@ -49,11 +49,11 @@ class FetchTest extends TestCase
         ];
 
         // 等价于
-        $article2 = $crawler->multi([
+        $article2 = $crawler->parse([
             'title' => ['h1', 'text'],
             'author' => ['#author_baidu>strong', 'text'],
             'content' => ['.post_content', 'html'],
-        ]);
+        ])->first();
 
         $this->assertEquals($article, $article2);
     }
@@ -80,7 +80,7 @@ class FetchTest extends TestCase
         });
 
         // 等价于
-        $articles2 = $crawler->filter('.bl li')->list($rules);
+        $articles2 = $crawler->filter('.bl li')->parse($rules)->all();
 
         $this->assertEquals($articles, $articles2);
     }
@@ -94,13 +94,13 @@ class FetchTest extends TestCase
         $content = $crawler->filter('.post_content')->text();
 
         // 等价于
-        $result = $crawler->multi([
+        $result = $crawler->parse([
             'title' => ['h1', 'text'],
             'author' => ['#author_baidu>strong', 'text'],
             'content' => ['.post_content', 'text', null, function (\Symfony\Component\DomCrawler\Crawler $crawler, \Illuminate\Support\Stringable $value) {
                 return $value->limit(120);
             }],
-        ]);
+        ])->first();
 
         $this->assertEquals(Str::limit($content, 120), $result['content']);
         $this->assertEquals($title, $result['title']);

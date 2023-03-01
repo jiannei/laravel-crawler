@@ -12,6 +12,7 @@
 namespace Jiannei\LaravelCrawler;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Symfony\Component\DomCrawler\Crawler as SymfonyCrawler;
@@ -83,10 +84,57 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 解析单个元素.
+     * 解析多个元素.
      */
-    public function single(array $rule, SymfonyCrawler $node = null): ?string
+    public function parse(array $rules): Collection
     {
+        return collect($this->each(function (SymfonyCrawler $node) use ($rules) {
+            $item = [];
+            foreach ($rules as $field => $rule) {
+                if (is_string($rule)) {
+                    Arr::set($item, $field, $rule);
+                    continue;
+                }
+
+                if (!is_array($rule) || count($rule) < 2) {
+                    throw new \InvalidArgumentException("The [$field] rule is invalid.");
+                }
+
+                Arr::set($item, $field, $this->parseRule($rule, $node));
+            }
+
+            return $item;
+        }));
+    }
+
+    /**
+     * 移除元素.
+     */
+    public function remove(string|array $rules): string
+    {
+        $html = $this->html();
+        foreach ($this->parse($rules) as $items) {
+            $html = Str::remove($items, $html);
+        }
+
+        // TODO 连贯操作 rules()->remove()
+        // TODO 移除指定元素属性、元素文本内容(removeHtml/removeText/removeAttr)
+        /*[
+            '.tt' => Element::TEXT,
+            'span:last' => Element::HTML,
+            'p:last' => Element::HTML,
+            'a' => ['href']
+        ]*/
+
+        return $html;
+    }
+
+    /**
+     * 根据规则解析元素.
+     */
+    protected function parseRule(array $rule, SymfonyCrawler $node = null): ?string
+    {
+        // [selector,attribute, position,callback]
         @list($selector, $attribute, $position, $closure) = $rule;
 
         $crawler = $node ?? $this;
@@ -113,57 +161,5 @@ class Crawler extends SymfonyCrawler
         }
 
         return is_callable($closure) ? $closure($crawler, Str::of($result)) : $result;
-    }
-
-    /**
-     * 解析多个元素.
-     */
-    public function multi(array $rules): array
-    {
-        return head($this->list($rules));
-    }
-
-    /**
-     * 解析多个重复元素（列表元素）.
-     */
-    public function list(array $rules): array
-    {
-        return $this->each(function (SymfonyCrawler $node) use ($rules) {
-            $item = [];
-            foreach ($rules as $field => $rule) {
-                // [selector,attribute, pseudo-class]
-                // [selector,attribute, position,callback]
-
-                if (!is_array($rule) || count($rule) < 2) {
-                    throw new \InvalidArgumentException("The [$field] rule is invalid.");
-                }
-
-                $item[$field] = $this->single($rule, $node);
-            }
-
-            return $item;
-        });
-    }
-
-    /**
-     * 移除元素.
-     */
-    public function remove(string|array $patterns): string
-    {
-        $html = $this->html();
-        foreach ($this->list($patterns) as $items) {
-            $html = Str::remove($items, $html);
-        }
-
-        // TODO 连贯操作 rules()->remove()
-        // TODO 移除指定元素属性、元素文本内容(removeHtml/removeText/removeAttr)
-        /*[
-            '.tt' => Element::TEXT,
-            'span:last' => Element::HTML,
-            'p:last' => Element::HTML,
-            'a' => ['href']
-        ]*/
-
-        return $html;
     }
 }
