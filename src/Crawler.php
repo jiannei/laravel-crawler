@@ -60,7 +60,18 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 获取元素的属性值
+     * 更简洁的爬取方式.
+     */
+    public function pattern(array $pattern): array|Collection
+    {
+        $crawler = $this->fetch($pattern['url'], $pattern['query'] ?? '', $pattern['options'] ?? []);
+        $group = $pattern['group'] ?? false;
+
+        return false !== $group ? $crawler->group($group)->parse($pattern['rules']) : $crawler->parse($pattern['rules']);
+    }
+
+    /**
+     * 获取元素的属性值.
      */
     public function attrs(string|array $attribute): array
     {
