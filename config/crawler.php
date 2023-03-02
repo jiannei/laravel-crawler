@@ -35,4 +35,13 @@ return [
             ],
         ],
     ],
+
+    'chrome' => [
+        'server_url' => 'http://localhost:4444',
+        'arguments' => ['--headless'],
+        'wait' => [
+            'timeout_in_second' => 30,
+            'interval_in_millisecond' => 250,
+        ],
+    ],
 ];

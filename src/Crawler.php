@@ -11,6 +11,11 @@
 
 namespace Jiannei\LaravelCrawler;
 
+use Facebook\WebDriver\Chrome\ChromeOptions;
+use Facebook\WebDriver\Remote\DesiredCapabilities;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\WebDriverExpectedCondition;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
@@ -145,6 +150,39 @@ class Crawler extends SymfonyCrawler
         });
 
         return $this->getGroupFlag() ? collect($data) : head($data);
+    }
+
+    /**
+     * 获取JS渲染页面.
+     *
+     * @return $this
+     *
+     * @throws \Facebook\WebDriver\Exception\NoSuchElementException
+     * @throws \Facebook\WebDriver\Exception\TimeoutException
+     * @throws \Facebook\WebDriver\Exception\UnsupportedOperationException
+     */
+    public function chrome(string $url, WebDriverExpectedCondition $condition)
+    {
+        $desiredCapabilities = DesiredCapabilities::chrome();
+
+        $chromeOptions = new ChromeOptions();
+        $chromeOptions->addArguments(config('crawler.chrome.arguments'));
+        $desiredCapabilities->setCapability(ChromeOptions::CAPABILITY, $chromeOptions);
+
+        $driver = RemoteWebDriver::create(config('crawler.chrome.server_url'), $desiredCapabilities);
+        $driver->get($url);
+
+        $driver->wait(config('crawler.chrome.wait.timeout_in_second'), config('crawler.chrome.wait.interval_in_millisecond'))->until($condition);
+
+        $element = $driver->findElement(
+            WebDriverBy::cssSelector('html')
+        );
+
+        $html = $element->getDomProperty('innerHTML');
+
+        $driver->quit();
+
+        return $this->new($html);
     }
 
     /**
