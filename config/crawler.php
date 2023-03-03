@@ -48,7 +48,7 @@ return [
         ],
         'log' => [
             'path' => storage_path('logs/crawler-server.log'),
-            'level' => 'INFO',// set log level: ALL, DEBUG, INFO, WARNING, SEVERE, OFF
+            'level' => 'INFO', // set log level: ALL, DEBUG, INFO, WARNING, SEVERE, OFF
         ],
     ],
 ];
