@@ -37,8 +37,11 @@ return [
     ],
 
     'chrome' => [
-        'server_url' => 'http://localhost:4444',
-        'arguments' => ['--headless'],
+        'server' => [
+            'url' => 'http://localhost',
+            'port' => 4444,
+        ],
+        'arguments' => ['--headless', '--disable-gpu'], // https://chromedriver.chromium.org/capabilities
         'wait' => [
             'timeout_in_second' => 30,
             'interval_in_millisecond' => 250,

@@ -163,22 +163,22 @@ class Crawler extends SymfonyCrawler
      */
     public function chrome(string $url, WebDriverExpectedCondition $condition)
     {
+        $driverConfig = config('crawler.chrome');
+
         $desiredCapabilities = DesiredCapabilities::chrome();
 
         $chromeOptions = new ChromeOptions();
-        $chromeOptions->addArguments(config('crawler.chrome.arguments'));
+        $chromeOptions->addArguments(Arr::get($driverConfig, 'arguments'));
         $desiredCapabilities->setCapability(ChromeOptions::CAPABILITY, $chromeOptions);
 
-        $driver = RemoteWebDriver::create(config('crawler.chrome.server_url'), $desiredCapabilities);
+        $serverUrl = Arr::get($driverConfig, 'server.url').':'.Arr::get($driverConfig, 'server.port');
+        $driver = RemoteWebDriver::create($serverUrl, $desiredCapabilities);
         $driver->get($url);
 
-        $driver->wait(config('crawler.chrome.wait.timeout_in_second'), config('crawler.chrome.wait.interval_in_millisecond'))->until($condition);
+        $driver->wait(Arr::get($driverConfig, 'wait.timeout_in_second'), Arr::get($driverConfig, 'wait.interval_in_millisecond'))
+            ->until($condition);
 
-        $element = $driver->findElement(
-            WebDriverBy::cssSelector('html')
-        );
-
-        $html = $element->getDomProperty('innerHTML');
+        $html = $driver->findElement(WebDriverBy::cssSelector('html'))->getDomProperty('innerHTML');
 
         $driver->quit();
 

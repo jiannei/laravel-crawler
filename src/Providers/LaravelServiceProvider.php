@@ -15,6 +15,7 @@ use Illuminate\Http\Client\Events\ConnectionFailed;
 use Illuminate\Http\Client\Events\RequestSending;
 use Illuminate\Http\Client\Events\ResponseReceived;
 use Illuminate\Support\ServiceProvider;
+use Jiannei\LaravelCrawler\Console\ServerStart;
 use Jiannei\LaravelCrawler\Listeners\ConnectionFailedListener;
 use Jiannei\LaravelCrawler\Listeners\RequestSendingListener;
 use Jiannei\LaravelCrawler\Listeners\ResponseReceivedListener;
@@ -32,6 +33,10 @@ class LaravelServiceProvider extends ServiceProvider
             $this->app['events']->listen(ConnectionFailed::class, ConnectionFailedListener::class);
             $this->app['events']->listen(RequestSending::class, RequestSendingListener::class);
             $this->app['events']->listen(ResponseReceived::class, ResponseReceivedListener::class);
+        }
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([ServerStart::class]);
         }
     }
 
