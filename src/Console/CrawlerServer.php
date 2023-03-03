@@ -23,6 +23,10 @@ class CrawlerServer extends Command
 
     public function handle(): void
     {
+        if ($pid = Process::run('pgrep chromedriver')->output()) {
+            Process::run('kill -9 '.$pid);
+        }
+
         $driverPath = $this->option('path') ?? '';
         if ($driverPath) {
             $driverPath = Str::of($driverPath)->finish(DIRECTORY_SEPARATOR);
