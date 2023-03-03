@@ -14,9 +14,9 @@ namespace Jiannei\LaravelCrawler\Console;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 
-class ServerStart extends Command
+class CrawlerServer extends Command
 {
-    protected $signature = 'crawler:server:start {--path=}';
+    protected $signature = 'crawler:server {--path=}';
 
     protected $description = 'Start a remote end (server)';
 
@@ -24,16 +24,18 @@ class ServerStart extends Command
     {
         $this->info('Server starting...');
 
-        $driverPath = $this->option('path') ?? 'chromedriver';
+        $driverPath = $this->option('path') ?? '';
 
-        $startCommand = $driverPath.' --port='.config('crawler.chrome.port', 4444);
+        $startCommand = $driverPath.'chromedriver --port='.config('crawler.chrome.port', 4444);
 
         $result = Process::run($startCommand);
 
         if ($result->failed()) {
             $this->error($result->errorOutput());
         } else {
-            $this->info('Server started!');
+            $this->info('Server started:');
+            $this->newLine();
+            $this->info($result->output());
         }
     }
 }

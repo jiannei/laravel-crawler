@@ -15,7 +15,7 @@ use Illuminate\Http\Client\Events\ConnectionFailed;
 use Illuminate\Http\Client\Events\RequestSending;
 use Illuminate\Http\Client\Events\ResponseReceived;
 use Illuminate\Support\ServiceProvider;
-use Jiannei\LaravelCrawler\Console\ServerStart;
+use Jiannei\LaravelCrawler\Console\CrawlerServer;
 use Jiannei\LaravelCrawler\Listeners\ConnectionFailedListener;
 use Jiannei\LaravelCrawler\Listeners\RequestSendingListener;
 use Jiannei\LaravelCrawler\Listeners\ResponseReceivedListener;
@@ -36,7 +36,7 @@ class LaravelServiceProvider extends ServiceProvider
         }
 
         if ($this->app->runningInConsole()) {
-            $this->commands([ServerStart::class]);
+            $this->commands([CrawlerServer::class]);
         }
     }
 
