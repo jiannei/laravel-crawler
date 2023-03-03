@@ -46,6 +46,9 @@ class CrawlerServer extends Command
             sleep(1);
         }
 
-        $process->wait();
+        $result = $process->wait();
+        if ($result->failed()) {
+            $this->error($result->errorOutput());
+        }
     }
 }
