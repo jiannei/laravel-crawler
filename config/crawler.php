@@ -46,5 +46,9 @@ return [
             'timeout_in_second' => 30,
             'interval_in_millisecond' => 250,
         ],
+        'log' => [
+            'path' => storage_path('logs/crawler-server.log'),
+            'level' => 'INFO',// set log level: ALL, DEBUG, INFO, WARNING, SEVERE, OFF
+        ],
     ],
 ];
