@@ -67,25 +67,22 @@ class Crawler extends SymfonyCrawler
     /**
      * 更简洁的爬取方式.
      */
-    public function pattern(array $pattern, string|array $fields = ''): array|Collection
+    public function pattern(array $pattern): array|Collection
     {
         $crawler = $this->fetch($pattern['url'], $pattern['query'] ?? '', $pattern['options'] ?? []);
         $group = $pattern['group'] ?? [];
+        $multiGroup = Arr::isList($group);
 
         $data = collect();
         if ($group) {
-            foreach (Arr::wrap($group) as $selector => $rules) {
-                $value = !is_string($selector) ?
-                    $crawler->group($rules)->parse($pattern['rules']) :
-                    $crawler->group($selector)->parse($rules);
-
-                $data->offsetSet($selector, $value);
+            foreach (!$multiGroup ? [$group] : $group as $key => $item) {
+                $data->put($item['alias'] ?? $key, $crawler->group($item['selector'])->parse($item['rules']));
             }
         } else {
             $data->push($crawler->parse($pattern['rules']));
         }
 
-        return (is_string($group) || empty($group)) ? $data->first() : collect(Arr::wrap($fields))->combine($data->all());
+        return (!$multiGroup || empty($group)) ? $data->first() : $data;
     }
 
     /**
@@ -143,7 +140,34 @@ class Crawler extends SymfonyCrawler
                     throw new \InvalidArgumentException("The [$field] rule is invalid.");
                 }
 
-                Arr::set($item, $field, $this->parseRule($rule, $node));
+                // [selector,attribute, position,callback]
+                @list($selector, $attribute, $position, $closure) = $rule;
+
+                $element = $node->filter($selector);
+                if (!$element->count()) {
+                    Arr::set($item, $field, null);
+                    continue;
+                }
+
+                if ('first' === $position) {
+                    $position = 0;
+                } elseif ('last' === $position) {
+                    $position = $element->count() - 1;
+                }
+
+                if (!is_null($position)) {
+                    $element = $element->eq($position);
+                }
+
+                if (in_array($attribute, ['text', 'html', 'outerHtml'])) {
+                    $result = $element->$attribute();
+                } else {
+                    $result = $element->attr($attribute);
+                }
+
+                $result = is_callable($closure) ? $closure($node, Str::of($result)) : $result;
+
+                Arr::set($item, $field, $result);
             }
 
             return $item;
@@ -205,40 +229,6 @@ class Crawler extends SymfonyCrawler
         ]*/
 
         return $html;
-    }
-
-    /**
-     * 根据规则解析元素.
-     */
-    protected function parseRule(array $rule, SymfonyCrawler $node = null): ?string
-    {
-        // [selector,attribute, position,callback]
-        @list($selector, $attribute, $position, $closure) = $rule;
-
-        $crawler = $node ?? $this;
-
-        $element = $crawler->filter($selector);
-        if (!$element->count()) {
-            return null;
-        }
-
-        if ('first' === $position) {
-            $position = 0;
-        } elseif ('last' === $position) {
-            $position = $element->count() - 1;
-        }
-
-        if (!is_null($position)) {
-            $element = $element->eq($position);
-        }
-
-        if (in_array($attribute, ['text', 'html', 'outerHtml'])) {
-            $result = $element->$attribute();
-        } else {
-            $result = $element->attr($attribute);
-        }
-
-        return is_callable($closure) ? $closure($crawler, Str::of($result)) : $result;
     }
 
     /**
