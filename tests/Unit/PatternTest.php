@@ -1,17 +1,9 @@
 <?php
 
-/*
- * This file is part of the jiannei/laravel-crawler.
- *
- * (c) jiannei <longjian.huang@foxmail.com>
- *
- * This source file is subject to the MIT license that is bundled
- * with this source code in the file LICENSE.
- */
-
 namespace Jiannei\LaravelCrawler\Tests\Unit;
 
 use Carbon\CarbonInterface;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Stringable;
 use Jiannei\LaravelCrawler\Support\Facades\Crawler;
@@ -77,7 +69,7 @@ class PatternTest extends TestCase
         ]);
 
         $this->assertInstanceOf(\Illuminate\Support\Collection::class, $result);
-        $this->assertIsList($result->toArray());
+        $this->assertTrue(Arr::isList($result->toArray()));
     }
 
     public function testMultiGroups()
@@ -113,15 +105,15 @@ class PatternTest extends TestCase
                         'node_label' => ['.node', 'text'],
                         'node_value' => ['.node', 'href'],
                         'reply_count' => ['.count_livid', 'text'],
-                    ],
+                    ]
                 ],
             ],
         ]);
 
         $this->assertInstanceOf(\Illuminate\Support\Collection::class, $result);
-        $this->assertArrayHasKey('tabs', $result->toArray());
-        $this->assertArrayHasKey('nodes', $result->toArray());
-        $this->assertArrayHasKey('posts', $result->toArray());
-        $this->assertIsList($result->toArray()['posts']);
+        $this->assertArrayHasKey('tabs',$result->toArray());
+        $this->assertArrayHasKey('nodes',$result->toArray());
+        $this->assertArrayHasKey('posts',$result->toArray());
+        $this->assertTrue(Arr::isList($result->toArray()['posts']));
     }
 }
