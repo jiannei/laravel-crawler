@@ -14,6 +14,10 @@
 return [
     'debug' => false, // http client debug
 
+    'source' => [
+        'storage' => storage_path('app/crawler.json'),
+    ],
+
     'log' => [
         'driver' => 'daily',
         'path' => storage_path('logs/http.log'),

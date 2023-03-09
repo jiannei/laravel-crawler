@@ -46,6 +46,10 @@ class LaravelServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->publishes([$path => config_path('crawler.php')], 'crawler');
+
+            $this->publishes([
+                dirname(__DIR__, 2).'/storage' => storage_path(),
+            ], 'crawler');
         }
 
         $this->mergeConfigFrom($path, 'crawler');

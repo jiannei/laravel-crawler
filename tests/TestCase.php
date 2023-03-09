@@ -29,5 +29,6 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
         $app['config']->set('cache.default', 'file');
         $app['config']->set('cache.stores.file.path', storage_path('framework/cache/data'));
         $app['config']->set('logging.channels.crawler.path', storage_path('logs/http.log'));
+        $app['config']->set('crawler.source.storage', storage_path('app/crawler.json'));
     }
 }

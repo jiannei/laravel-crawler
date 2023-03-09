@@ -18,6 +18,7 @@ use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverExpectedCondition;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Symfony\Component\DomCrawler\Crawler as SymfonyCrawler;
@@ -83,6 +84,23 @@ class Crawler extends SymfonyCrawler
         }
 
         return (!$multiGroup || empty($group)) ? $data->first() : $data;
+    }
+
+    /**
+     * 根据 url 匹配规则，返回解析结果.
+     */
+    public function json(string $url, string $source = 'storage'): array|Collection
+    {
+        if (!File::exists(config('crawler.source.storage'))) {
+            throw new \InvalidArgumentException('source config illegal');
+        }
+
+        $source = collect(json_decode(File::get(config('crawler.source.storage')), true))->keyBy('url');
+        if (!$source->has($url)) {
+            throw new \InvalidArgumentException('url pattern not exist');
+        }
+
+        return $this->pattern($source->get($url));
     }
 
     /**
