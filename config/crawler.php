@@ -55,4 +55,29 @@ return [
             'level' => 'INFO', // set log level: ALL, DEBUG, INFO, WARNING, SEVERE, OFF
         ],
     ],
+
+    'rss' => [
+        [
+            'alias' => 'channel',
+            'selector' => 'channel',
+            'rules' => [
+                'title' => ['title', 'text'],
+                'link' => ['link', 'text'],
+                'description' => ['description', 'text'],
+                'pubDate' => ['pubDate', 'text'],
+            ],
+        ],
+        [
+            'alias' => 'items',
+            'selector' => 'channel item',
+            'rules' => [
+                'category' => ['category', 'text'],
+                'title' => ['title', 'text'],
+                'description' => ['description', 'text'],
+                'link' => ['link', 'text'],
+                'guid' => ['guid', 'text'],
+                'pubDate' => ['pubDate', 'text'],
+            ],
+        ],
+    ],
 ];

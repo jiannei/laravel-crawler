@@ -104,6 +104,17 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
+     * 解析 RSS 规则.
+     */
+    public function rss(string $url): Collection
+    {
+        return $this->pattern(['url' => $url, 'group' => config('crawler.rss')])
+            ->map(function (Collection $item, $key) {
+                return 'channel' === $key ? $item->first() : $item->all();
+            });
+    }
+
+    /**
      * 获取元素的属性值.
      */
     public function attrs(string|array $attribute): array
