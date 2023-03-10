@@ -21,13 +21,11 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
-use Spatie\ArrayToXml\ArrayToXml;
 use Symfony\Component\DomCrawler\Crawler as SymfonyCrawler;
 
 class Crawler extends SymfonyCrawler
 {
     private static bool $grouped = false;
-    private static string $contentType = 'html';
 
     /**
      * 构建一个新的爬虫对象
@@ -58,25 +56,9 @@ class Crawler extends SymfonyCrawler
     {
         $response = $this->client($options)->get($url, $query);
 
-        $crawler = 'xml' !== self::$contentType ? $this->new($response->body()) : $this->new(ArrayToXml::convert($response->json()));
-
         $this->refresh();
 
-        return $crawler;
-    }
-
-    public function htmlContent(): static
-    {
-        self::$contentType = 'html';
-
-        return $this;
-    }
-
-    public function xmlContent(): static
-    {
-        self::$contentType = 'xml';
-
-        return $this;
+        return $this->new($response->body());
     }
 
     /**
@@ -293,6 +275,5 @@ class Crawler extends SymfonyCrawler
     protected function refresh()
     {
         $this->setGroupFlag(false);
-        self::$contentType = 'html';
     }
 }
