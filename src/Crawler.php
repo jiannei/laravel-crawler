@@ -52,15 +52,17 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 获取远程html后构建爬虫对象
+     * 获取远程内容后构建爬虫对象
      */
     public function fetch(string $url, array|string|null $query = null, array $options = []): static
     {
-        $this->setGroupFlag(false);
-
         $response = $this->client($options)->get($url, $query);
 
-        return 'xml' !== self::$contentType ? $this->new($response->body()) : $this->new(ArrayToXml::convert($response->json()));
+        $crawler = 'xml' !== self::$contentType ? $this->new($response->body()) : $this->new(ArrayToXml::convert($response->json()));
+
+        $this->refresh();
+
+        return $crawler;
     }
 
     public function htmlContent(): static
@@ -286,5 +288,11 @@ class Crawler extends SymfonyCrawler
     protected function getGroupFlag(): bool
     {
         return self::$grouped;
+    }
+
+    protected function refresh()
+    {
+        $this->setGroupFlag(false);
+        self::$contentType = 'html';
     }
 }
