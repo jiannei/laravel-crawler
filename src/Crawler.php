@@ -63,14 +63,14 @@ class Crawler extends SymfonyCrawler
         return 'xml' !== self::$contentType ? $this->new($response->body()) : $this->new(ArrayToXml::convert($response->json()));
     }
 
-    public function contentHtml(): static
+    public function htmlContent(): static
     {
         self::$contentType = 'html';
 
         return $this;
     }
 
-    public function contentXml(): static
+    public function xmlContent(): static
     {
         self::$contentType = 'xml';
 

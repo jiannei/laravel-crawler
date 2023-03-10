@@ -20,7 +20,7 @@ class XmlTest extends TestCase
 {
     public function testXml()
     {
-        $crawler = Crawler::contentXml()->fetch('https://api.github.com/repos/LaravelDaily/laravel-tips/git/trees/master?recursive=1');
+        $crawler = Crawler::xmlContent()->fetch('https://api.github.com/repos/LaravelDaily/laravel-tips/git/trees/master?recursive=1');
 
         $result = $crawler->group('tree')->parse([
             'path' => ['path', 'text'],
