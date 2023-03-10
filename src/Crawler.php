@@ -21,11 +21,13 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Spatie\ArrayToXml\ArrayToXml;
 use Symfony\Component\DomCrawler\Crawler as SymfonyCrawler;
 
 class Crawler extends SymfonyCrawler
 {
     private static bool $grouped = false;
+    private static string $contentType = 'html';
 
     /**
      * 构建一个新的爬虫对象
@@ -51,10 +53,6 @@ class Crawler extends SymfonyCrawler
 
     /**
      * 获取远程html后构建爬虫对象
-     *
-     * @param array|string|null $query
-     *
-     * @return $this
      */
     public function fetch(string $url, array|string|null $query = null, array $options = []): static
     {
@@ -62,7 +60,21 @@ class Crawler extends SymfonyCrawler
 
         $response = $this->client($options)->get($url, $query);
 
-        return $this->new($response->body());
+        return self::$contentType !== 'xml' ? $this->new($response->body()) : $this->new(ArrayToXml::convert($response->json()));
+    }
+
+    public function contentHtml(): static
+    {
+        self::$contentType = 'html';
+
+        return $this;
+    }
+
+    public function contentXml(): static
+    {
+        self::$contentType = 'xml';
+
+        return $this;
     }
 
     /**
