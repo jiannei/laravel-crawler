@@ -33,6 +33,6 @@ class JsonTest extends TestCase
 
         $this->assertInstanceOf(Collection::class, $result);
         $this->assertIsArray($result->toArray());
-        $this->assertTrue(Arr::isList($result->toArray()));
+        $this->assertTrue(Arr::isList($result->toArray()['items']));
     }
 }
