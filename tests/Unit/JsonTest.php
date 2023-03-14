@@ -26,4 +26,13 @@ class JsonTest extends TestCase
         $this->assertIsArray($result->toArray());
         $this->assertTrue(Arr::isList($result->toArray()));
     }
+
+    public function testRss()
+    {
+        $result = Crawler::json('https://sspai.com/feed');
+
+        $this->assertInstanceOf(Collection::class, $result);
+        $this->assertIsArray($result->toArray());
+        $this->assertTrue(Arr::isList($result->toArray()));
+    }
 }

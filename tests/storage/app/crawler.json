@@ -34,5 +34,9 @@
                 ]
             }
         }
+    },
+    {
+        "url": "https://sspai.com/feed",
+        "rss": true
     }
 ]

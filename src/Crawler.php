@@ -96,7 +96,9 @@ class Crawler extends SymfonyCrawler
             throw new \InvalidArgumentException('url pattern not exist');
         }
 
-        return $this->pattern($source->get($url));
+        $pattern = $source->get($url);
+
+        return Arr::get($pattern, 'rss', false) ? $this->rss($url) : $this->pattern($source->get($url));
     }
 
     /**
