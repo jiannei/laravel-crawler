@@ -85,7 +85,7 @@ class Crawler extends SymfonyCrawler
     /**
      * 根据 url 匹配规则，返回解析结果.
      */
-    public function json(string $url, string $source = 'storage'): array|Collection
+    public function json(string $url, array $query = []): array|Collection
     {
         if (!File::exists(config('crawler.source.storage'))) {
             throw new \InvalidArgumentException('source config illegal');
@@ -98,7 +98,9 @@ class Crawler extends SymfonyCrawler
 
         $pattern = $source->get($url);
 
-        return Arr::get($pattern, 'rss', false) ? $this->rss($url) : $this->pattern($source->get($url));
+        Arr::set($pattern, 'query', array_merge(Arr::get($pattern, 'query', []), $query));
+
+        return Arr::get($pattern, 'rss', false) ? $this->rss($url) : $this->pattern($pattern);
     }
 
     /**
