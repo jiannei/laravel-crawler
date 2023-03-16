@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Facade as IlluminateFacade;
  * @method static \Jiannei\LaravelCrawler\Crawler new(\DOMNodeList|\DOMNode|array|string $node = null, string $uri = null, string $baseHref = null)
  * @method static \Jiannei\LaravelCrawler\Crawler fetch(string $url, array|string|null $query = null,array $options = [])
  * @method static array|Collection                pattern(array $pattern)
- * @method static array|Collection                json(string $url)
+ * @method static array|Collection                json(string $url,array $query = [])
  * @method static Collection                      rss(string $url)
  * @method static \Jiannei\LaravelCrawler\Crawler chrome(string $url, WebDriverExpectedCondition $condition)
  *

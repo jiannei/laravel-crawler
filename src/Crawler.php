@@ -28,7 +28,7 @@ class Crawler extends SymfonyCrawler
     private static bool $grouped = false;
 
     /**
-     * 构建一个新的爬虫对象
+     * Build a new crawler object.
      *
      * @return $this
      */
@@ -50,7 +50,7 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 获取远程内容后构建爬虫对象
+     * Build crawler object after getting remote content.
      */
     public function fetch(string $url, array|string|null $query = null, array $options = []): static
     {
@@ -62,7 +62,7 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 更简洁的爬取方式.
+     * More concise crawling way.
      */
     public function pattern(array $pattern): array|Collection
     {
@@ -83,7 +83,7 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 根据 url 匹配规则，返回解析结果.
+     * Return the parsing result according to the url matching rule.
      */
     public function json(string $url, array $query = []): array|Collection
     {
@@ -104,7 +104,7 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 解析 RSS 规则.
+     * Parse RSS rules.
      */
     public function rss(string $url): Collection
     {
@@ -115,7 +115,7 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 获取元素的属性值.
+     * Get the attribute value of the element.
      */
     public function attrs(string|array $attribute): array
     {
@@ -123,7 +123,7 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 获取元素的文本内容.
+     * Get the text content of the element.
      */
     public function texts(): array
     {
@@ -133,7 +133,7 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 获取元素自身html.
+     * Get the element's html.
      */
     public function htmls(): array
     {
@@ -143,7 +143,7 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 规则分组.
+     * Group matching rules.
      */
     public function group(string $selector): static
     {
@@ -153,7 +153,7 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 解析多个元素.
+     * Parse multiple elements.
      */
     public function parse(array $rules): array|Collection
     {
@@ -206,7 +206,7 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 获取JS渲染页面.
+     * Get JS rendering page.
      *
      * @return $this
      *
@@ -239,7 +239,7 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 移除元素.
+     * Remove Elements.
      */
     public function remove(string|array $rules): string
     {
@@ -248,20 +248,11 @@ class Crawler extends SymfonyCrawler
             $html = Str::remove($items, $html);
         }
 
-        // TODO 连贯操作 rules()->remove()
-        // TODO 移除指定元素属性、元素文本内容(removeHtml/removeText/removeAttr)
-        /*[
-            '.tt' => Element::TEXT,
-            'span:last' => Element::HTML,
-            'p:last' => Element::HTML,
-            'a' => ['href']
-        ]*/
-
         return $html;
     }
 
     /**
-     * 设置规则分组标识.
+     * Set rule grouping flag.
      */
     protected function setGroupFlag(bool $flag): void
     {
@@ -269,7 +260,7 @@ class Crawler extends SymfonyCrawler
     }
 
     /**
-     * 获取规则分组标识.
+     * Get rule grouping flag.
      */
     protected function getGroupFlag(): bool
     {
