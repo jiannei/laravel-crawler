@@ -20,7 +20,7 @@ class JsonTest extends TestCase
 {
     public function testJson()
     {
-        $result = Crawler::json('https://github.com/trending');
+        $result = Crawler::json('github:trending');
 
         $this->assertInstanceOf(Collection::class, $result);
         $this->assertIsArray($result->toArray());
@@ -29,7 +29,7 @@ class JsonTest extends TestCase
 
     public function testRss()
     {
-        $result = Crawler::json('https://sspai.com/feed');
+        $result = Crawler::json('sspai');
 
         $this->assertInstanceOf(Collection::class, $result);
         $this->assertIsArray($result->toArray());

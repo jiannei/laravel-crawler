@@ -1,5 +1,6 @@
 [
     {
+        "key": "github:trending",
         "url": "https://github.com/trending",
         "query": {
             "since": "daily",
@@ -36,6 +37,7 @@
         }
     },
     {
+        "key": "sspai",
         "url": "https://sspai.com/feed",
         "rss": true
     }

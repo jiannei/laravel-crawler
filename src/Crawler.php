@@ -85,23 +85,23 @@ class Crawler extends SymfonyCrawler
     /**
      * Return the parsing result according to the url matching rule.
      */
-    public function json(string $url, array $query = [], array $options = []): array|Collection
+    public function json(string $key, array $query = [], array $options = []): array|Collection
     {
         if (!File::exists(config('crawler.source.storage'))) {
             throw new \InvalidArgumentException('source config illegal');
         }
 
-        $source = collect(json_decode(File::get(config('crawler.source.storage')), true))->keyBy('url');
-        if (!$source->has($url)) {
+        $source = collect(json_decode(File::get(config('crawler.source.storage')), true))->keyBy('key');
+        if (!$source->has($key)) {
             throw new \InvalidArgumentException('url pattern not exist');
         }
 
-        $pattern = $source->get($url);
+        $pattern = $source->get($key);
 
         Arr::set($pattern, 'query', array_merge(Arr::get($pattern, 'query', []), $query));
         Arr::set($pattern, 'options', array_merge(Arr::get($pattern, 'options', []), $options));
 
-        return Arr::get($pattern, 'rss', false) ? $this->rss($url) : $this->pattern($pattern);
+        return Arr::get($pattern, 'rss', false) ? $this->rss($pattern['url']) : $this->pattern($pattern);
     }
 
     /**
