@@ -40,5 +40,111 @@
         "key": "sspai",
         "url": "https://sspai.com/feed",
         "rss": true
+    },
+    {
+        "key": "gitee",
+        "url": "https://gitee.com/explore/:category",
+        "group": [
+            {
+                "alias": "categories",
+                "selector": ".explore-categories li",
+                "rules": {
+                    "label": [
+                        ".explore-categories__item a",
+                        "text"
+                    ],
+                    "link": [
+                        ".explore-categories__item a",
+                        "href"
+                    ]
+                }
+            },
+            {
+                "alias": "repos",
+                "selector": ".explore-repo__list .item",
+                "rules": {
+                    "author.homepage": [
+                        "a",
+                        "href"
+                    ],
+                    "author.avatar": [
+                        "a img",
+                        "src"
+                    ],
+                    "repo.title": [
+                        ".content .project-title h3",
+                        "text"
+                    ],
+                    "repo.link": [
+                        ".content .project-title h3 a",
+                        "href"
+                    ],
+                    "repo.stars": [
+                        ".content .project-title .explore-project__meta-social",
+                        "text"
+                    ],
+                    "repo.desc": [
+                        ".content .project-desc",
+                        "text"
+                    ],
+                    "language": [
+                        ".project-item-bottom .project-language",
+                        "text"
+                    ],
+                    "category": [
+                        ".project-item-bottom .project-class a",
+                        "text"
+                    ],
+                    "updated_at": [
+                        ".project-item-bottom div[title]",
+                        "title"
+                    ]
+                }
+            },
+            {
+                "alias": "daily",
+                "selector": "div[data-tab='daily-trending'] .explore-trending-projects__list-item",
+                "rules": {
+                    "title": [
+                        ".title a",
+                        "text"
+                    ],
+                    "link": [
+                        ".title a",
+                        "href"
+                    ],
+                    "stars": [
+                        ".stars-count",
+                        "data-count"
+                    ],
+                    "description": [
+                        ".description",
+                        "text"
+                    ]
+                }
+            },
+            {
+                "alias": "weekly",
+                "selector": "div[data-tab='weekly-trending'] .explore-trending-projects__list-item",
+                "rules": {
+                    "title": [
+                        ".title a",
+                        "text"
+                    ],
+                    "link": [
+                        ".title a",
+                        "href"
+                    ],
+                    "stars": [
+                        ".stars-count",
+                        "data-count"
+                    ],
+                    "description": [
+                        ".description",
+                        "text"
+                    ]
+                }
+            }
+        ]
     }
 ]

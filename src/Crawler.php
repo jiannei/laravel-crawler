@@ -16,6 +16,7 @@ use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverExpectedCondition;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
@@ -26,6 +27,9 @@ use Symfony\Component\DomCrawler\Crawler as SymfonyCrawler;
 class Crawler extends SymfonyCrawler
 {
     private static bool $grouped = false;
+    private static $beforeClosure;
+
+    private static $afterClosure;
 
     /**
      * Build a new crawler object.
@@ -54,9 +58,9 @@ class Crawler extends SymfonyCrawler
      */
     public function fetch(string $url, array|string|null $query = null, array $options = []): static
     {
-        $response = $this->client($options)->get($url, $query);
+        [$url,$query,$options] = $this->beforeFetch(func_get_args());
 
-        $this->refresh();
+        $response = $this->afterFetch($this->client($options)->get($url, $query));
 
         return $this->new($response->body());
     }
@@ -113,6 +117,20 @@ class Crawler extends SymfonyCrawler
             ->map(function (Collection $item, $key) {
                 return 'channel' === $key ? $item->first() : $item->all();
             });
+    }
+
+    public function before(\Closure $closure): static
+    {
+        self::$beforeClosure = $closure;
+
+        return $this;
+    }
+
+    public function after(\Closure $closure): static
+    {
+        self::$afterClosure = $closure;
+
+        return $this;
     }
 
     /**
@@ -268,8 +286,28 @@ class Crawler extends SymfonyCrawler
         return self::$grouped;
     }
 
-    protected function refresh()
+    protected function beforeFetch(array $args): array
     {
+        $args = array_pad($args, 3, []);
+
+        if (is_callable(self::$beforeClosure)) {
+            $args = (self::$beforeClosure)(...$args);
+        }
+
+        return $args;
+    }
+
+    protected function afterFetch(Response $response)
+    {
+        if (is_callable(self::$afterClosure)) {
+            $response = (self::$afterClosure)($response);
+        }
+
         $this->setGroupFlag(false);
+
+        self::$beforeClosure = null;
+        self::$afterClosure = null;
+
+        return $response;
     }
 }
