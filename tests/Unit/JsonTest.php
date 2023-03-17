@@ -13,6 +13,7 @@ namespace Jiannei\LaravelCrawler\Tests\Unit;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Jiannei\LaravelCrawler\Support\Facades\Crawler;
 use Jiannei\LaravelCrawler\Tests\TestCase;
 
@@ -34,5 +35,22 @@ class JsonTest extends TestCase
         $this->assertInstanceOf(Collection::class, $result);
         $this->assertIsArray($result->toArray());
         $this->assertTrue(Arr::isList($result->toArray()['items']));
+    }
+
+    public function testBefore()
+    {
+        $result = Crawler::before(function ($url, $query, $options) {
+            $url = Str::of($url)->replace(':category', 'all')->value();
+
+            return [$url, $query, $options];
+        })->json('gitee');
+
+        $this->assertInstanceOf(Collection::class, $result);
+        $this->assertIsArray($result->toArray());
+        $this->assertArrayHasKey('categories', $result->toArray());
+        $this->assertArrayHasKey('repos', $result->toArray());
+        $this->assertArrayHasKey('daily', $result->toArray());
+        $this->assertArrayHasKey('weekly', $result->toArray());
+        $this->assertTrue(Arr::isList($result->get('daily')->all()));
     }
 }
