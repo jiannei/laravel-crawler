@@ -16,12 +16,13 @@ use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverExpectedCondition;
-use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Jiannei\LaravelCrawler\Jobs\Fetch;
 use Symfony\Component\DomCrawler\Crawler as SymfonyCrawler;
 
 class Crawler extends SymfonyCrawler
@@ -60,9 +61,17 @@ class Crawler extends SymfonyCrawler
     {
         [$url,$query,$options] = $this->beforeFetch(func_get_args());
 
-        $response = $this->afterFetch($this->client($options)->get($url, $query));
+        dispatch(new Fetch($url, $query, $options));
 
-        return $this->new($response->body());
+        $key = 'crawler:fetch:'.md5($url);
+
+        return retry((int) config('crawler.fetch.times', 1), function () use ($key) {
+            if (!Cache::has($key)) {
+                throw new \RuntimeException('The content has not been fetched yet');
+            }
+
+            return $this->new($this->afterFetch(Cache::pull($key)));
+        }, (int) config('crawler.fetch.sleep', 0));
     }
 
     /**
@@ -297,10 +306,10 @@ class Crawler extends SymfonyCrawler
         return $args;
     }
 
-    protected function afterFetch(Response $response)
+    protected function afterFetch($html)
     {
         if (is_callable(self::$afterClosure)) {
-            $response = (self::$afterClosure)($response);
+            $html = (self::$afterClosure)($html);
         }
 
         $this->setGroupFlag(false);
@@ -308,6 +317,6 @@ class Crawler extends SymfonyCrawler
         self::$beforeClosure = null;
         self::$afterClosure = null;
 
-        return $response;
+        return $html;
     }
 }
