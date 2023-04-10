@@ -14,12 +14,6 @@
 return [
     'debug' => false, // http client debug
 
-    'fetch' => [
-        'times' => 1,
-        'sleep' => 1000, // Milliseconds
-        'cache' => 180, // seconds
-    ],
-
     'source' => [
         'storage' => storage_path('app/crawler.json'),
     ],
