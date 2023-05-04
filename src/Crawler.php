@@ -111,9 +111,9 @@ class Crawler extends SymfonyCrawler
     /**
      * Parse RSS rules.
      */
-    public function rss(string $url): Collection
+    public function rss(string $url, array $pattern = []): Collection
     {
-        return $this->pattern(['url' => $url, 'group' => config('crawler.rss')])
+        return $this->pattern(['url' => $url, 'group' => $pattern ?: config('crawler.rss')])
             ->map(function (Collection $item, $key) {
                 return 'channel' === $key ? $item->first() : $item->all();
             });
