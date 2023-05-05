@@ -21,7 +21,7 @@ class CrawlerServer extends Command
 
     protected $description = 'Start a remote end (server)';
 
-    public function handle(): void
+    public function handle()
     {
         if ($pid = Process::run('pgrep chromedriver')->output()) {
             Process::run('kill -9 '.$pid);

@@ -15,6 +15,7 @@ use Illuminate\Http\Client\Events\ConnectionFailed;
 use Illuminate\Http\Client\Events\RequestSending;
 use Illuminate\Http\Client\Events\ResponseReceived;
 use Illuminate\Support\ServiceProvider;
+use Jiannei\LaravelCrawler\Console\CrawlerRun;
 use Jiannei\LaravelCrawler\Console\CrawlerServer;
 use Jiannei\LaravelCrawler\Listeners\ConnectionFailedListener;
 use Jiannei\LaravelCrawler\Listeners\RequestSendingListener;
@@ -36,7 +37,8 @@ class LaravelServiceProvider extends ServiceProvider
         }
 
         if ($this->app->runningInConsole()) {
-            $this->commands([CrawlerServer::class]);
+            $this->commands([CrawlerServer::class,CrawlerRun::class]);
+            $this->setupMigration();
         }
     }
 
@@ -55,5 +57,13 @@ class LaravelServiceProvider extends ServiceProvider
         $this->mergeConfigFrom($path, 'crawler');
 
         $this->app['config']->set('logging.channels.crawler', $this->app['config']->get('crawler.log'));
+    }
+
+    protected function setupMigration(): void
+    {
+        $this->publishes([
+            __DIR__.'/../../database/migrations/create_crawl_tasks_table.php.stub' => database_path('migrations/'.date('Y_m_d_His').'_create_crawl_tasks_table.php'),
+            __DIR__.'/../../database/migrations/create_crawl_records_table.php.stub' => database_path('migrations/'.date('Y_m_d_His').'_create_crawl_records_table.php'),
+        ], 'migrations');
     }
 }
