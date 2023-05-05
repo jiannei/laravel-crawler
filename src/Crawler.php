@@ -91,11 +91,7 @@ class Crawler extends SymfonyCrawler
      */
     public function json(string $key, array $query = [], array $options = []): array|Collection
     {
-        if (!File::exists(config('crawler.source.storage'))) {
-            throw new \InvalidArgumentException('source config illegal');
-        }
-
-        $source = collect(json_decode(File::get(config('crawler.source.storage')), true))->keyBy('key');
+        $source = $this->source()->keyBy('key');
         if (!$source->has($key)) {
             throw new \InvalidArgumentException('url pattern not exist');
         }
@@ -106,6 +102,15 @@ class Crawler extends SymfonyCrawler
         Arr::set($pattern, 'options', array_merge(Arr::get($pattern, 'options', []), $options));
 
         return Arr::get($pattern, 'rss', false) ? $this->rss($pattern['url']) : $this->pattern($pattern);
+    }
+
+    public function source(string $source = 'json'): Collection
+    {
+        if (!File::exists(config('crawler.source.storage'))) {
+            throw new \InvalidArgumentException('source config illegal');
+        }
+
+        return collect(json_decode(File::get(config('crawler.source.storage')), true));
     }
 
     /**

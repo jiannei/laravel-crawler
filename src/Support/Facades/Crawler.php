@@ -21,10 +21,11 @@ use Illuminate\Support\Facades\Facade as IlluminateFacade;
  * @method static \Jiannei\LaravelCrawler\Crawler new(\DOMNodeList|\DOMNode|array|string $node = null, string $uri = null, string $baseHref = null)
  * @method static \Jiannei\LaravelCrawler\Crawler before(\Closure $closure)
  * @method static \Jiannei\LaravelCrawler\Crawler after(\Closure $closure)
- * @method static \Jiannei\LaravelCrawler\Crawler fetch(string $url, array|string|null $query = null,array $options = [])
+ * @method static \Jiannei\LaravelCrawler\Crawler fetch(string $url, array|string|null $query = null, array $options = [])
  * @method static array|Collection                pattern(array $pattern)
- * @method static array|Collection                json(string $key,array $query = [],array $options = [])
- * @method static Collection                      rss(string $url,array $pattern = [])
+ * @method static array|Collection                json(string $key, array $query = [], array $options = [])
+ * @method static Collection                      source(string $source = 'json')
+ * @method static Collection                      rss(string $url, array $pattern = [])
  * @method static \Jiannei\LaravelCrawler\Crawler chrome(string $url, WebDriverExpectedCondition $condition)
  *
  * @see \Jiannei\LaravelCrawler\Crawler
