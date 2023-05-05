@@ -38,7 +38,7 @@ class LaravelServiceProvider extends ServiceProvider
         }
 
         if ($this->app->runningInConsole()) {
-            $this->commands([CrawlerServer::class, CrawlerRun::class,CrawlerTasks::class]);
+            $this->commands([CrawlerServer::class, CrawlerRun::class, CrawlerTasks::class]);
             $this->setupMigration();
         }
     }
