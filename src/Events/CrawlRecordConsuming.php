@@ -15,7 +15,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Jiannei\LaravelCrawler\Models\CrawlRecord;
 
-class CrawlerRecordConsuming
+class CrawlRecordConsuming
 {
     use Dispatchable;
     use SerializesModels;
