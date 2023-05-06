@@ -26,7 +26,7 @@ class CrawlerTaskSync extends Command implements Isolatable
     {
         $this->info("[{$this->description}]:starting ".now()->format('Y-m-d H:i:s'));
 
-        $this->option('type') === 'export' ? $this->export() : $this->import();
+        'export' === $this->option('type') ? $this->export() : $this->import();
 
         $this->info("[{$this->description}]:finished ".now()->format('Y-m-d H:i:s'));
     }
@@ -48,8 +48,8 @@ class CrawlerTaskSync extends Command implements Isolatable
 
     protected function export()
     {
-        $tasks = CrawlTask::select('pattern')->where('active',true)->get();
+        $tasks = CrawlTask::select('pattern')->where('active', true)->get();
 
-        Crawler::source('json',$tasks->pluck('pattern')->all());
+        Crawler::source('json', $tasks->pluck('pattern')->all());
     }
 }
