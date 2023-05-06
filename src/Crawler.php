@@ -104,7 +104,7 @@ class Crawler extends SymfonyCrawler
         return Arr::get($pattern, 'rss', false) ? $this->rss($pattern['url']) : $this->pattern($pattern);
     }
 
-    public function source(string $source = 'json',array $patterns = []): Collection|int
+    public function source(string $source = 'json', array $patterns = []): Collection|int
     {
         if (!File::exists(config('crawler.source.storage'))) {
             throw new \InvalidArgumentException('source config illegal');
@@ -112,7 +112,7 @@ class Crawler extends SymfonyCrawler
 
         return !$patterns ?
             collect(json_decode(File::get(config('crawler.source.storage')), true))
-            : File::put(config('crawler.source.storage'),json_encode($patterns,JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT));
+            : File::put(config('crawler.source.storage'), json_encode($patterns, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
     }
 
     /**
