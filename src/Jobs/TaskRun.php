@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the jiannei/laravel-crawler.
+ *
+ * (c) jiannei <longjian.huang@foxmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Jiannei\LaravelCrawler\Jobs;
 
 use Cron\CronExpression;
@@ -15,7 +24,10 @@ use Jiannei\LaravelCrawler\Support\Facades\Crawler;
 
 class TaskRun implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     public function __construct(private readonly CrawlTask $task)
     {
