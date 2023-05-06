@@ -13,15 +13,16 @@ namespace Jiannei\LaravelCrawler\Console;
 
 use Cron\CronExpression;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Console\Isolatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Jiannei\LaravelCrawler\Models\CrawlTask;
 use Jiannei\LaravelCrawler\Support\Facades\Crawler;
 
-class CrawlerRun extends Command
+class CrawlerTaskRun extends Command implements Isolatable
 {
-    protected $signature = 'crawler:run';
+    protected $signature = 'crawler:task:run';
 
     protected $description = 'Run crawling tasks';
 

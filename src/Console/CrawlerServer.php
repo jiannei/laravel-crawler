@@ -12,10 +12,11 @@
 namespace Jiannei\LaravelCrawler\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Console\Isolatable;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
 
-class CrawlerServer extends Command
+class CrawlerServer extends Command implements Isolatable
 {
     protected $signature = 'crawler:server {--path=}';
 

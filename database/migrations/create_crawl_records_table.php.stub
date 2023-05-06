@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('crawl_records', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('task_id');
+            $table->boolean('consumed')->default(false);
             $table->json('content');
             $table->timestamps();
         });
