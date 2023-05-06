@@ -26,7 +26,7 @@ class CrawlerTaskSync extends Command implements Isolatable
     {
         $this->info("[{$this->description}]:starting ".now()->format('Y-m-d H:i:s'));
 
-        'export' === $this->option('type') ? $this->export() : $this->import();
+        'export' === $this->argument('type') ? $this->export() : $this->import();
 
         $this->info("[{$this->description}]:finished ".now()->format('Y-m-d H:i:s'));
     }
