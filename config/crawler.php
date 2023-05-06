@@ -19,7 +19,7 @@ return [
     ],
 
     'consume' => [
-        'service' => '',// Jiannei\LaravelCrawler\Contracts\ConsumeService
+        'service' => '', // Jiannei\LaravelCrawler\Contracts\ConsumeService
     ],
 
     'log' => [
