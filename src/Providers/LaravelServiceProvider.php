@@ -45,7 +45,7 @@ class LaravelServiceProvider extends ServiceProvider
 
         $consume = $this->app['config']->get('crawler.consume.service');
         if (class_exists($consume)) {
-            $this->app->bind(\Jiannei\LaravelCrawler\Contracts\ConsumeService::class,$consume);
+            $this->app->bind(\Jiannei\LaravelCrawler\Contracts\ConsumeService::class, $consume);
         }
     }
 
