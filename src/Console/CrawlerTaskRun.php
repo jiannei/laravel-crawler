@@ -36,9 +36,7 @@ class CrawlerTaskRun extends Command implements Isolatable
         $tasks->each(function ($task) {
             $this->comment('running:'.$task->name);
 
-            dispatch(new TaskRun($task))->catch(function (\Throwable $e) {
-                $this->error($e->getMessage());
-            });
+            dispatch(new TaskRun($task));
         });
 
         $this->info("[{$this->description}]:finished ".now()->format('Y-m-d H:i:s'));
