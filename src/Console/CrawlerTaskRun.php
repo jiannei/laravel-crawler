@@ -11,14 +11,12 @@
 
 namespace Jiannei\LaravelCrawler\Console;
 
-use Cron\CronExpression;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\Isolatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
+use Jiannei\LaravelCrawler\Jobs\TaskRun;
 use Jiannei\LaravelCrawler\Models\CrawlTask;
-use Jiannei\LaravelCrawler\Support\Facades\Crawler;
 
 class CrawlerTaskRun extends Command implements Isolatable
 {
@@ -38,33 +36,8 @@ class CrawlerTaskRun extends Command implements Isolatable
         $tasks->each(function ($task) {
             $this->comment('running:'.$task->name);
 
-            dispatch(function () use ($task) {
-                DB::transaction(function () use ($task) {
-                    $result = [];
-
-                    try {
-                        $result = Crawler::pattern($task->pattern);
-                        $task->previous_run_date = Carbon::now();
-                        $task->next_run_date = Carbon::instance((new CronExpression($task->expression))->getNextRunDate());
-                        $task->status = 1;
-                        $task->exception = '';
-                    } catch (\Throwable $exception) {
-                        $task->status = -1;
-                        $task->exception = $exception;
-                    }
-
-                    $task->save();
-
-                    if (is_array($result)) {
-                        $result = collect($result);
-                    }
-
-                    $contents = $result->map(function ($item) {
-                        return ['content' => $item];
-                    });
-
-                    $task->records()->createMany($contents->all());
-                });
+            dispatch(new TaskRun($task))->catch(function (\Throwable $e) {
+                $this->error($e->getMessage());
             });
         });
 

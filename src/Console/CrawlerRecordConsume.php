@@ -12,7 +12,7 @@
 namespace Jiannei\LaravelCrawler\Console;
 
 use Illuminate\Console\Command;
-use Jiannei\LaravelCrawler\Events\CrawlRecordConsuming;
+use Jiannei\LaravelCrawler\Jobs\RecordConsume;
 use Jiannei\LaravelCrawler\Models\CrawlRecord;
 
 class CrawlerRecordConsume extends Command
@@ -28,7 +28,9 @@ class CrawlerRecordConsume extends Command
         $records = CrawlRecord::with('task')->where('consumed', false)->cursorPaginate($this->option('limit'));
 
         foreach ($records as $record) {
-            event(new CrawlRecordConsuming($record));
+            dispatch(new RecordConsume($record))->catch(function (\Throwable $e) {
+                $this->error($e->getMessage());
+            });
         }
 
         $this->info("[{$this->description}]:finished ".now()->format('Y-m-d H:i:s'));

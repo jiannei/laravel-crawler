@@ -42,6 +42,11 @@ class LaravelServiceProvider extends ServiceProvider
             $this->commands([CrawlerServer::class, CrawlerTaskRun::class, CrawlerTaskSync::class, CrawlerRecordConsume::class]);
             $this->setupMigration();
         }
+
+        $consume = $this->app['config']->get('crawler.consume.service');
+        if (class_exists($consume)) {
+            $this->app->bind(\Jiannei\LaravelCrawler\Contracts\ConsumeService::class,$consume);
+        }
     }
 
     protected function setupConfig()

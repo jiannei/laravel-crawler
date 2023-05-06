@@ -18,6 +18,10 @@ return [
         'storage' => storage_path('app/crawler.json'),
     ],
 
+    'consume' => [
+        'service' => '',// Jiannei\LaravelCrawler\Contracts\ConsumeService
+    ],
+
     'log' => [
         'driver' => 'daily',
         'path' => storage_path('logs/http.log'),
