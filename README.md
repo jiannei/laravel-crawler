@@ -4,6 +4,11 @@
 
 [![Test](https://github.com/jiannei/laravel-crawler/actions/workflows/test.yml/badge.svg)](https://github.com/jiannei/laravel-crawler/actions/workflows/test.yml)
 [![StyleCI](https://github.styleci.io/repos/585477175/shield?branch=main&style=flat)](https://github.styleci.io/repos/585477175/shield?branch=main&style=flat)
+[![Latest Stable Version](http://poser.pugx.org/jiannei/laravel-crawler/v)](https://packagist.org/packages/jiannei/laravel-crawler)
+[![Total Downloads](http://poser.pugx.org/jiannei/laravel-crawler/downloads)](https://packagist.org/packages/jiannei/laravel-crawler)
+[![Latest Unstable Version](http://poser.pugx.org/jiannei/laravel-crawler/v/unstable)](https://packagist.org/packages/jiannei/laravel-crawler)
+[![License](http://poser.pugx.org/jiannei/laravel-crawler/license)](https://packagist.org/packages/jiannei/laravel-crawler)
+[![PHP Version Require](http://poser.pugx.org/jiannei/laravel-crawler/require/php)](https://packagist.org/packages/jiannei/laravel-crawler)
 
 ## Installing
 
