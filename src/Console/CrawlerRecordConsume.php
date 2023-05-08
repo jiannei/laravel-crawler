@@ -41,7 +41,7 @@ class CrawlerRecordConsume extends Command
         foreach ($records as $record) {
             $method = Str::camel($record->name);
             if (!method_exists($service, $method)) {
-                $this->error("[{$this->description}]:error ".now()->format('Y-m-d H:i:s'));
+                $this->error("error: $method not exist".now()->format('Y-m-d H:i:s'));
                 continue;
             }
 
