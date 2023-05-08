@@ -28,12 +28,12 @@ class CrawlerRecordConsume extends Command
     {
         $this->info("[{$this->description}]:starting ".now()->format('Y-m-d H:i:s'));
 
-        $records = CrawlRecord::select(['crawl_records.*','crawl_tasks.name'])
-            ->join('crawl_tasks','crawl_tasks.id','=','crawl_records.task_id')
-            ->where('crawl_tasks.active',true)
+        $records = CrawlRecord::select(['crawl_records.*', 'crawl_tasks.name'])
+            ->join('crawl_tasks', 'crawl_tasks.id', '=', 'crawl_records.task_id')
+            ->where('crawl_tasks.active', true)
             ->where('crawl_records.consumed', false)
-            ->when($this->argument('name'), function (Builder $query,string $name) {
-                $query->where('crawl_tasks.name',$name);
+            ->when($this->argument('name'), function (Builder $query, string $name) {
+                $query->where('crawl_tasks.name', $name);
             })
             ->orderBy('id')
             ->cursorPaginate($this->option('limit'));
@@ -47,7 +47,7 @@ class CrawlerRecordConsume extends Command
 
             $this->comment("consuming:[$record->name] with {$method}");
 
-            dispatch(new RecordConsume($record,$method));
+            dispatch(new RecordConsume($record, $method));
         }
 
         $this->info("[{$this->description}]:finished ".now()->format('Y-m-d H:i:s'));
