@@ -37,7 +37,7 @@ class RecordConsume implements ShouldQueue
     {
         try {
             DB::transaction(function () use ($service) {
-                $service->{$this->method}($this->record);
+                $service->{$this->method}($this->record->content);
 
                 $this->record->consumed = true;
                 $this->record->save();
