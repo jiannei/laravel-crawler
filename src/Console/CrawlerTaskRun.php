@@ -33,8 +33,8 @@ class CrawlerTaskRun extends Command implements Isolatable
                 $query->where('next_run_date', '<=', Carbon::now())
                     ->orWhereNull('next_run_date');
             })
-            ->when($this->argument('name'), function (Builder $query,string $name) {
-                $query->where('name',$name);
+            ->when($this->argument('name'), function (Builder $query, string $name) {
+                $query->where('name', $name);
             })
             ->get();
 
