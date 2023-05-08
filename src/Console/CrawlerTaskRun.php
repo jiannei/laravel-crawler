@@ -20,7 +20,7 @@ use Jiannei\LaravelCrawler\Models\CrawlTask;
 
 class CrawlerTaskRun extends Command implements Isolatable
 {
-    protected $signature = 'crawler:task:run';
+    protected $signature = 'crawler:task:run {name?}';
 
     protected $description = 'Run crawling tasks';
 
@@ -28,10 +28,15 @@ class CrawlerTaskRun extends Command implements Isolatable
     {
         $this->info("[{$this->description}]:starting ".now()->format('Y-m-d H:i:s'));
 
-        $tasks = CrawlTask::where('active', true)->where(function (Builder $query) {
-            $query->where('next_run_date', '<=', Carbon::now())
-                ->orWhereNull('next_run_date');
-        })->get();
+        $tasks = CrawlTask::where('active', true)
+            ->where(function (Builder $query) {
+                $query->where('next_run_date', '<=', Carbon::now())
+                    ->orWhereNull('next_run_date');
+            })
+            ->when($this->argument('name'), function (Builder $query,string $name) {
+                $query->where('name',$name);
+            })
+            ->get();
 
         $tasks->each(function ($task) {
             $this->comment('running:'.$task->name);

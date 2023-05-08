@@ -41,7 +41,7 @@ class CrawlerRecordConsume extends Command
         foreach ($records as $record) {
             $method = Str::camel($record->name);
             if (!method_exists($service, $method)) {
-                $this->warn("warn: $method not exist");
+                $this->error("error: $method not exist");
                 continue;
             }
 
