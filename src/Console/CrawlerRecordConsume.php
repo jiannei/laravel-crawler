@@ -12,23 +12,42 @@
 namespace Jiannei\LaravelCrawler\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
+use Jiannei\LaravelCrawler\Contracts\ConsumeService;
 use Jiannei\LaravelCrawler\Jobs\RecordConsume;
 use Jiannei\LaravelCrawler\Models\CrawlRecord;
 
 class CrawlerRecordConsume extends Command
 {
-    protected $signature = 'crawler:record:consume {--limit=1000}';
+    protected $signature = 'crawler:record:consume {name?} {--limit=1000}';
 
     protected $description = 'Consume crawled records.';
 
-    public function handle()
+    public function handle(ConsumeService $service)
     {
         $this->info("[{$this->description}]:starting ".now()->format('Y-m-d H:i:s'));
 
-        $records = CrawlRecord::with('task')->where('consumed', false)->cursorPaginate($this->option('limit'));
+        $records = CrawlRecord::select(['crawl_records.*','crawl_tasks.name'])
+            ->join('crawl_tasks','crawl_tasks.id','=','crawl_records.task_id')
+            ->where('crawl_tasks.active',true)
+            ->where('crawl_records.consumed', false)
+            ->when($this->argument('name'), function (Builder $query,string $name) {
+                $query->where('crawl_tasks.name',$name);
+            })
+            ->orderBy('id')
+            ->cursorPaginate($this->option('limit'));
 
         foreach ($records as $record) {
-            dispatch(new RecordConsume($record));
+            $method = Str::camel($record->name);
+            if (!method_exists($service, $method)) {
+                $this->error("[{$this->description}]:error ".now()->format('Y-m-d H:i:s'));
+                continue;
+            }
+
+            $this->comment("consuming:[$record->name] with {$method}");
+
+            dispatch(new RecordConsume($record,$method));
         }
 
         $this->info("[{$this->description}]:finished ".now()->format('Y-m-d H:i:s'));
