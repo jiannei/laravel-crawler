@@ -16,6 +16,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Jiannei\LaravelCrawler\Contracts\ConsumeService;
 use Jiannei\LaravelCrawler\Models\CrawlRecord;
@@ -39,6 +41,15 @@ class RecordConsume implements ShouldQueue
             throw new \InvalidArgumentException("$method not exist");
         }
 
-        $service->$method($this->record);
+        try {
+            DB::transaction(function () use ($service, $method) {
+                $service->$method($this->record);
+
+                $this->record->consumed = true;
+                $this->record->save();
+            });
+        } catch (\Throwable $e) {
+            Log::channel('crawler')->debug('consume', ['exception' => $e->getMessage()]);
+        }
     }
 }
