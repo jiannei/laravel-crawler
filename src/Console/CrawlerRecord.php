@@ -18,9 +18,9 @@ use Jiannei\LaravelCrawler\Contracts\ConsumeService;
 use Jiannei\LaravelCrawler\Jobs\RecordConsume;
 use Jiannei\LaravelCrawler\Models\CrawlRecord;
 
-class CrawlerRecordConsume extends Command
+class CrawlerRecord extends Command
 {
-    protected $signature = 'crawler:record:consume {name?} {--limit=1000}';
+    protected $signature = 'crawler:record {name?} {--limit=1000}';
 
     protected $description = 'Consume crawled records.';
 
@@ -45,7 +45,7 @@ class CrawlerRecordConsume extends Command
                 continue;
             }
 
-            $this->comment("consuming:[$record->name] with {$method}");
+            $this->comment("consuming:[$record->name] - {$method}");
 
             dispatch(new RecordConsume($record, $method));
         }

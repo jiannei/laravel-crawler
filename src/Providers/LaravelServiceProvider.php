@@ -15,10 +15,9 @@ use Illuminate\Http\Client\Events\ConnectionFailed;
 use Illuminate\Http\Client\Events\RequestSending;
 use Illuminate\Http\Client\Events\ResponseReceived;
 use Illuminate\Support\ServiceProvider;
-use Jiannei\LaravelCrawler\Console\CrawlerRecordConsume;
-use Jiannei\LaravelCrawler\Console\CrawlerTaskRun;
+use Jiannei\LaravelCrawler\Console\CrawlerRecord;
 use Jiannei\LaravelCrawler\Console\CrawlerServer;
-use Jiannei\LaravelCrawler\Console\CrawlerTaskSync;
+use Jiannei\LaravelCrawler\Console\CrawlerTask;
 use Jiannei\LaravelCrawler\Listeners\ConnectionFailedListener;
 use Jiannei\LaravelCrawler\Listeners\RequestSendingListener;
 use Jiannei\LaravelCrawler\Listeners\ResponseReceivedListener;
@@ -39,7 +38,7 @@ class LaravelServiceProvider extends ServiceProvider
         }
 
         if ($this->app->runningInConsole()) {
-            $this->commands([CrawlerServer::class, CrawlerTaskRun::class, CrawlerTaskSync::class, CrawlerRecordConsume::class]);
+            $this->commands([CrawlerServer::class, CrawlerTask::class, CrawlerRecord::class]);
             $this->setupMigration();
         }
 

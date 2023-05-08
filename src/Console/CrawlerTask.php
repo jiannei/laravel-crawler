@@ -13,20 +13,27 @@ namespace Jiannei\LaravelCrawler\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\Isolatable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
+use Jiannei\LaravelCrawler\Jobs\TaskRun;
 use Jiannei\LaravelCrawler\Models\CrawlTask;
 use Jiannei\LaravelCrawler\Support\Facades\Crawler;
 
-class CrawlerTaskSync extends Command implements Isolatable
+class CrawlerTask extends Command implements Isolatable
 {
-    protected $signature = 'crawler:task:sync {type=import}';
+    protected $signature = 'crawler:task {name?} {--action=run}';
 
-    protected $description = 'Sync crawling tasks.';
+    protected $description = 'Manage crawler tasks.';
 
     public function handle()
     {
         $this->info("[{$this->description}]:starting ".now()->format('Y-m-d H:i:s'));
 
-        'export' === $this->argument('type') ? $this->export() : $this->import();
+        match ($this->option('action')) {
+            default => $this->runTask(),
+            'export' => $this->export(),
+            'import' => $this->import()
+        };
 
         $this->info("[{$this->description}]:finished ".now()->format('Y-m-d H:i:s'));
     }
@@ -48,8 +55,29 @@ class CrawlerTaskSync extends Command implements Isolatable
 
     protected function export()
     {
+        $this->comment('exporting...');
+
         $tasks = CrawlTask::select('pattern')->where('active', true)->get();
 
         Crawler::source('json', $tasks->pluck('pattern')->all());
+    }
+
+    protected function runTask()
+    {
+        $tasks = CrawlTask::where('active', true)
+            ->where(function (Builder $query) {
+                $query->where('next_run_date', '<=', Carbon::now())
+                    ->orWhereNull('next_run_date');
+            })
+            ->when($this->argument('name'), function (Builder $query, string $name) {
+                $query->where('name', $name);
+            })
+            ->get();
+
+        $tasks->each(function ($task) {
+            $this->comment('running:'.$task->name);
+
+            dispatch(new TaskRun($task));
+        });
     }
 }
