@@ -28,7 +28,7 @@ class CrawlerRecord extends Command
     {
         $this->info("[{$this->description}]:starting ".now()->format('Y-m-d H:i:s'));
 
-        $records = CrawlRecord::select(['crawl_records.*', 'crawl_tasks.name'])
+        $records = CrawlRecord::with('task')->select(['crawl_records.*', 'crawl_tasks.name', 'crawl_tasks.pattern'])
             ->join('crawl_tasks', 'crawl_tasks.id', '=', 'crawl_records.task_id')
             ->where('crawl_tasks.active', true)
             ->where('crawl_records.consumed', false)
@@ -39,15 +39,16 @@ class CrawlerRecord extends Command
             ->cursorPaginate($this->option('limit'));
 
         foreach ($records as $record) {
-            $method = Str::camel($record->name);
-            if (!method_exists($service, $method)) {
-                $this->error("error: $method not exist");
+            $method = $service->resolveCallbackMethod($record->task->pattern);
+
+            if (!$service->valid($record->task->pattern)) {
+                $this->error("error: {$method} not exist");
                 continue;
             }
 
             $this->comment("consuming:[$record->name] - {$method}");
 
-            dispatch(new RecordConsume($record, $method));
+            dispatch(new RecordConsume($record->task->pattern,$record));
         }
 
         $this->info("[{$this->description}]:finished ".now()->format('Y-m-d H:i:s'));

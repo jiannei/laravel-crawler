@@ -13,4 +13,13 @@ namespace Jiannei\LaravelCrawler\Contracts;
 
 interface ConsumeService
 {
+    public function process(array $pattern,array $content): bool;
+
+    public function before();
+
+    public function after();
+
+    public function valid(array $pattern): bool;
+
+    public function resolveCallbackMethod(array $pattern): string;
 }
