@@ -13,7 +13,7 @@ namespace Jiannei\LaravelCrawler\Contracts;
 
 interface ConsumeService
 {
-    public function process(array $pattern,array $content): bool;
+    public function process(array $pattern, array $content): bool;
 
     public function before();
 

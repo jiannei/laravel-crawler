@@ -13,7 +13,6 @@ namespace Jiannei\LaravelCrawler\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Str;
 use Jiannei\LaravelCrawler\Contracts\ConsumeService;
 use Jiannei\LaravelCrawler\Jobs\RecordConsume;
 use Jiannei\LaravelCrawler\Models\CrawlRecord;
@@ -48,7 +47,7 @@ class CrawlerRecord extends Command
 
             $this->comment("consuming:[$record->name] - {$method}");
 
-            dispatch(new RecordConsume($record->task->pattern,$record));
+            dispatch(new RecordConsume($record->task->pattern, $record));
         }
 
         $this->info("[{$this->description}]:finished ".now()->format('Y-m-d H:i:s'));
