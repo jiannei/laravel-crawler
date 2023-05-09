@@ -28,7 +28,7 @@ class RecordConsume implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public function __construct(private readonly array $pattern,private readonly CrawlRecord $record)
+    public function __construct(private readonly array $pattern, private readonly CrawlRecord $record)
     {
         $this->afterCommit();
     }
@@ -37,7 +37,7 @@ class RecordConsume implements ShouldQueue
     {
         try {
             DB::transaction(function () use ($service) {
-                $flag = $service->process($this->pattern,$this->record->content);
+                $flag = $service->process($this->pattern, $this->record->content);
 
                 $this->record->consumed = $flag;
                 $this->record->save();
