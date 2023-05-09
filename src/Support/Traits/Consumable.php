@@ -17,7 +17,7 @@ trait Consumable
     {
         $this->before();
 
-        $result = $this->resolveCallback($pattern)($pattern, $content);
+        $result = $this->resolveCallback($pattern)($content,$pattern);
 
         $this->after();
 
