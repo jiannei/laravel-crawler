@@ -41,11 +41,11 @@ class CrawlerRecord extends Command
             $method = $service->resolveCallbackMethod($record->task->pattern);
 
             if (!$service->valid($record->task->pattern)) {
-                $this->error("error: {$method} not exist");
+                $this->error("error: [$record->name] [{$method}] not exist");
                 continue;
             }
 
-            $this->comment("consuming:[$record->name] - {$method}");
+            $this->comment("consuming:[$record->name] [{$method}]");
 
             dispatch(new RecordConsume($record->task->pattern, $record));
         }
