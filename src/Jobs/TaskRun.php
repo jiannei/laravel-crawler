@@ -19,6 +19,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Jiannei\LaravelCrawler\Models\CrawlTask;
 use Jiannei\LaravelCrawler\Support\Facades\Crawler;
 
@@ -45,9 +46,11 @@ class TaskRun implements ShouldQueue
                 $this->task->next_run_date = Carbon::instance((new CronExpression($this->task->expression))->getNextRunDate());
                 $this->task->status = 1;
                 $this->task->exception = '';
-            } catch (\Throwable $exception) {
+            } catch (\Throwable $e) {
                 $this->task->status = -1;
-                $this->task->exception = $exception;
+                $this->task->exception = $e;
+
+                Log::channel('crawler')->debug('task', ['exception' => $e->getMessage()]);
             }
 
             $this->task->save();
