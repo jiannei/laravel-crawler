@@ -92,7 +92,7 @@ class Crawler extends SymfonyCrawler
      */
     public function json(string $key, array $query = [], array $options = []): array|Collection
     {
-        $source = $this->source(config('crawler.source.default','file'))->keyBy('key');
+        $source = $this->source(config('crawler.source.default', 'file'))->keyBy('key');
         if (!$source->has($key)) {
             throw new \InvalidArgumentException('url pattern not exist');
         }
@@ -104,7 +104,6 @@ class Crawler extends SymfonyCrawler
 
         return Arr::get($pattern, 'rss', false) ? $this->rss($pattern['url']) : $this->pattern($pattern);
     }
-
 
     /**
      * Get crawler pattern rules by source.

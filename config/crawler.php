@@ -15,11 +15,11 @@ return [
     'debug' => false, // http client debug
 
     'source' => [
-        'default' => env('CRAWLER_SOURCE_CHANNEL','file'),
+        'default' => env('CRAWLER_SOURCE_CHANNEL', 'file'),
 
         'channels' => [
             'file' => storage_path('app/crawler.json'),
-            'database' => \Jiannei\LaravelCrawler\Models\CrawlTask::class
+            'database' => \Jiannei\LaravelCrawler\Models\CrawlTask::class,
         ],
     ],
 

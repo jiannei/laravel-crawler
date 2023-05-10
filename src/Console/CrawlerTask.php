@@ -42,7 +42,7 @@ class CrawlerTask extends Command implements Isolatable
     {
         $this->comment('importing...');
 
-        Crawler::source('database',Crawler::source()->all());
+        Crawler::source('database', Crawler::source()->all());
     }
 
     protected function export()
