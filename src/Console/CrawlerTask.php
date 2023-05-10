@@ -49,7 +49,7 @@ class CrawlerTask extends Command implements Isolatable
     {
         $this->comment('exporting...');
 
-        Crawler::source('json', Crawler::source('database')->all());
+        Crawler::source('file', Crawler::source('database')->all());
     }
 
     protected function runTask()

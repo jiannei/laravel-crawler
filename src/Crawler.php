@@ -114,7 +114,7 @@ class Crawler extends SymfonyCrawler
             throw new \InvalidArgumentException('source illegal');
         }
 
-        $sourceAction = Str::camel($patterns ? 'set' : 'get'.$source.'Source');
+        $sourceAction = ($patterns ? 'set' : 'get').ucfirst($source).'Source';
 
         return match ($sourceAction) {
             default => $this->getFileSource(),
