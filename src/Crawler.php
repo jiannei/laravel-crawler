@@ -22,6 +22,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Jiannei\LaravelCrawler\Models\CrawlTask;
 use Symfony\Component\DomCrawler\Crawler as SymfonyCrawler;
 
 class Crawler extends SymfonyCrawler
@@ -91,7 +92,7 @@ class Crawler extends SymfonyCrawler
      */
     public function json(string $key, array $query = [], array $options = []): array|Collection
     {
-        $source = $this->source()->keyBy('key');
+        $source = $this->source(config('crawler.source.default','file'))->keyBy('key');
         if (!$source->has($key)) {
             throw new \InvalidArgumentException('url pattern not exist');
         }
@@ -104,15 +105,24 @@ class Crawler extends SymfonyCrawler
         return Arr::get($pattern, 'rss', false) ? $this->rss($pattern['url']) : $this->pattern($pattern);
     }
 
-    public function source(string $source = 'json', array $patterns = []): Collection|int
+
+    /**
+     * Get crawler pattern rules by source.
+     */
+    public function source(string $source = 'file', array $patterns = []): Collection|int
     {
-        if (!File::exists(config('crawler.source.storage'))) {
-            throw new \InvalidArgumentException('source config illegal');
+        if (!in_array($source, ['file', 'database'])) {
+            throw new \InvalidArgumentException('source illegal');
         }
 
-        return !$patterns ?
-            collect(json_decode(File::get(config('crawler.source.storage')), true))
-            : File::put(config('crawler.source.storage'), json_encode($patterns, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+        $sourceAction = Str::camel($patterns ? 'set' : 'get'.$source.'Source');
+
+        return match ($sourceAction) {
+            default => $this->getFileSource(),
+            'setFileSource' => $this->setFileSource($patterns),
+            'getDatabaseSource' => $this->getDatabaseSource(),
+            'setDatabaseSource' => $this->setDatabaseSource($patterns)
+        };
     }
 
     /**
@@ -316,5 +326,41 @@ class Crawler extends SymfonyCrawler
         self::$afterClosure = null;
 
         return $response;
+    }
+
+    protected function getFileSource(): Collection
+    {
+        if (!File::exists(config('crawler.source.channels.file'))) {
+            throw new \InvalidArgumentException('source config illegal');
+        }
+
+        return collect(json_decode(File::get(config('crawler.source.channels.file')), true));
+    }
+
+    protected function setFileSource(array $patterns): bool|int
+    {
+        return File::put(config('crawler.source.channels.file'),
+            json_encode($patterns, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
+        );
+    }
+
+    protected function getDatabaseSource()
+    {
+        return CrawlTask::active()->select('pattern')->get()->pluck('pattern');
+    }
+
+    protected function setDatabaseSource(array $patterns): bool
+    {
+        foreach ($patterns as $pattern) {
+            $data = [
+                'name' => $pattern['key'],
+                'expression' => $pattern['expression'] ?? '* * * * *',
+                'pattern' => $pattern,
+            ];
+
+            CrawlTask::updateOrCreate(['name' => $data['name']], $data);
+        }
+
+        return true;
     }
 }

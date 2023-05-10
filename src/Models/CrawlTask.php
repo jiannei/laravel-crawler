@@ -11,6 +11,7 @@
 
 namespace Jiannei\LaravelCrawler\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class CrawlTask extends Model
@@ -29,5 +30,13 @@ class CrawlTask extends Model
     public function records()
     {
         return $this->hasMany(CrawlRecord::class, 'task_id');
+    }
+
+    /**
+     * Scope a query to only include active tasks.
+     */
+    public function scopeActive(Builder $query): void
+    {
+        $query->where('active', true);
     }
 }

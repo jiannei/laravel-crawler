@@ -40,26 +40,16 @@ class CrawlerTask extends Command implements Isolatable
 
     protected function import()
     {
-        Crawler::source()->each(function ($item) {
-            $this->comment('importing: '.$item['key']);
+        $this->comment('importing...');
 
-            $data = [
-                'name' => $item['key'],
-                'expression' => $item['expression'] ?? '* * * * *',
-                'pattern' => $item,
-            ];
-
-            CrawlTask::query()->updateOrCreate(['name' => $data['name']], $data);
-        });
+        Crawler::source('database',Crawler::source()->all());
     }
 
     protected function export()
     {
         $this->comment('exporting...');
 
-        $tasks = CrawlTask::select('pattern')->where('active', true)->get();
-
-        Crawler::source('json', $tasks->pluck('pattern')->all());
+        Crawler::source('json', Crawler::source('database')->all());
     }
 
     protected function runTask()
