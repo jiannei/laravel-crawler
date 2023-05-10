@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-// $suffix = now()->format('Y-m-d')
+// $suffix = now()->format('Y-m-d');
 
 return [
     'debug' => false, // http client debug
@@ -18,7 +18,7 @@ return [
         'default' => env('CRAWLER_SOURCE_CHANNEL', 'file'),
 
         'channels' => [
-            'file' => storage_path('app/crawler.json'),
+            'file' => resource_path('crawler.json'),
             'database' => \Jiannei\LaravelCrawler\Models\CrawlTask::class,
         ],
     ],

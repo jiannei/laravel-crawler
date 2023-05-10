@@ -26,7 +26,9 @@ class LaravelServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        $this->setupConfig();
+        $this->mergeConfigFrom(dirname(__DIR__, 2).'/config/crawler.php', 'crawler');
+
+        $this->app['config']->set('logging.channels.crawler', $this->app['config']->get('crawler.log'));
     }
 
     public function boot()
@@ -39,7 +41,7 @@ class LaravelServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->commands([CrawlerServer::class, CrawlerTask::class, CrawlerRecord::class]);
-            $this->setupMigration();
+            $this->setupPublishes();
         }
 
         $consume = $this->app['config']->get('crawler.consume.service');
@@ -48,28 +50,13 @@ class LaravelServiceProvider extends ServiceProvider
         }
     }
 
-    protected function setupConfig()
-    {
-        $path = dirname(__DIR__, 2).'/config/crawler.php';
-
-        if ($this->app->runningInConsole()) {
-            $this->publishes([$path => config_path('crawler.php')], 'crawler');
-
-            $this->publishes([
-                dirname(__DIR__, 2).'/storage' => storage_path(),
-            ], 'crawler');
-        }
-
-        $this->mergeConfigFrom($path, 'crawler');
-
-        $this->app['config']->set('logging.channels.crawler', $this->app['config']->get('crawler.log'));
-    }
-
-    protected function setupMigration(): void
+    protected function setupPublishes()
     {
         $this->publishes([
-            __DIR__.'/../../database/migrations/create_crawl_tasks_table.php.stub' => database_path('migrations/'.date('Y_m_d_His').'_create_crawl_tasks_table.php'),
-            __DIR__.'/../../database/migrations/create_crawl_records_table.php.stub' => database_path('migrations/'.date('Y_m_d_His').'_create_crawl_records_table.php'),
-        ], 'migrations');
+            dirname(__DIR__, 2).'/config/crawler.php' => config_path('crawler.php'),
+            dirname(__DIR__, 2).'/database/migrations/create_crawl_tasks_table.php.stub' => database_path('migrations/'.date('Y_m_d_His').'_create_crawl_tasks_table.php'),
+            dirname(__DIR__, 2).'/database/migrations/create_crawl_records_table.php.stub' => database_path('migrations/'.date('Y_m_d_His').'_create_crawl_records_table.php'),
+            dirname(__DIR__, 2).'/resources/' => resource_path(),
+        ], 'crawler');
     }
 }
