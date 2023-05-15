@@ -11,27 +11,33 @@
 
 namespace Jiannei\LaravelCrawler\Support\Traits;
 
+use Jiannei\LaravelCrawler\Models\CrawlRecord;
+use Jiannei\LaravelCrawler\Models\CrawlTask;
+
 trait Consumable
 {
-    public function process(array $pattern, array $content): bool
+    public function process(CrawlTask $task, CrawlRecord $record): bool
     {
+       $method = $this->valid($task);
+
         $this->before();
 
-        $result = $this->resolveCallback($pattern)($content, $pattern);
+        $result = $this->{$method}()($record, $task);
 
         $this->after();
 
         return $result;
     }
 
-    public function valid(array $pattern): bool
+    public function valid(CrawlTask $task): string
     {
-        return method_exists($this, $this->resolveCallbackMethod($pattern)) && is_callable($this->resolveCallback($pattern));
-    }
+        $method = $task->pattern['consume'] ?? 'defaultCallback';
 
-    public function resolveCallbackMethod(array $pattern): string
-    {
-        return $pattern['consume'] ?? 'defaultCallback';
+        if (!method_exists($this,$method) || !is_callable($this->{$method}())) {
+            throw new \RuntimeException('consume config illegal');
+        }
+
+        return $method;
     }
 
     protected function before()
@@ -40,10 +46,5 @@ trait Consumable
 
     protected function after()
     {
-    }
-
-    protected function resolveCallback(array $pattern): \Closure
-    {
-        return $this->{$this->resolveCallbackMethod($pattern)}();
     }
 }

@@ -29,7 +29,7 @@ return [
 
     'log' => [
         'driver' => 'daily',
-        'path' => storage_path('logs/http.log'),
+        'path' => storage_path('logs/crawler.log'),
         'level' => env('CRAWLER_LOG_LEVEL', 'debug'),
         'days' => 14,
     ],
@@ -37,7 +37,7 @@ return [
     'guzzle' => [
         // https://docs.guzzlephp.org/en/stable/request-options.html
         'options' => [
-            'debug' => false, // fopen(storage_path("logs/guzzle-{$suffix}.log"), 'a+')
+            'debug' => false, // fopen(storage_path("logs/crawler-guzzle-{$suffix}.log"), 'a+')
             'connect_timeout' => 10,
             'http_errors' => false,
             'timeout' => 30,

@@ -38,16 +38,16 @@ class CrawlerRecord extends Command
             ->cursorPaginate($this->option('limit'));
 
         foreach ($records as $record) {
-            $method = $service->resolveCallbackMethod($record->task->pattern);
-
-            if (!$service->valid($record->task->pattern)) {
-                $this->error("error: [$record->name] [{$method}] not exist");
+            try {
+                $method = $service->valid($record->task);
+            } catch (\Throwable $e) {
+                $this->error("error: [$record->name] [{$e->getMessage()}]");
                 continue;
             }
 
             $this->comment("consuming:[$record->name] [{$method}]");
 
-            dispatch(new RecordConsume($record->task->pattern, $record));
+            dispatch(new RecordConsume($record->task, $record));
         }
 
         $this->info("[{$this->description}]:finished ".now()->format('Y-m-d H:i:s'));

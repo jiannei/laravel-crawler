@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Jiannei\LaravelCrawler\Contracts\ConsumeService;
 use Jiannei\LaravelCrawler\Models\CrawlRecord;
+use Jiannei\LaravelCrawler\Models\CrawlTask;
 
 class RecordConsume implements ShouldQueue
 {
@@ -28,7 +29,7 @@ class RecordConsume implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public function __construct(private readonly array $pattern, private readonly CrawlRecord $record)
+    public function __construct(private readonly CrawlTask $task, private readonly CrawlRecord $record)
     {
         $this->afterCommit();
     }
@@ -37,7 +38,7 @@ class RecordConsume implements ShouldQueue
     {
         try {
             DB::transaction(function () use ($service) {
-                $flag = $service->process($this->pattern, $this->record->content);
+                $flag = $service->process($this->task, $this->record);
 
                 $this->record->consumed = $flag;
                 $this->record->save();

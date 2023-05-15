@@ -11,11 +11,12 @@
 
 namespace Jiannei\LaravelCrawler\Contracts;
 
+use Jiannei\LaravelCrawler\Models\CrawlRecord;
+use Jiannei\LaravelCrawler\Models\CrawlTask;
+
 interface ConsumeService
 {
-    public function process(array $pattern, array $content): bool;
+    public function process(CrawlTask $task, CrawlRecord $record): bool;
 
-    public function valid(array $pattern): bool;
-
-    public function resolveCallbackMethod(array $pattern): string;
+    public function valid(CrawlTask $task): string;
 }
