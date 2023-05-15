@@ -18,7 +18,7 @@ trait Consumable
 {
     public function process(CrawlTask $task, CrawlRecord $record): bool
     {
-       $method = $this->valid($task);
+        $method = $this->valid($task);
 
         $this->before();
 
@@ -33,7 +33,7 @@ trait Consumable
     {
         $method = $task->pattern['consume'] ?? 'defaultCallback';
 
-        if (!method_exists($this,$method) || !is_callable($this->{$method}())) {
+        if (!method_exists($this, $method) || !is_callable($this->{$method}())) {
             throw new \RuntimeException('consume config illegal');
         }
 
