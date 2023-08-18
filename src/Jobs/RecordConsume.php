@@ -29,7 +29,7 @@ class RecordConsume implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public function __construct(private readonly CrawlTask $task, private readonly CrawlRecord $record)
+    public function __construct(protected readonly CrawlTask $task, protected readonly CrawlRecord $record)
     {
         $this->afterCommit();
     }

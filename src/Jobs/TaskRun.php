@@ -30,7 +30,7 @@ class TaskRun implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public function __construct(private readonly CrawlTask $task)
+    public function __construct(protected readonly CrawlTask $task)
     {
         $this->afterCommit();
     }
