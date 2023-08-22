@@ -14,6 +14,9 @@ namespace Jiannei\LaravelCrawler\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @method static \Illuminate\Database\Eloquent\Builder|CrawlTask active(\Illuminate\Database\Eloquent\Model $subject)
+ */
 class CrawlTask extends Model
 {
     protected $fillable = [
