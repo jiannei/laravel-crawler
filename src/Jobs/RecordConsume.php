@@ -44,7 +44,7 @@ class RecordConsume implements ShouldQueue
                 $this->record->save();
             });
         } catch (\Throwable $e) {
-            Log::channel('crawler')->debug('consume', ['exception' => $e->getMessage()]);
+            Log::channel('crawler')->debug('consume', ['file' => $e->getFile(), 'line' => $e->getLine(), 'message' => $e->getMessage()]);
         }
     }
 }
