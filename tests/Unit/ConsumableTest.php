@@ -22,7 +22,7 @@ class ConsumableTest extends TestCase
 {
     public function testItRunsTheNamedCallbackBetweenHooks(): void
     {
-        $consumer = new class implements ConsumeService {
+        $consumer = new class() implements ConsumeService {
             use Consumable;
 
             public array $events = [];
@@ -60,7 +60,7 @@ class ConsumableTest extends TestCase
 
     public function testAnEmptyConsumeKeyFallsBackToTheDefaultCallback(): void
     {
-        $consumer = new class implements ConsumeService {
+        $consumer = new class() implements ConsumeService {
             use Consumable;
 
             public array $events = [];
@@ -88,7 +88,7 @@ class ConsumableTest extends TestCase
 
     public function testAnUnknownCallbackIsRejected(): void
     {
-        $consumer = new class implements ConsumeService {
+        $consumer = new class() implements ConsumeService {
             use Consumable;
 
             protected function defaultCallback(): callable
@@ -104,7 +104,7 @@ class ConsumableTest extends TestCase
 
     public function testAfterRunsWhenTheCallbackThrows(): void
     {
-        $consumer = new class implements ConsumeService {
+        $consumer = new class() implements ConsumeService {
             use Consumable;
 
             public array $events = [];
