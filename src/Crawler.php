@@ -37,7 +37,7 @@ class Crawler extends SymfonyCrawler
      *
      * @return $this
      */
-    public function new(\DOMNodeList|\DOMNode|array|string $node = null, string $uri = null, string $baseHref = null): static
+    public function new(\DOMNodeList|\DOMNode|array|string|null $node = null, ?string $uri = null, ?string $baseHref = null): static
     {
         return new static(...func_get_args());
     }
@@ -120,7 +120,7 @@ class Crawler extends SymfonyCrawler
             default => $this->getFileSource(),
             'setFileSource' => $this->setFileSource($patterns),
             'getDatabaseSource' => $this->getDatabaseSource(),
-            'setDatabaseSource' => $this->setDatabaseSource($patterns)
+            'setDatabaseSource' => $this->setDatabaseSource($patterns),
         };
     }
 

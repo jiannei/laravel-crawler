@@ -32,7 +32,7 @@ class CrawlerTask extends Command implements Isolatable
         match ($this->option('action')) {
             default => $this->runTask(),
             'export' => $this->export(),
-            'import' => $this->import()
+            'import' => $this->import(),
         };
 
         $this->info("[{$this->description}]:finished ".now()->format('Y-m-d H:i:s'));

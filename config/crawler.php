@@ -19,7 +19,7 @@ return [
 
         'channels' => [
             'file' => resource_path('crawler.json'),
-            'database' => \Jiannei\LaravelCrawler\Models\CrawlTask::class,
+            'database' => Jiannei\LaravelCrawler\Models\CrawlTask::class,
         ],
     ],
 
