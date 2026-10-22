@@ -23,13 +23,13 @@ jobs:
                       phpunit: ^13.0
         steps:
             - name: Checkout code
-              uses: actions/checkout@v5
+              uses: actions/checkout@v7
 
             - name: Validate composer.json
               run: composer validate --strict
 
             - name: Cache Composer packages
-              uses: actions/cache@v4
+              uses: actions/cache@v6
               with:
                   path: vendor
                   key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
