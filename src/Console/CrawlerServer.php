@@ -14,7 +14,7 @@ namespace Jiannei\LaravelCrawler\Console;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\Isolatable;
 use Illuminate\Support\Facades\Process;
-use Illuminate\Support\Str;
+use Jiannei\LaravelCrawler\Chrome\ChromeSettings;
 
 class CrawlerServer extends Command implements Isolatable
 {
@@ -22,21 +22,22 @@ class CrawlerServer extends Command implements Isolatable
 
     protected $description = 'Start a remote end (server)';
 
-    public function handle()
+    public function handle(ChromeSettings $settings)
     {
         if ($pid = Process::run('pgrep chromedriver')->output()) {
             Process::run('kill -9 '.$pid);
         }
 
-        $driverPath = $this->option('path') ?? '';
-        if ($driverPath) {
-            $driverPath = Str::of($driverPath)->finish(DIRECTORY_SEPARATOR);
+        $binary = $settings->binary;
+
+        if ($path = $this->option('path')) {
+            $binary = rtrim($path, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.$binary;
         }
 
-        $startCommand = $driverPath
-            .'chromedriver --port='.config('crawler.chrome.port', 4444)
-            .' --log-path='.config('crawler.chrome.log.path')
-            .' --log-level='.config('crawler.chrome.log.level');
+        $startCommand = escapeshellarg($binary)
+            .' --port='.$settings->port
+            .' --log-path='.escapeshellarg($settings->logPath)
+            .' --log-level='.escapeshellarg($settings->logLevel);
 
         $process = Process::start($startCommand);
 

@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Jiannei\LaravelCrawler\Jobs\TaskRun;
 use Jiannei\LaravelCrawler\Models\CrawlTask;
-use Jiannei\LaravelCrawler\Support\Facades\Crawler;
+use Jiannei\LaravelCrawler\Sources\PatternSourceManager;
 
 class CrawlerTask extends Command implements Isolatable
 {
@@ -25,31 +25,31 @@ class CrawlerTask extends Command implements Isolatable
 
     protected $description = 'Manage crawler tasks.';
 
-    public function handle()
+    public function handle(PatternSourceManager $sources)
     {
         $this->info("[{$this->description}]:starting ".now()->format('Y-m-d H:i:s'));
 
         match ($this->option('action')) {
             default => $this->runTask(),
-            'export' => $this->export(),
-            'import' => $this->import(),
+            'export' => $this->export($sources),
+            'import' => $this->import($sources),
         };
 
         $this->info("[{$this->description}]:finished ".now()->format('Y-m-d H:i:s'));
     }
 
-    protected function import()
+    protected function import(PatternSourceManager $sources): void
     {
         $this->comment('importing...');
 
-        Crawler::source('database', Crawler::source()->all());
+        $sources->driver('database')->save($sources->driver('file')->all()->values()->all());
     }
 
-    protected function export()
+    protected function export(PatternSourceManager $sources): void
     {
         $this->comment('exporting...');
 
-        Crawler::source('file', Crawler::source('database')->all());
+        $sources->driver('file')->save($sources->driver('database')->all()->values()->all());
     }
 
     protected function runTask()

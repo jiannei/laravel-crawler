@@ -11,120 +11,170 @@
 
 namespace Jiannei\LaravelCrawler\Tests\Unit;
 
-use Carbon\CarbonInterface;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Stringable;
-use Jiannei\LaravelCrawler\Support\Facades\Crawler;
+use Illuminate\Support\Collection;
+use Jiannei\LaravelCrawler\Data\FetchResponse;
+use Jiannei\LaravelCrawler\Exceptions\FetchFailed;
+use Jiannei\LaravelCrawler\Exceptions\InvalidPattern;
+use Jiannei\LaravelCrawler\Facades\Crawler;
 use Jiannei\LaravelCrawler\Tests\TestCase;
-use PHPUnit\Framework\Attributes\Group;
 
-#[Group('integration')]
 class PatternTest extends TestCase
 {
-    public function testRules()
+    public function testSingleGroupReturnsOneItemPerMatch(): void
     {
-        $baseUrl = 'https://laravel-news.com';
-        $link = 'laravel-10';
+        $this->fakeFetcher($this->response());
 
-        $result = Crawler::pattern([
-            'url' => $baseUrl."/{$link}",
-            'rules' => [
-                'title' => ['h1', 'text'],
-                'category.link' => [
-                    'h1 + div a', 'href', null, function ($node, Stringable $val) use ($baseUrl) {
-                        return $val->start($baseUrl);
-                    },
-                ],
-                'category.name' => ['h1 + div a', 'text'],
-                'author.name' => ["article div:nth-of-type(2) div:nth-of-type(2) > div:last-child a[rel='author']", 'text'],
-                'author.homepage' => [
-                    "article div:nth-of-type(2) div:nth-of-type(2) > div:last-child a[rel='author']", 'href', null, function ($node, Stringable $val) use ($baseUrl) {
-                        return $val->start($baseUrl);
-                    },
-                ],
-                'author.intro' => ['article div:nth-of-type(2) div:nth-of-type(2) > div:last-child p:last-child', 'text'],
-                'description' => ['article div:nth-of-type(2) div:nth-of-type(1)', 'html'],
-                'publishDate' => [
-                    'h1 + div p', 'text', null, function ($node, $val) {
-                        return Carbon::createFromTimestamp(strtotime($val))->format(CarbonInterface::DEFAULT_TO_STRING_FORMAT);
-                    },
-                ],
-                'link' => $baseUrl."/{$link}",
-            ],
-        ]);
-
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('title', $result);
-        $this->assertArrayHasKey('category', $result);
-        $this->assertArrayHasKey('link', $result['category']);
-        $this->assertArrayHasKey('name', $result['author']);
-    }
-
-    public function testSingleGroup()
-    {
-        $result = Crawler::pattern([
-            'url' => 'https://github.com/trending',
-            'query' => ['since' => 'daily', 'spoken_language_code' => 'zh'],
+        $items = Crawler::pattern([
+            'url' => 'https://example.test/list',
             'group' => [
-                'selector' => 'article',
+                'selector' => '.item',
                 'rules' => [
-                    'repo' => ['h1 a', 'href'],
-                    'desc' => ['p', 'text'],
-                    'language' => ["span[itemprop='programmingLanguage']", 'text'],
-                    'stars' => ['div.f6.color-fg-muted.mt-2 > a:nth-of-type(1)', 'text'],
-                    'forks' => ['div.f6.color-fg-muted.mt-2 > a:nth-of-type(2)', 'text'],
-                    'added_stars' => ['div.f6.color-fg-muted.mt-2 > span.d-inline-block.float-sm-right', 'text'],
+                    'title' => ['h2 a', 'text'],
+                    'link' => ['h2 a', 'href'],
+                    'author' => ['.author', 'text'],
                 ],
             ],
         ]);
 
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $result);
-        $this->assertTrue(Arr::isList($result->toArray()));
+        $this->assertInstanceOf(Collection::class, $items);
+        $this->assertCount(2, $items);
+        $this->assertSame('Alpha', $items->first()['title']);
+        $this->assertSame('/a', $items->first()['link']);
+        $this->assertSame('Grace', $items->last()['author']);
     }
 
-    public function testMultiGroups()
+    public function testUngroupedPatternReturnsOneItem(): void
     {
-        $result = Crawler::pattern([
-            'url' => 'https://www.v2ex.com/?tab=hot',
+        $this->fakeFetcher($this->response());
+
+        $items = Crawler::pattern([
+            'url' => 'https://example.test/single',
+            'rules' => [
+                'title' => ['#title', 'text'],
+                'author' => ['#author', 'text'],
+                'body' => ['.body', 'html'],
+            ],
+        ]);
+
+        $this->assertCount(1, $items);
+        $this->assertSame('A single page', $items->first()['title']);
+        $this->assertSame('Ada', $items->first()['author']);
+        $this->assertStringContainsString('<b>world</b>', $items->first()['body']);
+    }
+
+    public function testMultipleGroupsKeepTheirAliases(): void
+    {
+        $this->fakeFetcher($this->response());
+
+        $items = Crawler::pattern([
+            'url' => 'https://example.test/page',
             'group' => [
                 [
-                    'alias' => 'tabs',
-                    'selector' => '#Tabs a',
-                    'rules' => [
-                        'label' => ['a', 'text'],
-                        'value' => ['a', 'href'],
-                    ],
+                    'alias' => 'list',
+                    'selector' => '.item',
+                    'rules' => ['title' => ['h2 a', 'text']],
                 ],
                 [
-                    'alias' => 'nodes',
-                    'selector' => '#SecondaryTabs a',
-                    'rules' => [
-                        'label' => ['a', 'text'],
-                        'value' => ['a', 'href'],
-                    ],
-                ],
-                [
-                    'alias' => 'posts',
-                    'selector' => 'div .item table',
-                    'rules' => [
-                        'member_avatar' => ['.avatar', 'src'],
-                        'member_link' => ['strong a', 'href'],
-                        'member_name' => ['strong a', 'text'],
-                        'title' => ['.topic-link', 'text'],
-                        'link' => ['.topic-link', 'href'],
-                        'node_label' => ['.node', 'text'],
-                        'node_value' => ['.node', 'href'],
-                        'reply_count' => ['.count_livid', 'text'],
-                    ],
+                    'alias' => 'single',
+                    'selector' => '#single',
+                    'rules' => ['title' => ['#title', 'text']],
                 ],
             ],
         ]);
 
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $result);
-        $this->assertArrayHasKey('tabs', $result->toArray());
-        $this->assertArrayHasKey('nodes', $result->toArray());
-        $this->assertArrayHasKey('posts', $result->toArray());
-        $this->assertTrue(Arr::isList($result->toArray()['posts']));
+        $this->assertTrue($items->has('list'));
+        $this->assertCount(2, $items->get('list'));
+        $this->assertSame('A single page', $items->get('single')->first()['title']);
+    }
+
+    public function testPositionAndCallbackRules(): void
+    {
+        $this->fakeFetcher($this->response());
+
+        $items = Crawler::pattern([
+            'url' => 'https://example.test/list',
+            'group' => [
+                'selector' => '.item',
+                'rules' => [
+                    'last_desc' => ['.desc', 'text', 'last', function ($node, $value) {
+                        return $value->upper();
+                    }],
+                ],
+            ],
+        ]);
+
+        $this->assertSame('SECOND', (string) $items->last()['last_desc']);
+    }
+
+    public function testMissingFieldBecomesNull(): void
+    {
+        $this->fakeFetcher($this->response());
+
+        $items = Crawler::pattern([
+            'url' => 'https://example.test/single',
+            'rules' => [
+                'missing' => ['.does-not-exist', 'text'],
+            ],
+        ]);
+
+        $this->assertCount(1, $items);
+        $this->assertNull($items->first()['missing']);
+    }
+
+    public function testPageParseReturnsACollection(): void
+    {
+        $page = Crawler::new('<div class="row"><span>A</span><span>B</span></div>');
+
+        $items = $page->filter('.row')->parse([
+            'first' => ['span', 'text'],
+            'second' => ['span', 'text', 'last'],
+        ]);
+
+        $this->assertInstanceOf(Collection::class, $items);
+        $this->assertSame('A', $items->first()['first']);
+        $this->assertSame('B', $items->first()['second']);
+    }
+
+    public function testEmptySelectionReturnsAnEmptyCollection(): void
+    {
+        $items = Crawler::new('<div></div>')
+            ->filter('.missing')
+            ->parse(['text' => ['span', 'text']]);
+
+        $this->assertTrue($items->isEmpty());
+    }
+
+    public function testPatternWithoutRulesIsInvalid(): void
+    {
+        $this->expectException(InvalidPattern::class);
+
+        Crawler::pattern([
+            'url' => 'https://example.test/single',
+            'rules' => [],
+        ]);
+    }
+
+    public function testInvalidRuleIsRejected(): void
+    {
+        $this->fakeFetcher($this->response());
+
+        $this->expectException(InvalidPattern::class);
+
+        Crawler::pattern([
+            'url' => 'https://example.test/single',
+            'rules' => ['title' => ['h1']],
+        ]);
+    }
+
+    public function testNonSuccessfulResponseIsARejectedCrawl(): void
+    {
+        $this->fakeFetcher(new FetchResponse(503, 'down'));
+
+        $this->expectException(FetchFailed::class);
+
+        Crawler::pattern([
+            'url' => 'https://example.test/single',
+            'rules' => ['title' => ['#title', 'text']],
+        ]);
     }
 }

@@ -11,48 +11,52 @@
 
 namespace Jiannei\LaravelCrawler\Tests\Unit;
 
-use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
-use Jiannei\LaravelCrawler\Support\Facades\Crawler;
+use Jiannei\LaravelCrawler\Data\RunOptions;
+use Jiannei\LaravelCrawler\Exceptions\InvalidPattern;
+use Jiannei\LaravelCrawler\Facades\Crawler;
 use Jiannei\LaravelCrawler\Tests\TestCase;
-use PHPUnit\Framework\Attributes\Group;
 
-#[Group('integration')]
 class JsonTest extends TestCase
 {
-    public function testJson()
+    public function testStoredGroupPattern(): void
     {
-        $result = Crawler::json('github:trending');
+        $fetcher = $this->fakeFetcher($this->response());
 
-        $this->assertInstanceOf(Collection::class, $result);
-        $this->assertIsArray($result->toArray());
-        $this->assertTrue(Arr::isList($result->toArray()));
+        $items = Crawler::json('fixture:list', new RunOptions(query: ['since' => 'daily']));
+
+        $this->assertCount(2, $items);
+        $this->assertSame('Alpha', $items->first()['title']);
+        $this->assertSame(['page' => '1', 'since' => 'daily'], $fetcher->requests[0]['query']);
+        $this->assertSame('text/html', $fetcher->requests[0]['options']['headers']['Accept']);
     }
 
-    public function testRss()
+    public function testStoredUngroupedPattern(): void
     {
-        $result = Crawler::json('sspai');
+        $this->fakeFetcher($this->response());
 
-        $this->assertInstanceOf(Collection::class, $result);
-        $this->assertIsArray($result->toArray());
-        $this->assertTrue(Arr::isList($result->toArray()['items']));
+        $items = Crawler::json('fixture:single');
+
+        $this->assertCount(1, $items);
+        $this->assertSame('A single page', $items->first()['title']);
     }
 
-    public function testBefore()
+    public function testStoredRssPattern(): void
     {
-        $result = Crawler::before(function ($url, $query, $options) {
-            $url = Str::of($url)->replace(':category', 'all')->value();
+        $fetcher = $this->fakeFetcher($this->response('feed.xml'));
 
-            return [$url, $query, $options];
-        })->json('gitee');
+        $result = Crawler::json('fixture:rss', new RunOptions(query: ['limit' => 10]));
 
-        $this->assertInstanceOf(Collection::class, $result);
-        $this->assertIsArray($result->toArray());
-        $this->assertArrayHasKey('categories', $result->toArray());
-        $this->assertArrayHasKey('repos', $result->toArray());
-        $this->assertArrayHasKey('daily', $result->toArray());
-        $this->assertArrayHasKey('weekly', $result->toArray());
-        $this->assertTrue(Arr::isList($result->get('daily')->all()));
+        $this->assertTrue($result->has('channel'));
+        $this->assertTrue($result->has('items'));
+        $this->assertSame('Example feed', $result->get('channel')['title']);
+        $this->assertCount(2, $result->get('items'));
+        $this->assertSame(['limit' => 10], $fetcher->requests[0]['query']);
+    }
+
+    public function testUnknownKeyIsInvalid(): void
+    {
+        $this->expectException(InvalidPattern::class);
+
+        Crawler::json('fixture:unknown');
     }
 }

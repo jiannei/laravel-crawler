@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('task_id');
             $table->boolean('consumed')->default(false);
             $table->json('content');
+            $table->longText('exception')->nullable();
             $table->timestamps();
         });
     }

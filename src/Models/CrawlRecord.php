@@ -19,6 +19,7 @@ class CrawlRecord extends Model
         'content',
     ];
     protected $casts = [
+        'consumed' => 'boolean',
         'content' => 'json',
     ];
 

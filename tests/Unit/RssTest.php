@@ -12,21 +12,32 @@
 namespace Jiannei\LaravelCrawler\Tests\Unit;
 
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
-use Jiannei\LaravelCrawler\Support\Facades\Crawler;
+use Jiannei\LaravelCrawler\Data\RunOptions;
+use Jiannei\LaravelCrawler\Facades\Crawler;
 use Jiannei\LaravelCrawler\Tests\TestCase;
-use PHPUnit\Framework\Attributes\Group;
 
-#[Group('integration')]
 class RssTest extends TestCase
 {
-    public function testRss()
+    public function testRssShapesChannelAndItems(): void
     {
-        $result = Crawler::rss('https://packagist.org/feeds/packages.rss');
+        $this->fakeFetcher($this->response('feed.xml'));
 
-        $this->assertInstanceOf(Collection::class, $result);
+        $result = Crawler::rss('https://example.test/feed.xml');
+
         $this->assertTrue($result->has('channel'));
         $this->assertTrue($result->has('items'));
+        $this->assertSame('Example feed', $result->get('channel')['title']);
         $this->assertTrue(Arr::isList($result->get('items')));
+        $this->assertCount(2, $result->get('items'));
+        $this->assertSame('First post', $result->get('items')[0]['title']);
+    }
+
+    public function testRssHonoursRunOptions(): void
+    {
+        $fetcher = $this->fakeFetcher($this->response('feed.xml'));
+
+        Crawler::rss('https://example.test/feed.xml', [], new RunOptions(query: ['limit' => 5]));
+
+        $this->assertSame(['limit' => 5], $fetcher->requests[0]['query']);
     }
 }

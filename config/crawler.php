@@ -12,19 +12,29 @@
 // $suffix = now()->format('Y-m-d');
 
 return [
-    'debug' => false, // http client debug
+    'fetch' => [
+        'debug' => false, // log one structured summary per crawler fetch
+    ],
 
     'source' => [
         'default' => env('CRAWLER_SOURCE_CHANNEL', 'file'),
 
         'channels' => [
-            'file' => resource_path('crawler.json'),
-            'database' => Jiannei\LaravelCrawler\Models\CrawlTask::class,
+            'file' => [
+                'driver' => Jiannei\LaravelCrawler\Sources\FilePatternSource::class,
+                'path' => resource_path('crawler.json'),
+            ],
+            'database' => [
+                'driver' => Jiannei\LaravelCrawler\Sources\DatabasePatternSource::class,
+                'model' => Jiannei\LaravelCrawler\Models\CrawlTask::class,
+            ],
         ],
     ],
 
     'consume' => [
-        'service' => '', // Jiannei\LaravelCrawler\Contracts\ConsumeService
+        // A class implementing Jiannei\LaravelCrawler\Contracts\ConsumeService.
+        // Leave empty when this application only crawls.
+        'service' => '',
     ],
 
     'log' => [
@@ -51,9 +61,12 @@ return [
 
     'chrome' => [
         'server' => [
-            'url' => 'http://localhost',
+            'url' => 'http://localhost', // scheme and host only; set the port below
             'port' => 4444,
+            'connection_timeout_in_ms' => 30000,
+            'request_timeout_in_ms' => 30000,
         ],
+        'binary' => 'chromedriver', // name or path; crawler:server --path adds a directory prefix
         'arguments' => ['--headless', '--disable-gpu'], // https://chromedriver.chromium.org/capabilities
         'wait' => [
             'timeout_in_second' => 30,

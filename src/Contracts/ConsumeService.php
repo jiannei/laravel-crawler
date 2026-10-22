@@ -16,7 +16,8 @@ use Jiannei\LaravelCrawler\Models\CrawlTask;
 
 interface ConsumeService
 {
-    public function process(CrawlTask $task, CrawlRecord $record): bool;
-
-    public function valid(CrawlTask $task): string;
+    /**
+     * Consume one Record. Return false when the Record was not consumed but the attempt did not fail.
+     */
+    public function consume(CrawlTask $task, CrawlRecord $record): bool;
 }

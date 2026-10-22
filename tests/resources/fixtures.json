@@ -1,0 +1,37 @@
+[
+  {
+    "key": "fixture:list",
+    "url": "https://example.test/list",
+    "query": {
+      "page": "1"
+    },
+    "options": {
+      "headers": {
+        "Accept": "text/html"
+      }
+    },
+    "group": {
+      "selector": ".item",
+      "rules": {
+        "title": ["h2 a", "text"],
+        "link": ["h2 a", "href"],
+        "desc": [".desc", "text"],
+        "author": [".author", "text"]
+      }
+    }
+  },
+  {
+    "key": "fixture:single",
+    "url": "https://example.test/single",
+    "rules": {
+      "title": ["#title", "text"],
+      "author": ["#author", "text"],
+      "body": [".body", "html"]
+    }
+  },
+  {
+    "key": "fixture:rss",
+    "url": "https://example.test/feed.xml",
+    "rss": true
+  }
+]

@@ -11,17 +11,17 @@
 
 namespace Jiannei\LaravelCrawler\Tests\Feature;
 
-use Jiannei\LaravelCrawler\Support\Facades\Crawler;
+use Jiannei\LaravelCrawler\Facades\Crawler;
 use Jiannei\LaravelCrawler\Tests\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 
 #[Group('integration')]
 class GithubTrendingTest extends TestCase
 {
-    public function testTrendingRepos()
+    public function testTrendingRepos(): void
     {
         $url = 'https://github.com/trending';
-        $crawler = Crawler::fetch($url, ['spoken_language_code' => 'zh', 'since' => 'daily']);
+        $page = Crawler::fetch($url, ['spoken_language_code' => 'zh', 'since' => 'daily']);
 
         $rules = [
             'repo' => ['h1 a', 'href'],
@@ -32,8 +32,9 @@ class GithubTrendingTest extends TestCase
             'added_stars' => ['div.f6.color-fg-muted.mt-2 > span.d-inline-block.float-sm-right', 'text'],
         ];
 
-        $trending = $crawler->group('article')->parse($rules)->all();
+        $trending = $page->filter('article')->parse($rules)->all();
 
         $this->assertIsArray($trending);
+        $this->assertNotEmpty($trending);
     }
 }

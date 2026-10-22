@@ -27,7 +27,7 @@
                 "Jiannei\\LaravelCrawler\\Providers\\LaravelServiceProvider"
             ],
             "aliases": {
-                "Crawler": "Jiannei\\LaravelCrawler\\Support\\Facades\\Crawler"
+                "Crawler": "Jiannei\\LaravelCrawler\\Facades\\Crawler"
             }
         }
     },

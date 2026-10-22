@@ -16,9 +16,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Jiannei\LaravelCrawler\Contracts\ConsumeService;
+use Jiannei\LaravelCrawler\Actions\RecordConsumer;
 use Jiannei\LaravelCrawler\Models\CrawlRecord;
 use Jiannei\LaravelCrawler\Models\CrawlTask;
 
@@ -34,17 +32,8 @@ class RecordConsume implements ShouldQueue
         $this->afterCommit();
     }
 
-    public function handle(ConsumeService $service)
+    public function handle(RecordConsumer $consumer): void
     {
-        try {
-            DB::transaction(function () use ($service) {
-                $flag = $service->process($this->task, $this->record);
-
-                $this->record->consumed = $flag;
-                $this->record->save();
-            });
-        } catch (\Throwable $e) {
-            Log::channel('crawler')->debug('consume', ['file' => $e->getFile(), 'line' => $e->getLine(), 'message' => $e->getMessage()]);
-        }
+        $consumer->consume($this->task, $this->record);
     }
 }

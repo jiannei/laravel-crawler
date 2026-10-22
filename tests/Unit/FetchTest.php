@@ -11,99 +11,38 @@
 
 namespace Jiannei\LaravelCrawler\Tests\Unit;
 
-use Illuminate\Support\Str;
-use Jiannei\LaravelCrawler\Support\Facades\Crawler;
+use Jiannei\LaravelCrawler\Data\FetchResponse;
+use Jiannei\LaravelCrawler\Exceptions\FetchFailed;
+use Jiannei\LaravelCrawler\Facades\Crawler;
+use Jiannei\LaravelCrawler\Parsing\Page;
 use Jiannei\LaravelCrawler\Tests\TestCase;
-use PHPUnit\Framework\Attributes\Group;
 
-#[Group('integration')]
 class FetchTest extends TestCase
 {
-    public function testFetch()
+    public function testFetchReturnsAPage(): void
     {
-        $crawler = Crawler::fetch('https://www.ithome.com/html/discovery/358585.htm');
+        $fetcher = $this->fakeFetcher($this->response());
 
-        $title = $crawler->filter('h1')->text();
-        $author = $crawler->filter('#author_baidu>strong')->text();
-        $content = $crawler->filter('.post_content')->text();
+        $page = Crawler::fetch('https://example.test/single', ['page' => '2'], ['timeout' => 5]);
 
-        // 等价于
-        $result = $crawler->parse([
-            'title' => ['h1', 'text'],
-            'author' => ['#author_baidu>strong', 'text'],
-            'content' => ['.post_content', 'text'],
-        ]);
-
-        $this->assertEquals($title, $result['title']);
-        $this->assertEquals($author, $result['author']);
-        $this->assertEquals($content, $result['content']);
+        $this->assertInstanceOf(Page::class, $page);
+        $this->assertSame('A single page', $page->filter('#title')->text());
+        $this->assertSame('https://example.test/single', $fetcher->requests[0]['url']);
+        $this->assertSame(['page' => '2'], $fetcher->requests[0]['query']);
+        $this->assertSame(['timeout' => 5], $fetcher->requests[0]['options']);
     }
 
-    public function testList()
+    public function testNonSuccessfulFetchCarriesTheResponse(): void
     {
-        $crawler = Crawler::fetch('https://www.ithome.com/html/discovery/358585.htm');
+        $this->fakeFetcher(new FetchResponse(404, 'missing'));
 
-        // 解析文章详情
-        $article = [
-            'title' => $crawler->filter('h1')->text(),
-            'author' => $crawler->filter('#author_baidu>strong')->text(),
-            'content' => $crawler->filter('.post_content')->html(),
-        ];
-
-        // 等价于
-        $article2 = $crawler->parse([
-            'title' => ['h1', 'text'],
-            'author' => ['#author_baidu>strong', 'text'],
-            'content' => ['.post_content', 'html'],
-        ]);
-
-        $this->assertEquals($article, $article2);
-    }
-
-    public function testListAdvanced()
-    {
-        $crawler = Crawler::fetch('https://it.ithome.com/ityejie');
-
-        // 解析文章列表
-        $articles = $crawler->filter('.bl li')->each(function ($node) {
-            return [
-                'title' => $node->filter('h2>a')->text(),
-                'link' => $node->filter('h2>a')->attr('href'),
-                'img' => $node->filter('a img')->attr('src'),
-                'desc' => $node->filter('.m')->text(),
-            ];
-        });
-
-        // 等价于
-        $articles2 = $crawler->group('.bl li')->parse([
-            'title' => ['h2>a', 'text'],
-            'link' => ['h2>a', 'href'],
-            'img' => ['a>img', 'src'],
-            'desc' => ['.m', 'text'],
-        ])->all();
-
-        $this->assertEquals($articles, $articles2);
-    }
-
-    public function testTransformResult()
-    {
-        $crawler = Crawler::fetch('https://www.ithome.com/html/discovery/358585.htm');
-
-        $title = $crawler->filter('h1')->text();
-        $author = $crawler->filter('#author_baidu>strong')->text();
-        $content = $crawler->filter('.post_content')->text();
-
-        // 等价于
-        $result = $crawler->parse([
-            'title' => ['h1', 'text'],
-            'author' => ['#author_baidu>strong', 'text'],
-            'content' => ['.post_content', 'text', null, function (\Symfony\Component\DomCrawler\Crawler $crawler, \Illuminate\Support\Stringable $value) {
-                return $value->limit(120);
-            }],
-        ]);
-
-        $this->assertEquals(Str::limit($content, 120), $result['content']);
-        $this->assertEquals($title, $result['title']);
-        $this->assertEquals($author, $result['author']);
+        try {
+            Crawler::fetch('https://example.test/missing');
+            $this->fail('A non-successful response should not become a Page.');
+        } catch (FetchFailed $failure) {
+            $this->assertSame('https://example.test/missing', $failure->url);
+            $this->assertSame(404, $failure->status);
+            $this->assertSame('missing', $failure->body);
+        }
     }
 }

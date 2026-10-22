@@ -11,7 +11,7 @@
 
 namespace Jiannei\LaravelCrawler\Tests\Unit;
 
-use Jiannei\LaravelCrawler\Support\Facades\Crawler;
+use Jiannei\LaravelCrawler\Facades\Crawler;
 use Jiannei\LaravelCrawler\Tests\TestCase;
 
 class RemoveTest extends TestCase

@@ -1,10 +1,12 @@
 [
   {
-    "key": "",
-    "url": "",
-    "expression": "",
+    "key": "example",
+    "url": "https://example.com",
+    "expression": "* * * * *",
     "consume": "",
     "query": {},
-    "group": {}
+    "rules": {
+      "title": ["h1", "text"]
+    }
   }
 ]
