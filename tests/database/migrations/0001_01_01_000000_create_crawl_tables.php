@@ -1,10 +1,19 @@
 <?php
 
+/*
+ * This file is part of the jiannei/laravel-crawler.
+ *
+ * (c) jiannei <jiannei@sinan.fun>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class() extends Migration {
     public function up(): void
     {
         Schema::create('crawl_tasks', function (Blueprint $table) {

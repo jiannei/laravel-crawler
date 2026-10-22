@@ -21,7 +21,7 @@ class DebugFetcherTest extends TestCase
 {
     public function testItLogsAStructuredSummaryOfASuccessfulFetch(): void
     {
-        $inner = new class implements Fetcher {
+        $inner = new class() implements Fetcher {
             public array $calls = [];
 
             public function fetch(string $url, array|string|null $query = null, array $options = []): FetchResponse
@@ -120,7 +120,7 @@ class DebugFetcherTest extends TestCase
 
     private function logger(): AbstractLogger
     {
-        return new class extends AbstractLogger {
+        return new class() extends AbstractLogger {
             public array $records = [];
 
             public function log($level, string|\Stringable $message, array $context = []): void
