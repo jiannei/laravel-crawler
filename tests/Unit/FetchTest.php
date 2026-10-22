@@ -14,7 +14,9 @@ namespace Jiannei\LaravelCrawler\Tests\Unit;
 use Illuminate\Support\Str;
 use Jiannei\LaravelCrawler\Support\Facades\Crawler;
 use Jiannei\LaravelCrawler\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
+#[Group('integration')]
 class FetchTest extends TestCase
 {
     public function testFetch()

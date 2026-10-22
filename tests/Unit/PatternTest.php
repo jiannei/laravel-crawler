@@ -17,7 +17,9 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Stringable;
 use Jiannei\LaravelCrawler\Support\Facades\Crawler;
 use Jiannei\LaravelCrawler\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
+#[Group('integration')]
 class PatternTest extends TestCase
 {
     public function testRules()

@@ -13,7 +13,9 @@ namespace Jiannei\LaravelCrawler\Tests\Feature;
 
 use Jiannei\LaravelCrawler\Support\Facades\Crawler;
 use Jiannei\LaravelCrawler\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
+#[Group('integration')]
 class GithubTrendingTest extends TestCase
 {
     public function testTrendingRepos()

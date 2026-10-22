@@ -45,6 +45,8 @@
     },
     "scripts": {
         "test": "vendor/bin/phpunit",
-        "lint": "vendor/bin/pint"
+        "test:integration": "vendor/bin/phpunit --group integration",
+        "lint": "vendor/bin/pint",
+        "lint:test": "vendor/bin/pint --test"
     }
 }

@@ -15,7 +15,9 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Jiannei\LaravelCrawler\Support\Facades\Crawler;
 use Jiannei\LaravelCrawler\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
+#[Group('integration')]
 class RssTest extends TestCase
 {
     public function testRss()

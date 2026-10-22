@@ -16,7 +16,9 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Jiannei\LaravelCrawler\Support\Facades\Crawler;
 use Jiannei\LaravelCrawler\Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
+#[Group('integration')]
 class JsonTest extends TestCase
 {
     public function testJson()
