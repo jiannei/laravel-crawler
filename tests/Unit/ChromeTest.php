@@ -21,7 +21,7 @@ class ChromeTest extends TestCase
 {
     public function testChromeWrapsRenderedHtmlInAPage(): void
     {
-        $browser = new class() implements Browser {
+        $browser = new class implements Browser {
             public ?string $requestedUrl = null;
 
             public function html(string $url, WebDriverExpectedCondition $condition): string

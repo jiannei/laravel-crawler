@@ -23,7 +23,7 @@ class ChromeBrowserTest extends TestCase
 {
     public function testItLoadsWaitsAndQuitsTheDriver(): void
     {
-        $driver = new class() implements ChromeDriver {
+        $driver = new class implements ChromeDriver {
             public array $calls = [];
 
             public function get(string $url): void
@@ -85,7 +85,7 @@ class ChromeBrowserTest extends TestCase
 
     public function testItQuitsTheDriverWhenWaitingFails(): void
     {
-        $driver = new class() implements ChromeDriver {
+        $driver = new class implements ChromeDriver {
             public array $calls = [];
 
             public function get(string $url): void

@@ -1,0 +1,4 @@
+preset: symfony
+
+disabled:
+  - new_with_parentheses
